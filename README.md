@@ -3,6 +3,7 @@
 TR-1um -- openIP62_rev1.0 -- AnagixLoader
        |                  +- IP62
        +- GDSII
+       +- schematic
        +- tech
        +- Tools
        +- Document
@@ -12,6 +13,9 @@ The directory contains the original PDKs provided by Tokai Rika. It includes two
 
 ## GDSII
 Final GDSII data for 2025/09/24-25 OSS workshop on Kyushu university.
+
+## schematic
+Final schematic data for 2025/09/24-25 OSS workshop on Kyushu university.
 
 ## tech
 Working directry for Open Source Silicon community to exchange new idea and currently **drc** is active for klayout DRC file development. **lvs** is preserved.

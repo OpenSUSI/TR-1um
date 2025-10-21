@@ -1,0 +1,5 @@
+---
+target: cs-vth-ref
+reference: lvs_work/cs-vth-ref_reference.cir.txt
+netlist: "/mnt/c/Data/OneDrive/MyDocuments/Community/ISHIKAI/github/openmpw-transistor-level-examples/TR10/current-source/noritsuna/simulation/cs-vth-ref.spice"
+schematic: "/mnt/c/Data/OneDrive/MyDocuments/Community/ISHIKAI/github/openmpw-transistor-level-examples/TR10/current-source/noritsuna/simulation/cs-vth-ref.spice"
