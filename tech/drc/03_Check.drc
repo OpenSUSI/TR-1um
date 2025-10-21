@@ -1,0 +1,56 @@
+
+# Well and Implant displacement check
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  NW to NW separation
+#
+(NWMP).drc(space     < 12.0).output("ERR03: NWMP to NWMP separation < 12.0")	 
+(NWMP).drc(sep(NWRR) <  9.5).output("ERR03: NWMP to NWRR separation <  9.5") 
+(NWRR).drc(space     <  8.0).output("ERR03: NWRR to NWRR separation <  8.0") 
+(NWCS).drc(space     < 12.0).output("ERR03: NWCS to NWCS separation < 12.0") 
+# ----- ------ ----- 
+#  NF, PF must cross PSUB
+#
+(PSUB).edges.inside_part(NF).output("ERR03: NF crossed PSUB")
+(PSUB).edges.inside_part(PF).output("ERR03: NF crossed PSUB")
+#
+# NF, PF enclosure to PSUB ???
+#
+(PF).drc(enclosed(PSUB) < 0.0).output("ERR03: NF enclosed PSUB < 0.0")  # There is NO L to PF rules...
+(NF).drc(enclosed(PSUB) < 0.0).output("ERR03: PF enclosed PSUB < 0.0")  # There is NO L to PF rules...
+#
+# (NF  ).not_in(PSUB).output("ERR03: NF not match to PSUB")     # Much more make sense in terms of the process assamption
+# (PF  ).not_in(PSUB).output("ERR03: NF not match to PSUB")     # Much more make sense in terms of the process assamption
+# ----- ------ ----- 
+#  PSUB to NW/HVNW
+#
+(PSUB).drc(enclosed(NW)   < 1.5).output("ERR03: PSUB enclosed NW   < 1.5")
+(PSUB).drc(enclosed(HVNW) < 1.5).output("ERR03: PSUB enclosed HVNW < 1.5") 
+#
+# ----- ------ ----- 
+#  IMPLA to L
+#
+(L & PF ).drc( enclosed(PF ) < 1.4 ).output("ERR03: L enclosed PF  < 1.4")
+(L & NF ).drc( enclosed(NF ) < 1.4 ).output("ERR03: L enclosed NF  < 1.4")
+#
+(L & PBE).drc( enclosed(PBE) < 1.4 ).output("ERR03: L enclosed PBE < 1.4")
+(L & NBE).drc( enclosed(NBE) < 1.4 ).output("ERR03: L enclosed NBE < 1.4")
+#
+(L & PM ).drc( enclosed(PM ) < 1.4 ).output("ERR03: L enclosed PM  < 1.4")
+(L & NM ).drc( enclosed(NM ) < 1.4 ).output("ERR03: L enclosed NM  < 1.4")
+#
+(L & PSD - R).drc( enclosed(PSD) < 1.4 ).output("ERR03: L enclosed PSD < 1.4")
+(L & NSD - R).drc( enclosed(NSD) < 1.4 ).output("ERR03: L enclosed NSD < 1.4")
+#
+# ----- ------ ----- 
+#  Special for RR　
+#
+(L & PM & R).drc( enclosed(PM ) < 2.0 ).output("ERR03: L(RR) enclosed PM  < 2.0")
+(L & NM & R).drc( enclosed(NM ) < 2.0 ).output("ERR03: L(RR) enclosed NM  < 2.0")
+#
+(PSD & R - L).drc( width < 2.0 ).output("ERR03: L(RR) enclosed PSD < 2.0")
+(NSD & R - L).drc( width < 2.0 ).output("ERR03: L(RR) enclosed NSD < 2.0")
+#

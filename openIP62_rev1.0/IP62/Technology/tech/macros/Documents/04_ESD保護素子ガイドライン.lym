@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>04_ESD保護素子ガイドライン</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text>module MyMacro
+  MinedaUtility::ViewDoc::view_doc $ip62_docs &amp;&amp; $ip62_docs['ESD保護素子ガイドライン'] ||
+    File.join('salt/IP62/Technology/doc','OS04_ESD保護素子ガイドライン_rev1.pdf')
+end
+</text>
+</klayout-macro>

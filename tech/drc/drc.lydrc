@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>TR-1um DRC</description>
+ <version/>
+ <category>drc</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>drc_scripts</group-name>
+ <menu-path>tools_menu.drc.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
+ <text>
+# TR-1um DRC v0.001 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- 
+report("TR-1um DRC")
+#----
+# %include 00_Layers.drc
+# %include 01_Basics.drc
+# %include 02_Device.drc
+# %include 03_Check.drc
+# %include 04_Check.drc
+# %include 05_Check.drc
+# %include 06_Check.drc
+# %include 07_Check.drc
+# %include 08_Check.drc
+# %include 09_Check.drc
+### %include test.drc
+#----
+</text>
+</klayout-macro>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Get reference for IP62</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text># IP62 lvs preprocessor v0.84 Aug. 21st, 2025 copy right Seijiro Moriyama (Anagix Corp.)
+module MyMacro
+  include RBA
+  #include MinedaLVSpreprop
+  mi = MinedaCommon::MinedaInput::new
+  MinedaLVS.new.lvs_go 'IP62', mi.tweak({
+    version: 0.84,
+    device: {NMOS: ['NCH', 'NMOS', 'MN', 'MNE'],
+               PMOS: ['PCH', 'PMOS', 'MP', 'MPE'], 
+               NDIO: 'DN', PDIO: 'DP', 
+               CSIO: ['F_CSIO', 'CAP'],
+               RR: ['F_RR', 'RES'], RS: ['F_RS', 'RES']},
+    tolerance: {RR: {R: {relative: 0.03}},
+                RS: {R: {relative: 0.03}},
+                CSIO: {C: {relative: 0.03}}},
+    flatten_circuit: ['Nch*', 'Pch*', 'R_poly*', 'HR_poly'],
+    virtual_connections: $vc
+  }) 
+end
+</text>
+</klayout-macro>

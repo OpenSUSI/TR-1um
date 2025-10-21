@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text>#module MyMacro
+# see https://www.klayout.de/forum/discussion/1446/schematic-vs-schematic-svs-not-lvs
+
+# This class provides a receiver for netlist compare events
+class NetlistCompareTestLogger &lt; RBA::GenericNetlistCompareLogger
+
+  def initialize
+    @texts = []
+  end
+
+  def out(text)
+    @texts &lt;&lt; text
+  end
+
+  def device_class_mismatch(a, b, msg)
+    out("device_class_mismatch " + dc2str(a) + " " + dc2str(b))
+  end
+
+  def begin_circuit(a, b)
+    out("begin_circuit " + circuit2str(a) + " " + circuit2str(b))
+  end
+
+  def end_circuit(a, b, matching, msg)
+    out("end_circuit " + circuit2str(a) + " " + circuit2str(b) + " " + (matching ? "MATCH" : "NOMATCH"))
+  end
+
+  def circuit_skipped(a, b, msg)
+    out("circuit_skipped " + circuit2str(a) + " " + circuit2str(b))
+  end
+
+  def circuit_mismatch(a, b, msg)
+    out("circuit_mismatch " + circuit2str(a) + " " + circuit2str(b))
+  end
+
+  def match_nets(a, b)
+    out("match_nets " + net2str(a) + " " + net2str(b))
+  end
+
+  def match_ambiguous_nets(a, b, msg)
+    out("match_ambiguous_nets " + net2str(a) + " " + net2str(b))
+  end
+
+  def net_mismatch(a, b, msg)
+    out("net_mismatch " + net2str(a) + " " + net2str(b))
+  end
+
+  def match_devices(a, b)
+    out("match_devices " + device2str(a) + " " + device2str(b))
+  end
+
+  def device_mismatch(a, b, msg)
+    out("device_mismatch " + device2str(a) + " " + device2str(b))
+  end
+
+  def match_devices_with_different_parameters(a, b)
+    out("match_devices_with_different_parameters " + device2str(a) + " " + device2str(b))
+  end
+
+  def match_devices_with_different_device_classes(a, b)
+    out("match_devices_with_different_device_classes " + device2str(a) + " " + device2str(b))
+  end
+
+  def match_pins(a, b)
+    out("match_pins " + pin2str(a) + " " + pin2str(b))
+  end
+
+  def pin_mismatch(a, b, msg)
+    out("pin_mismatch " + pin2str(a) + " " + pin2str(b))
+  end
+
+  def match_subcircuits(a, b)
+    out("match_subcircuits " + subcircuit2str(a) + " " + subcircuit2str(b))
+  end
+
+  def subcircuit_mismatch(a, b, msg)
+    out("subcircuit_mismatch " + subcircuit2str(a) + " " + subcircuit2str(b))
+  end
+
+  def text
+    return @texts.join("\n") + "\n"
+  end
+
+  def clear
+    @texts = []
+  end
+
+  def dc2str(x) 
+    return x ? x.name : "(null)"
+  end
+
+  def circuit2str(x) 
+    return x ? x.name : "(null)"
+  end
+
+  def device2str(x) 
+    return x ? x.expanded_name : "(null)"
+  end
+
+  def net2str(x) 
+    return x ? x.expanded_name : "(null)"
+  end
+
+  def pin2str(x) 
+    return x ? x.expanded_name : "(null)"
+  end
+
+  def subcircuit2str(x) 
+    return x ? x.expanded_name : "(null)"
+  end
+
+end
+
+# This is the actual compare step
+app = RBA::Application.instance
+@mw = app.main_window
+@cv = @mw.current_view.active_cellview
+cir_path1 = RBA::QFileDialog::getOpenFileName(@mw, 'Netlist file 1', File.dirname(@cv.filename), 'schematic(*.net *.cir *.spice *.sp *.spc)')
+nl1 = RBA::Netlist::new
+nl1.read(cir_path1, RBA::NetlistSpiceReader::new)
+
+cir_path2 = RBA::QFileDialog::getOpenFileName(@mw, 'Netlist file 2', File.dirname(@cv.filename), 'schematic(*.net *.cir *.spice *.sp *.spc)')
+nl2 = RBA::Netlist::new
+nl2.read(cir_path2, RBA::NetlistSpiceReader::new)
+
+logger = NetlistCompareTestLogger::new
+comp = RBA::NetlistComparer::new(logger)
+comp.compare(nl1, nl2)
+# dump compare log
+puts logger.text
+#end</text>
+</klayout-macro>

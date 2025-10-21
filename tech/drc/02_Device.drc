@@ -1,0 +1,70 @@
+# Device recognition check
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  WELLs
+#
+NWCS = (PSUB & NW).interacting(CL) 	    # Nwell for CSIO 
+NWMP = (PSUB & NW).not_interacting(CL)	# Nwell for PMOS 
+NWRR = (PSUB & HVNW)	                # HVNW  for RR
+PWMN = (BBOX - PSUB)                    # PWEL  for NMOS
+# ----- ------ ----- 
+#  Implant Layer Combination Table (Y:DATA N:Blank)
+# ----------+------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+# Device    | WELL | NF  | PF  | NBE | PBE | PM  | NM  | PSD | NSD |  R  | CL  |
+# ----------+------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+# PMOS      | NWMP |  Y  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  N  |
+# NMOS      | PWMN |  N  |  N  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  N  |  N  |
+# NMOS(ESD) | PWMN |  N  |  N  |  Y  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
+# DP        | NWMP |  Y  |  Y  |  N  |  N  |  Y  |  Y  |  N  |  Y  |  N  |  N  |
+# DN        | PWMN |  N  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
+# BG-NW     | NWMP |  Y  |  Y  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
+# BG-PSUB   | PWMN |  N  |  N  |  N  |  N  |  Y  |  Y  |  N  |  Y  |  N  |  N  |
+# RR        | NWRR |  Y  |  N  |  N  |  N  |  Y  |  Y  |     |     |  Y  |  N  |
+# BG-HVNW   | NWGR |  Y  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
+# CSIO      | NWCS |  Y  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  Y  |  N  |  Y  |
+# BG-CSIO   | NWCS |  Y  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
+# PESD      | NWMP |  Y  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  N  |
+# NESD      | PWMN |  N  |  N  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  N  |  N  |
+# ----------+------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+#  EXTRACT L connected to PRO (for ESD device) 
+#
+LX = L.interacting(ESD)
+LL = L.not_interacting(ESD)
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Active Area for Device recognition
+#
+AAMP = (LL.interacting(SG)   ).and(NWMP & NF & PF - NBE & PBE - PM & NM - PSD & NSD - R - CL) # PMOS
+AAMN = (LL.interacting(SG)   ).and(PWMN - NF - PF & NBE - PBE & PM - NM & PSD - NSD - R - CL) # NMOS
+AAPE = (LX.interacting(SG)   ).and(NWMP & NF & PF - NBE & PBE - PM & NM - PSD & NSD - R - CL) # PMOS
+AANE = (LX.interacting(SG)   ).and(PWMN - NF - PF & NBE - PBE & PM & NM & PSD - NSD - R - CL) # NMOS (ESD)
+AADP = (L.not_interacting(SG)).and(NWMP & NF & PF - NBE - PBE & PM & NM - PSD & NSD - R - CL) # DP
+AADN = (L.not_interacting(SG)).and(PWMN - NF - PF - NBE - PBE & PM & NM & PSD - NSD - R - CL) # DN
+AAGP = (L.not_interacting(SG)).and(NWMP & NF & PF - NBE - PBE & PM & NM & PSD - NSD - R - CL) # BG-Nwell
+AAGN = (L.not_interacting(SG)).and(PWMN - NF - PF - NBE - PBE & PM & NM - PSD & NSD - R - CL) # BG-Pwell
+AARR = (L.not_interacting(SG)).and(NWRR & NF - PF - NBE - PBE & PM & NM             & R - CL) # RR
+AAGR = (L.not_interacting(SG)).and(NWRR & NF - PF - NBE - PBE & PM & NM - PSD & NSD - R - CL) # BG-RR
+AACC = (L.interacting(SG)    ).and(NWCS & NF - PF - NBE - PBE & PM & NM & PSD & NSD - R & CL) # CSIO
+AAGC = (L.not_interacting(SG)).and(NWCS & NF - PF - NBE - PBE & PM & NM & PSD - NSD - R - CL) # BG-CSIO
+#
+(L - (AAMP + AAMN + AAPE + AANE + AADP + AADN + AAGP + AAGN + AARR + AAGR + AACC + AAGC)).output("ERR02: Uncertain AA") # Uncertain AA
+#
+#  Debug
+#(LX  ).drc(area > 0.0).output("LX")
+#(LL  ).drc(area > 0.0).output("LL")
+#(AAMP).drc(area > 0.0).output("AAMP")
+#(AAMN).drc(area > 0.0).output("AAMN")
+#(AAPE).drc(area > 0.0).output("AAPE")
+#(AANE).drc(area > 0.0).output("AANE")
+#(AADP).drc(area > 0.0).output("AADP")
+#(AADN).drc(area > 0.0).output("AADN")
+#(AAGP).drc(area > 0.0).output("AAGP")
+#(AAGN).drc(area > 0.0).output("AAGN")
+#(AARR).drc(area > 0.0).output("AARR")
+#(AAGR).drc(area > 0.0).output("AAGR")
+#(AACC).drc(area > 0.0).output("AACC")
+#(AAGC).drc(area > 0.0).output("AAGC")
+

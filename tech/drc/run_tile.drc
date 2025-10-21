@@ -1,0 +1,24 @@
+# TR-1um DRC v0.001 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- 
+source($input, "TOP")
+report("TR-1um DRC",  $output)
+#----
+tiles( 1 .mm )
+# Use 4 CPU cores
+threads(8)
+#----
+# %include 00_Layers.drc
+# %include 01_Basics.drc
+# %include 02_Device.drc
+# %include 03_Check.drc
+# %include 04_Check.drc
+# %include 05_Check.drc
+# %include 06_Check.drc
+# %include 07_Check.drc
+# %include 08_Check.drc
+# %include 09_Check.drc
+### %include test.drc
+#----

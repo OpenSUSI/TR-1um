@@ -1,0 +1,29 @@
+* simulator lang=spectre
+* ;change 20131017
+
+* ///  2024.09.30 D.Aoki  fixed tnom
+
+* //macro F_CSIO/////////////////////////////////
+.model m_CSIO C tnom=27
+
+.subckt F_CSIO_mst plus minus sub
+.param c=0 y=0 x=0 m=1 magCSIO=1
+
+C1 plus minus m_CSIO c=c*magCSIO  m=m
+
+C2 minus sub  							
++ c = '0.56*(((x+18.8+((2.03e-8*(0.61+v(minus,sub)))**0.5)*1e+4)*			
++     (y+18.8+((2.03e-8*(0.61+v(minus,sub)))**0.5)*1e+4))*(1.053e-20)/		
++     (2.03e-8*(0.61+v(minus,sub)))**0.5+(2.0*(x+18.8+((1.03e-8*(0.71+		
++     v(minus,sub)))**0.5)*1e+4)*(10+0.5*((1.03e-8*(0.71+v(minus,sub)))**0.5)*	
++     1e+4)+2.0*(y+18.8+((1.03e-8*(0.71+v(minus,sub)))**0.5)*1e+4)*		
++     (10+0.5*((1.03e-8*(0.71+v(minus,sub)))**0.5)*1e+4))*(1.053e-20)/		
++     (1.03e-8*(0.71+v(minus,sub)))**0.5)'    m=m
+
+.ends F_CSIO_mst
+
+.subckt F_CSIO plus minus sub
+.param c=0 y=0 x=0 m=1
+                           
+X1 plus minus sub F_CSIO_mst c=c m=m  x=x*1e+6  y=y*1e+6  
+.ends F_CSIO

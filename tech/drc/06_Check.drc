@@ -1,0 +1,90 @@
+# Salisaide Gate related
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Electrical connection definition
+# 
+SDMP = (AAMP - SG)          # MP S/D
+SDMN = (AAMN - SG)          # MN S/D
+SDPE = (AAPE - SG)          # MPE S/D
+SDNE = (AANE - SG)          # MNE S/D
+#
+connect(SDMP, CONT)         # MP S/D
+connect(SDMN, CONT)         # MN S/D
+connect(SDPE, CONT)         # MPE S/D
+connect(SDNE, CONT)         # MNE S/D
+connect(AAGP, CONT)         # BG-PMOS
+connect(AAGN, CONT)         # BG-NMOS
+connect(AADP, CONT)         # DP
+connect(AADN, CONT)         # DN
+#
+connect(SG,   CONT)         
+connect(CONT, M1)           
+connect(M1,   TC)           
+connect(TC,   M2)           
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  SG to L Separation
+# 
+(SG ).drc( sep(L)    < 0.4 ).output("ERR06: SG to L     <  0.4")
+(SG ).drc( sep(AARR) < 1.0 ).output("ERR06: SG to L(RR) <  1.0")
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  SG to CONT Separation
+# 
+(CONT & AAMP).drc( sep( SG , projection ) < 1.0 ).output("ERR06: SG to CONT(MP) < 1.0") # 
+(CONT & AAMN).drc( sep( SG , projection ) < 1.0 ).output("ERR06: SG to CONT(MN) < 1.0") # 
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  SG FOR ESD DEVICE
+#
+(SG & ESD).drc( width < 2.0 ).output("ERR06: SG for ESD < 2.0") # 
+#(SG & ESD).drc( space < ??? ).output("ERR06: SG for ESD < ???") # NO document ??? 
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Distinguished Source and Drain contact for MPE/MNE (ESD/IO) 
+#
+PS_CONT = (AAPE & antenna_check(AAGP, CONT, 0.0))
+PD_CONT = ((AAPE & CONT) - PS_CONT)
+NS_CONT = (AANE & antenna_check(AAGN, CONT, 0.0))
+ND_CONT = ((AANE & CONT) - NS_CONT)
+#
+#  SG to CONT(MPE/MNE) Separation
+#
+PS_CONT.drc( sep( SG, projection ) < 3.0 ).output("ERR06: SG to CONT(MPE-S) <  3.0")
+PD_CONT.drc( sep( SG, projection ) < 7.0 ).output("ERR06: SG to CONT(MPE-D) <  7.0")
+#
+NS_CONT.drc( sep( SG, projection ) < 3.0 ).output("ERR06: SG to CONT(MNE-S) <  3.0")
+ND_CONT.drc( sep( SG, projection ) < 7.0 ).output("ERR06: SG to CONT(MNE-D) <  7.0")
+#
+#PS_CONT.drc(area > 0).output("PS_CONT")    # DEBUG
+#PD_CONT.drc(area > 0).output("PD_CONT")    # DEBUG
+#NS_CONT.drc(area > 0).output("NS_CONT")    # DEBUG
+#ND_CONT.drc(area > 0).output("ND_CONT")    # DEBUG
+#
+PS_CONT.forget  # release memory
+PD_CONT.forget  # release memory
+NS_CONT.forget  # release memory
+ND_CONT.forget  # release memory
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  Floating SG detection (WARNING)
+#
+SG_MP = antenna_check(SDMP, SG, 0.0)
+SG_MN = antenna_check(SDMN, SG, 0.0)
+SG_PE = antenna_check(SDPE, SG, 0.0)
+SG_NE = antenna_check(SDNE, SG, 0.0)
+SG_GP = antenna_check(AAGP, SG, 0.0)
+SG_GN = antenna_check(AAGN, SG, 0.0)
+#
+(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_GP + SG_GN )).output("WAR06: Floating SG Detected")
+#
+SG_MP.forget  # release memory
+SG_MN.forget  # release memory
+SG_PE.forget  # release memory
+SG_NE.forget  # release memory
+SG_GP.forget  # release memory
+SG_GN.forget  # release memory
+

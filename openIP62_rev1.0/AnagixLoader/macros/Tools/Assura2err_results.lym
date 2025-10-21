@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Convert Assura DRC err file</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text># Assura2err_results - Convert Assura DRC err file v0.5 April 16th, 2024 copy right Seijiro Moriyama
+module MyMacro
+ 
+  include RBA
+
+  class Assura2results
+    include RBA
+    def initialize 
+      @converted = []
+      app = Application.instance
+      @mw = app.main_window
+      @cv = @mw.current_view.active_cellview
+    end
+    
+    def assura2results
+      err_file = QFileDialog::getOpenFileName(@mw, 'Assura DRC error file', File.dirname(@cv.filename), 'err(*.err)')
+      if err_file != ''
+        data, cell_names = read_assura(err_file)
+        if data
+          err2results err_file, data
+          Dir.chdir(File.dirname(err_file)){
+            cell_names.each{|cell|
+              next if cell == @cv.cell.name
+              err2results cell + '.err', select(data, cell), cell
+            }  
+          }       
+        end
+      end
+    end
+    
+    def select data, cell
+      selected = {}
+      data.each_key{|rule|
+        selected[rule] ||= {}
+        selected[rule][:bb] = data[rule][:bb]
+        selected[rule][:no] = data[rule][:no]
+        selected[rule][:box] = []
+        data[rule][:box].each{|err_marker|
+          next if err_marker[0] != cell
+          selected[rule][:box] &lt;&lt; err_marker
+        }
+      }
+      selected
+    end
+
+    def read_assura err_file
+      mode = nil
+      data = {}
+      rule = nil
+      cell_name = nil
+      cell_names = []
+      File.read(err_file).each_line{|l|
+        # puts l
+        if mode == 'bounding box'
+          next if l.strip.size == 0
+          l =~ /^  1        1 +(\S+) +(\S+) +(\S+) +(\S+)/
+          data[rule][:bb] = [$1, $2, $3, $4].map{|a| a.to_f*1000.to_i}
+          mode = nil
+        elsif l =~ /^Cell Name : (\S+)/
+          cell_name = $1
+          puts "Cell Name: #{cell_name}"
+          cell_names &lt;&lt; cell_name unless cell_names.include? cell_name
+        elsif mode == 'box'
+          next if l.strip.size == 0
+          if l =~ /====/ || l =~ /----/
+            mode = nil
+          elsif l =~ /^ +\d+ +X +(\S+) +(\S+) +(\S+) +(\S+)/
+            data[rule][:box] &lt;&lt; [cell_name] + [$1, $2, $3, $4].map{|a| a.to_f*1000.to_i}
+            # puts  [[cell_name] + [$1, $2, $3, $4].map{|a| a.to_f*1000.to_i}].inspect
+          end
+        elsif l =~ /^Env\.  Env\. Placements/
+          mode = 'bounding box'
+        elsif l =~ /^Shape/
+          mode = 'box'
+        elsif l =~ /^Rule No. +(\S+) : (.*)$/
+          rule = $2
+          puts "*** rule = #{rule}"
+          data[rule] ||= {}
+          data[rule][:no] = $1
+          data[rule][:box] = []
+        else
+          next if l =~ /^Real Error Count/
+          next
+        end
+      }
+      data.each_key{|rule|
+        puts "#{rule}: found #{data[rule][:box].count} errors on #{data[rule][:cell_name]}"
+      }
+      [data, cell_names]
+    end
+      
+    def err2results err_file, data, cell = @cv.cell.name
+      File.open(err_file + '.results', 'w'){|f|
+        f.puts "#{cell || @cv.cell.name} #{(1/@cv.layout.dbu).round(0).to_i}" 
+        data.each_pair{|rule, err|
+          prev_cn = nil
+          f.puts rule
+          count = err[:box].count
+          f.puts "#{count} #{count} 2 #{Time.now}"
+          f.puts "Rule File Pathname: #{ARGV[2]||'unknown'}"
+          f.puts "Rule No. #{err[:no]} #{rule}"
+          err[:box].each_with_index{|p, i|
+            cell_name, x1, y1, x2, y2 = p
+            f.puts "p #{i+1} 4"
+            if prev_cn != cell_name
+              f.puts "CN #{cell_name} c 1 0 0 1 0 0 1"
+              prev_cn = cell_name
+            end
+            f.puts "#{x1.to_i} #{y1.to_i}"
+            f.puts "#{x1.to_i} #{y2.to_i}"
+            f.puts "#{x2.to_i} #{y2.to_i}"
+            f.puts "#{x2.to_i} #{y1.to_i}"
+          }
+        }
+      }
+    end
+  end
+  a2k = Assura2results.new
+  a2k.assura2results
+end
+  
+</text>
+</klayout-macro>

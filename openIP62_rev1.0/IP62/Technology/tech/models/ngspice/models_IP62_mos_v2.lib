@@ -1,0 +1,180 @@
+* /// IP62 Model File ///
+* /// models_IP62_mos_v2  ///
+* /// 2025.08.19 ARAKAWA Natsuki ///
+
+* simulator lang=spectre
+
+* // model PMOS ////////////////////////////////////////
+.subckt PMOS d g s b
+.param w=0 l=0 as=0 ad=0 ps=0 pd=0 nrd=0 nrs=0 m=1
+M1 d g s b PMOS_mst w=w l=l as=as ad=ad ps=ps pd=pd nrd=nrd nrs=nrs m=m
+.ends PMOS
+
+.model PMOS_mst PMOS
+* type	 = p	       							      
++ vth0     = '-0.678475+vthMP'
++ level = 49 version = 3.3 tnom = 27
++ tox      = 1.95e-08       xj       = 3.2e-07        nch      = 1.6e+17
++ k1       = 0.865126       k2       = 0
++ k3       = 19.9415        k3b      = -10            w0       = 3.12082e-06
++ nlx      = 3.11982e-07    dvt0w    = 0              dvt1w    = 0
++ dvt2w    = -0.032         dvt0     = 1.41234        dvt1     = 0.524423
++ dvt2     = -0.031468      vbm      = -3             u0       = 0.0196669
++ ua       = 1.77818e-09    ub       = 2.67881e-18    uc       = -8.71484e-11
++ vsat     = 700000         a0       = 1.24985        ags      = 0.131047
++ b0       = 8.23429e-09    b1       = -1e-07         keta     = 0.0135411
++ a1       = 0              a2       = 1              rdsw     = 1989.6
++ prwg     = -0.001         prwb     = 0.0554082      wr       = 1
++ wint     = 8.28413e-07    lint     = -8.68261e-08   xl       = 0
++ xw       = 0              dwg      = -2.60218e-08   dwb      = -4.2585e-08
++ voff     = -0.15          nfactor  = 2              cit      = 0
++ cdsc     = 0.01           cdscd    = 0              cdscb    = 0
++ eta0     = 0.159519       etab     = -0.07722       dsub     = 0.567003
++ pclm     = 9.90814        pdiblc1  = 1              pdiblc2  = 0.00997756
++ pdiblcb  = -0.000118146   drout    = 0.823024       pscbe1   = 5.67248e+09
++ pscbe2   = 9.89777e-09    pvag     = 4.17315        delta    = 0.03
++ rsh      = 44.9607        mobmod   = 1              prt      = 292.21
++ ute      = -1.00674       kt1      = -0.506653      kt1l     = -1e-07
++ kt2      = -0.0438588     ua1      = 3.51352e-09    ub1      = -9.77898e-18
++ uc1      = -9.8421e-11    at       = 100000         nqsmod   = 0
++ wl       = 0              wln      = 1              ww       = 0
++ wwn      = 1              wwl      = 0              ll       = 0
++ lln      = 1              lw       = 0              lwn      = 1
++ lwl      = 0              capmod   = 2              noff     = 1
++ acde     = 1              moin     = 15             tpbswg   = 0
++ tcjswg   = 0              cgsl     =1.81e-09        cgdl     =1.81e-09
++ cj       =1.02e-03
+
+
+
+*// model NMOS ////////////////////////////////////////
+.subckt NMOS d g s b
+.param w=0 l=0 as=0 ad=0 ps=0 pd=0 nrd=0 nrs=0 m=1
+M1 d g s b NMOS_mst w=w l=l as=as ad=ad ps=ps pd=pd nrd=nrd nrs=nrs m=m
+.ends NMOS
+
+.model NMOS_mst NMOS
+* type	 = n	       							      
++ vth0     = '0.762948+vthMN'
++ level    = 49             version  = 3.3            tnom     = 27
++ tox      = 1.95e-08       xj       = 3.4e-07        nch      = 3.2e+16
++ k1       = 0.854475       k2       = -0.0311518
++ k3       = 86.2769        k3b      = 10             w0       = 5e-05
++ nlx      = 1.38901e-07    dvt0w    = 0              dvt1w    = 0
++ dvt2w    = -0.032         dvt0     = 1.01297        dvt1     = 0.348472
++ dvt2     = -0.0511863     vbm      = -3             u0       = 0.0668151
++ ua       = 2.05262e-09    ub       = 1e-21          uc       = 1.38707e-10
++ vsat     = 135539         a0       = 0.856098       ags      = 0.11654
++ b0       = -3.75624e-08   b1       = 1e-07          keta     = 0.05
++ a1       = 0              a2       = 0.9            rdsw     = 802.878
++ prwg     = 0.0727305      prwb     = 0.1            wr       = 1
++ wint     = 6.60865e-07    lint     = -1.03955e-07   xl       = 0
++ xw       = 0              dwg      = -7.69191e-09   dwb      = 3.86077e-08
++ voff     = -0.15          nfactor  = 2              cit      = 0
++ cdsc     = 0.01           cdscd    = 0              cdscb    = 0.000770059
++ eta0     = 0.487318       etab     = -0.2           dsub     = 0.821574
++ pclm     = 1.33874        pdiblc1  = 0.0770736      pdiblc2  = 1e-05
++ pdiblcb  = 1e-10          drout    = 0.850868       pscbe1   = 4.96301e+08
++ pscbe2   = 0.001          pvag     = 2.71787        delta    = 0.0147876
++ mobmod   = 1              prt      = -774           ute      = -1.70065
++ kt1      = -0.464518      kt1l     = -1e-07         kt2      = -0.0556928
++ ua1      = 2.9856e-09     ub1      = -9.01491e-18   uc1      = -1e-10
++ at       = 80156.4        nqsmod   = 0              wl       = 0
++ wln      = 1              ww       = 0              wwn      = 1
++ wwl      = 0              ll       = 0              lln      = 1
++ lw       = 0              lwn      = 1              lwl      = 0
++ capmod   = 2              tcj      = 0              tpb      = 0
++ tcjsw    = 0              tpbsw    = 0              noff     = 1
++ acde     = 1              moin     = 15             tpbswg   = 0
++ tcjswg   = 0              cgsl     =2.02e-09        cgdl     =2.02e-09
++ cj       =7.44e-04
+
+
+
+
+// model MPE ////////////////////////////////////////
+.subckt MPE d g s b
+.param w=0 l=0 as=0 ad=0 ps=0 pd=0 nrd=0 nrs=0 m=1
+M1 d g s b MPE_mst w=w l=l as=as ad=ad ps=ps pd=pd nrd=nrd nrs=nrs m=m
+.ends MPE
+  
+.model MPE_mst PMOS   							
+* type    = p              							                                                                                                            
++ level   = 49             							
++ vth0    = '-0.762724+vthMPE'							
++ version = 3.2            tnom    = 27             tox     = 1.95e-8      	
++ xj      = 3.4e-7         nch     = 1.7e17           				
++ k1      = 0.867919       k2      = 2.49771e-4     k3      = 12.7816      	
++ k3b     = -3.78874       w0      = 2.19075e-15    nlx     = 8.01009e-8   	
++ dvt0w   = 0              dvt1w   = 0              dvt2w   = -0.032        	
++ dvt0    = 0.147425       dvt1    = 0.846761       dvt2    = -5.71497e-3  	
++ u0      = 0.0213212      ua      = 3.09087e-9     ub      = 2.18544e-21  	
++ uc      = -1.20194e-10   vsat    = 5.09445e4      a0      = 0.673754     	
++ ags     = 0.0727372      b0      = 1.76573e-8     b1      = 9.76657e-8   	
++ keta    = -7.03809e-3    a1      = 0              a2      = 1                 	
++ rdsw    = 3.58581e3      prwg    = 1.1611e-3      prwb    = -1.11281e-3    	
++ wr      = 1              wint    = 6.88908e-7     lint    = -3.88163e-8   	
++ xl      = 0              xw      = 0              dwg     = -9.05461e-9   	
++ dwb     = 1.43164e-7     voff    = -0.192136      nfactor = 1.00668       	
++ cit     = 0              cdsc    = 0.01           cdscd   = 0                   
++ cdscb   = 0              eta0    = 0              etab    = 0                 	
++ dsub    = 0.504817       pclm    = 1.74948        pdiblc1 = 0                 	
++ pdiblc2 = 4.14925e-4     pdiblcb = 0              drout   = 0.504817         	
++ pscbe1  = 5.67248e9      pscbe2  = 6.03103e-8     pvag    = 0                   
++ delta   = 0.01           mobmod  = 1              prt     = 65                 	
++ ute     = -1.2395586     kt1     = -0.6126297     kt1l    = 0                   
++ kt2     = -0.0733395     ua1     = 1.145521E-9    ub1     = -2.10694E-18   	
++ uc1     = 5.969856E-11   at      = 2.274e4        nqsmod  = 0                   
++ wl      = 0              wln     = 1              ww      = 0                 	
++ wwn     = 1              wwl     = 0              ll      = 0                 	
++ lln     = 1              lw      = 0              lwn     = 1                  	
++ lwl     = 0              capmod  = 2              tcj     = 0                  	
++ tpb     = 0              tcjsw   = 0              tpbsw   = 0                 	
++ noff    = 1              acde    = 1              moin    = 15                  
++ tpbswg  = 0              tcjswg  = 0              cgsl    =1.81e-09          	
++ cgdl    =1.81e-09        cj      =1.02e-03
+
+
+// model MNE ////////////////////////////////////////
+.subckt MNE d g s b
+.param w=0 l=0 as=0 ad=0 ps=0 pd=0 nrd=0 nrs=0 m=1
+M1 d g s b MNE_mst w=w l=l as=as ad=ad ps=ps pd=pd nrd=nrd nrs=nrs m=m
+.ends MNE
+
+.model MNE_mst NMOS   							
+* type    = n              							
++ level   = 49             							
++ vth0    = '0.99248+vthMNE'							
++ version = 3.3            tnom    = 27             tox     = 1.95e-8      	
++ xj      = 3.4e-7         nch     = 1.7e17         				
++ k1      = 0.696051       k2      = 0.267145       k3      = 435.901      	
++ k3b     = 89.2607        w0      = 6.4069e-5      nlx     = -9.30087e-7  	
++ dvt0w   = 0              dvt1w   = 0              dvt2w   = -0.032        	
++ dvt0    = -1.93795       dvt1    = 0.0309573      dvt2    = 1.97695e-3   	
++ u0      = 0.0676316      ua      = 8.8062e-17     ub      = 7.18487e-18  	
++ uc      = 7.28444e-10    vsat    = 3.95988e4      a0      = -0.16        	
++ ags     = 0.1            b0      = 4.71626e-9     b1      = 9.2172e-8    	
++ keta    = -0.0822589     a1      = 0              a2      = 1            	
++ rdsw    = 1.27823        prwg    = -3.69297e-4    prwb    = -6.46678e-3  	
++ wr      = 1              wint    = -4.25837e-7    lint    = -5.16247e-7  	
++ xl      = 0              xw      = 0              dwg     = 2.58527e-8   	
++ dwb     = 3.9095e-7      voff    = -0.268111      nfactor = 1.45224      	
++ cit     = 0              cdscd   = 0              cdscb   = 0            	
++ eta0    = 0              etab    = 0              dsub    = 27.7073      	
++ pclm    = 1              pdiblc1 = 0              pdiblc2 = 2e-6          	
++ pdiblcb = 0              drout   = 27.7073        pscbe1  = 5.67248e9    	
++ pscbe2  = 6.64306e-8     pvag    = 0              delta   = 0.34         	
++ rs      = 0.3            mobmod  = 1              prt     = 65            	
++ ute     = -1.30959       kt1     = -0.602209      kt1l    = 0             	
++ kt2     = 0.142263       ua1     = 5.21795e-9     ub1     = -5.18383e-18  	
++ uc1     = 3.77821e-12    at      = 13.1825674     nqsmod  = 0             	
++ wl      = 0              wln     = 0.125          ww      = 0             	
++ wwn     = 2.2892         wwl     = 7.36e-19       ll      = 0             	
++ lln     = 0.785          lw      = 0              lwn     = 0.74            	
++ lwl     = -6.4e-20       capmod  = 2              tcj     = 0                   
++ tpb     = 0              tcjsw   = 0              tpbsw   = 0               	
++ noff    = 1              acde    = 1              moin    = 15                	
++ tpbswg  = 0              tcjswg  = 0              cgsl    =  2.02e-09      	
++ cgdl    =  2.02e-09        cj      = 7.44e-04
+
+

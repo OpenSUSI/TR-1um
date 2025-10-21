@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text># Back Annotate v0.74 Mar. 12 2023 Copy right Seijiro Moriyama
+module BackannotateModule
+  # require 'YAML'
+  class Backannotate
+    include RBA
+    attr_accessor :ba, :ba_type
+    def initialize device_class_map = nil
+      @dc_map = device_class_map
+      app = Application.instance
+      @mw = app.main_window
+      @cv = @mw.current_view.active_cellview  
+      @ba_type = '*unknown*'
+      ba_file = @cv.filename.sub(/\.[^\.]*$/,'_ba.yaml')
+      @converted = []
+      if File.exist? ba_file
+        @ba = YAML.load File.read(ba_file)
+        @ba_type = '*final*'
+      else
+        ba_file = @cv.filename.sub(/\.[^\.]*$/,'_table.yaml')
+        if File.exist? ba_file
+          initialize_ba_data ba_file
+          @ba_type = '*initial*'
+        end
+      end
+      if @ba_type == '*unknown*'
+        raise "Error: both #{@cv.filename.sub(/\.[^\.]*$/,'_ba.yaml')} and #{@cv.filename.sub(/\.[^\.]*$/,'_table.yaml')} do not exist!"
+      end
+    end
+    def initialize_ba_data ba_file
+      ba_table = YAML.load(File.read(ba_file))['M']
+      ba_data = {}
+      ba_table.each_pair{|type, device|
+        ba_data[type] ||= {}
+        device.each_pair{|l, w_group|
+          w_group.each_pair{|w_m, w_params|
+            w_m =~ /(\S+)\*(\S+)/
+            w = $1.to_f
+            m = $2.to_i
+            as_tot = ad_tot = ps_tot = pd_tot = 0
+            w_params.each{|params|
+              puts "params=#{params.inspect}"  
+              as, ad, ps, pd = params[1]
+              as_tot = as_tot + as
+              ad_tot = ad_tot + ad
+              ps_tot = ps_tot + ps
+              pd_tot = pd_tot + pd
+            }
+            puts "m(#{m}) for #{w}/#{l} weird! should be #{w_params.size}" if m != w_params.size
+            key = "#{w}/#{l}/#{m}"
+            ba_data[type][key] ||= {}
+            ba_data[type][key] = {'M' =&gt; m, 'AS' =&gt; as_tot.round(6), 'AD' =&gt; ad_tot.round(6), 
+                                         'PS' =&gt; ps_tot.round(6), 'PD' =&gt; pd_tot.round(6)}
+            puts "#{type}: l=#{l} w=#{w} m=#{w_params.size} =&gt; total: (#{as_tot}, #{ad_tot}, #{ps_tot}, #{pd_tot})"
+          } 
+        }
+      }      
+      @ba = ba_data
+      puts ba_data.to_yaml
+    end
+    def inside? box, x, y
+      (x &gt; box.p1.x) &amp;&amp; (x &lt; box.p2.x) &amp;&amp;
+      (y &gt; box.p1.y) &amp;&amp; (y &lt; box.p2.y)
+    end
+    def backannotate file, ba=@ba
+      Dir.chdir(File.dirname file){
+        ckt_name = File.basename(file).sub(File.extname(file), '').upcase
+        puts "ckt_name=#{ckt_name}"
+        puts "ba: #{ba.inspect}"
+        (ba[ckt_name] &amp;&amp; ba = ba[ckt_name])||(ba['.TOP'] &amp;&amp; ba = ba['.TOP'])
+        #netlist = File.read(file).encode('UTF-8')
+        netlist = File.open(file, 'r:Windows-1252').read.encode('UTF-8', invalid: :replace)
+        header = netlist.slice(0..100)
+        if ['.net', '.cir', '.spice', '.spc', '.sp'].include? File.extname(file).downcase
+          ba_netlist netlist, file, ba if @ba_type == '*initial*'
+          ba_netlist_final netlist, file, ba if @ba_type == '*final*'
+        elsif header =~ /xschem/
+          ba_xschem netlist, file, ba  if @ba_type == '*initial*'
+          ba_xschem_final netlist, file, ba  if @ba_type == '*final*'
+        elsif header =~ /^Version 4/
+          if @ba_type == '*initial*'
+            @device_class_map = create_device_table file.sub('.asc', '.net')
+            puts @device_class_map
+            ba_ltspice netlist, file, ba
+          elsif @ba_type == '*final*'
+            ba_ltspice_final netlist, file
+          end
+        end
+      }
+    end
+    def formalize_parameters w, m, as, ad, ps, pd, formalize=false
+      if formalize
+        if m == 1
+          #" as=#{as}=&gt;{#{w}u*#{(as/w).round(4)}u} ps=#{ps}u=&gt;{(#{w}u+#{(ps/2 - w).round(4)}u)*2}"
+          " as={#{w}u*#{(as/w).round(4)}u} ad={#{w}u*#{(ad/w).round(4)}u} ps={(#{w}u+#{(ps/2 - w).round(4)}u)*2} pd={(#{w}u+#{(pd/2 - w).round(4)}u)*2}"
+        else
+          #" as=#{as}=&gt;{#{w}u*#{(as/w).round(4)}u} ps=#{ps}u=&gt;{(#{w}u+#{((ps*m/2 - w)/m).round(4)}u*#{m})*2/#{m}}"
+          " as={#{w}u*#{(as/w).round(4)}u} ad={#{w}u*#{(ad/w).round(4)}u} ps={(#{w}u+#{((ps*m/2 - w)/m).round(4)}u*#{m})*2/#{m}} pd={(#{w}u+#{((pd*m/2 - w)/m).round(4)}u*#{m})*2/#{m}}"
+        end
+      else # {(2u+4u)*2} = ps
+        " as=#{as}p ad=#{ad}p ps=#{ps}u pd=#{pd}u"
+      end
+    end
+    def update_parameters params, current
+      as = params['AS'].to_f
+      ad = params['AD'].to_f
+      ps = params['PS'].to_f
+      pd = params['PD'].to_f
+      w = params['W'].to_f
+      erased = current.gsub(/ [apAP][sdSD]=\S+/, '')
+      if m = params['M']
+        m = params['M'].to_i
+        erased = erased.gsub(/ [mMwW]=\S+/, '') + " w=#{w.round(4)}u m=#{m}"
+      else
+        m = 1
+        erased = erased.gsub(/ [mMwW]=\S+/, '') + " w=#{w.round(4)}u"
+      end
+      erased  + formalize_parameters(w.round(4), m, (as/m).round(4), (ad/m).round(4),
+                                                  (ps/m).round(4), (pd/m).round(4), true)
+    end
+    def v_in_micron desc
+      if desc =~ /(\S+)[uU]/
+        $1.to_f.round(4)
+      elsif desc =~/(\S+)[nN]/
+        ($1.to_f * 1.0e-3).round(4)
+      else
+        (desc.to_f * 1.0e6).round(4)
+      end
+    end
+    def backannotate_parameters current, ba_data
+      puts "current = #{current} for #{ba_data}"
+      param = current.upcase.scan(/(\S+) *= *(\S+)/).to_h
+      m = param['M'] ? param['M'].to_i : 1
+      width = v_in_micron param['W']
+      length = v_in_micron param['L']
+      key = "#{width}/#{length}/#{m}"
+      puts "key=#{key} for #{param}"
+      if params = ba_data[key]
+        puts '=&gt; OK'                  
+        params['W'] = width
+        #yield  l, params, current, new_netlist
+        return update_parameters(params, current)
+      else
+        total_width = width * m
+        n = 2
+        puts "Try width =  #{(total_width/n).round(4)} &gt; #{length}"
+        done = false
+        while (width = (total_width/n).round(4)) &gt; length
+          key = "#{width}/#{length}/#{n}"
+          puts "Try key=#{key}"
+          if params = ba_data[key]
+            params['M']  = n
+            params['W'] = width
+            #yield  l, params, current, new_netlist
+            new = update_parameters(params, current)
+            done = true
+            break
+          end
+          n = n + 1
+        end
+        if done
+          return new
+        else
+          raise "Error: backannotation data for '#{current}' is not available --- please convert cells with routing_scale_factor: larger than pcell_scale_factor and run LVS again"
+        end
+      end
+    end
+    def ba_netlist netlist, file, ba_data=@ba
+      new_netlist = ''
+      netlist.each_line{|l|
+        if l =~ /^[Xx]*[Mm]\S+ +\S+ +\S+ +\S+ +\S+ +(\S+) +(.*)$/
+          dc = @dc_map[$1.to_sym] || @dc_map[$1.upcase.to_sym]
+          current = $2
+          if ba_data[dc]
+            puts ba_data[dc].inspect
+            if new = backannotate_parameters(current, ba_data[dc])
+              new_netlist &lt;&lt; l.sub(current,  new)
+              next
+            end
+          end
+        else
+          new_netlist &lt;&lt; l
+        end
+      }
+      File.open(file, 'w:Windows-1252'){|f| f.puts new_netlist}
+      puts "#{file} updated"
+    end
+    def ba_netlist_final netlist, file, ba_source=@ba
+      new_netlist = ''
+      ba_data = nil
+      netlist.each_line{|l|
+        if l.upcase =~ /^\.SUBCKT +(\S+)/
+          cname = $1
+          ba_data = ba_source[cname]
+        elsif l =~ /^([Mm]\S+) +\S+ +\S+ +\S+ +\S+ +(\S+) +(.*)$/
+          en = $1
+          # dc = $2
+          current = $3         
+          if params = ba_data[en]
+            puts ba_data[en].inspect
+            param = current.upcase.scan(/(\S+) *= *(\S+)/).to_h
+            # params['W'] = v_in_micron param['W'] if param['W'] == '0' || param['W'] == '0.0u'
+            if m = param['M']
+              params['M'] = m.to_i
+              params['W'] = params['W'].to_f / params['M']
+            end
+            # arams['L'] = v_in_micron param['L']
+            #yield  l, params, current, new_netlist
+            new_netlist &lt;&lt; l.sub(current, update_parameters(params, current))
+            next
+          end
+        end
+        new_netlist &lt;&lt; l
+      }
+      File.open(file, 'w:Windows-1252'){|f| f.puts new_netlist}
+      puts "#{file} updated"
+    end
+    def ba_xschem netlist, file, ba_data=@ba
+      netlist.each_line{|l|
+        if l =~ /^C {(.*)\.sym}.*name=x(\d+)/
+          cell = "#{$1}.sch"
+          unless @converted.include? cell
+            ba_xschem File.read(cell), cell, ba_data[$2]
+            @converted &lt;&lt; cell
+          end
+        elsif l =~ /^C {(.*)\.sym}.*name=(M\d+) (.*)}/
+          current = $3
+          params = ba_data[$2]
+          #yield l, params, current, new_netlist
+          new_netlist &lt;&lt; l.sub(current, update_parameters(params, current))
+          next
+        end
+        new_netlist &lt;&lt; l
+      }
+      File.open(file, 'w'){|f| f.puts new_netlist}
+      puts "#{file} updated"
+    end
+    def ba_xschem_final netlist, file, ba_data=@ba
+      puts 'not implemented yet'
+    end
+    # DC_MAP = {'pch' =&gt; 'PMOS', 'nch' =&gt; 'NMOS'}          
+    def create_device_table file
+      device_class = {}
+      ckt_name = '.TOP'
+      unless File.exist? file
+        raise "Error: netlist for #{file} is not available --- please generate it with LTspice"
+      end
+      netlist = File.open(file, 'r:Windows-1252').read.encode('UTF-8', invalid: :replace)
+      netlist.each_line{|l|
+        l.gsub! 0.chr, ''
+       # puts "ckt_name:#{ckt_name}:#{l}"
+        puts ":#{File.basename file}:#{l}"
+        device_class[ckt_name] ||= {}
+        if l =~ /^([Mm]\S+) +\S+ +\S+ +\S+ +\S+ +(\S+) +(.*)$/
+          name = $1
+          dc = $2.upcase.to_sym
+          device_class[ckt_name] [name] = (@dc_map &amp;&amp; @dc_map[dc]) || dc
+        elsif  l.upcase =~ /^\.SUBCKT +(\S+)/
+          ckt_name = $1
+        end
+      }
+      device_class
+    end
+    def update_symattr symattr, current, prefix, ckt_name, id, ba_data
+      new_netlist = ''
+      if symattr 
+        if prefix == 'M'
+          if @device_class_map[ckt_name].nil?
+            raise 'Error: @device_class_map is broken --- maybe netlist is broken'
+          end
+          dc = @device_class_map[ckt_name][prefix+id]
+          if current &amp;&amp; new = backannotate_parameters(current, ba_data[dc])              # new_netlist &lt;&lt; l.sub(current,  new)       
+            symattr[:Value2].sub!(current,  new)
+          end
+        end
+       symattr.values.each{|l|
+          new_netlist &lt;&lt; l
+          puts l
+        }
+      end
+      new_netlist
+    end
+    def ba_ltspice netlist, file, ba_data
+      #puts ba.inspect
+      ckt_name = File.basename(file).sub(File.extname(file), '').upcase
+      new_netlist = ''
+      symbol = prefix = id = dc = current = symattr = nil
+      netlist.each_line{|l|
+        if l =~ /^SYMBOL (\S+)/
+          puts symbol # previous symbol name
+          symbol = $1          
+          new_netlist &lt;&lt; update_symattr(symattr, current, prefix, ckt_name.upcase, id, ba_data)
+          symattr = {}
+        elsif l =~ /^SYMATTR InstName X(\d+)/
+          id = $1
+          ckt_name = symbol
+          cell = "#{symbol}.asc"
+          unless @converted.include? cell
+            # data = ba_data['X' + id] || ba_data[symbol.upcase]
+            ba_ltspice File.read(cell), cell, ba_data
+            @converted &lt;&lt; cell
+          end
+          #symattr[:InstName] = l
+          #next
+        elsif l =~ /^SYMATTR InstName (\w)(\d+)/
+          prefix = $1
+          id = $2
+          symattr[:InstName] = l
+          next
+        elsif l =~ /^SYMATTR Value2 (.*)$/
+          current = $1
+          symattr[:Value2] = l
+          next
+        end
+        new_netlist &lt;&lt; l
+      }
+      new_netlist &lt;&lt; update_symattr(symattr, current, prefix, ckt_name.upcase, id, ba_data)
+      File.open(file, 'w:Windows-1252'){|f| f.puts new_netlist}
+      puts "#{file} updated"
+    end
+    def update_symattr_final symattr, current, prefix, id, top_ckt, inst_sym, ids
+      new_netlist = ''
+      if symattr 
+        symattr.values.each{|l|
+          if prefix == 'M'
+            m_id = "M#{id}"
+            if ckt_inst(ids) == ''
+              params = @ba[top_ckt][m_id]
+            else
+              params = @ba[top_ckt][ckt_inst(ids)][m_id]
+            end
+            new_netlist &lt;&lt; l.sub(current, update_parameters(params, current))
+          else
+            new_netlist &lt;&lt; l
+          end
+          puts l
+        }
+      end
+      new_netlist
+    end
+    def ckt_inst ids
+      ids.map{|a| "X#{a}"}.join('.')
+    end
+    def ba_ltspice_final netlist, file, ids = [], top_ckt = '.TOP', inst_sym=nil
+      #puts ba.inspect
+      new_netlist = ''
+      symbol = prefix = id = dc = current = symattr = nil
+      netlist.each_line{|l|
+        if l =~ /^SYMBOL (\S+)/
+          # puts symbol
+          symbol = $1
+          new_netlist &lt;&lt; update_symattr_final(symattr, current, prefix, id, top_ckt, inst_sym, ids)
+          symattr = {}
+        elsif l =~ /^SYMATTR InstName X(\d+)/
+          id = $1
+          cell = "#{symbol}.asc"
+          unless @converted.include? cell
+            if @ba[symbol.upcase]
+              ba_ltspice_final File.read(cell), cell, [], symbol.upcase
+            else
+              ids.push(id)
+              ba_ltspice_final File.read(cell), cell, ids, top_ckt, symbol
+              ids.pop
+            end
+            @converted &lt;&lt; cell
+          end
+        elsif l =~ /^SYMATTR InstName (\w)(\d+)/
+          prefix = $1
+          id = $2
+          symattr[:InstName] = l
+          if $debug &amp;&amp; $1.upcase == 'M'
+            m_id = "M#{id}"
+            puts "#{top_ckt}/#{inst_sym}:#{ckt_inst ids}/#{m_id}"
+            if ckt_inst(ids) == ''
+              puts "=&gt; #{@ba[top_ckt][m_id]}"
+            else
+              puts "=&gt; #{@ba[top_ckt][ckt_inst(ids)][m_id]}"
+            end
+          end
+          next
+        elsif l =~ /^SYMATTR Value2 (.*)$/
+          current = $1
+          symattr[:Value2] = l
+          next
+        end
+        new_netlist &lt;&lt; l
+      }
+      new_netlist &lt;&lt; update_symattr_final(symattr, current, prefix, id, top_ckt, inst_sym, ids)
+      unless $debug
+        File.open(file, 'w:Windows-1252'){|f| f.puts new_netlist}
+        puts "#{file} updated"
+      end
+    end
+    def do_backannotate
+      begin
+        sch = QFileDialog::getOpenFileName(@mw, 'Schematic file', File.dirname(@cv.filename), 'schematic(*.asc *.sch)')
+        #ba.backannotate 'op2_tb.sch'
+        puts sch.inspect
+        if sch == '' || sch == nil
+          sch = nil
+          net = QFileDialog::getOpenFileName(@mw, 'Netlist file', File.dirname(@cv.filename), 'schematic(*.net *.cir *.spice *.sp *.spc)')
+        end
+        backannotate(sch||net)
+      rescue =&gt; error
+        puts error
+        puts "Backannotation might not exist under #{File.dirname @cv.filename}!"
+      end 
+    end
+  end
+  # ba = Backannotate.new
+  # ba.do_backannotate
+  puts 'Caution: Please run Backannotation device parasitics in each PDK!'
+end
+</text>
+</klayout-macro>

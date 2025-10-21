@@ -1,0 +1,25 @@
+# --------- --------- --------- --------- --------- --------- ---------
+#PSUB_CL.drc( space() < 5.0  ).output( "ER0201 PSUB_CL SPACE < 5.0 " )
+# --------- --------- --------- --------- --------- --------- ---------
+#  PF.edges.outside_part(PSUB_RR).output( "ER0301   PF NOT_INSIDE PSUB_RR" )
+# NF.edges.outside_part(PSUB).output( "ER0304   NF NOT_INSIDE PSUB" )
+# --------- --------- --------- --------- --------- --------- ---------
+#PSUB_MP.drc( space() < 10.0 ).output( "ER0406 PSUB_MP SPACE < 10.0" )
+#PSUB_RR.drc( space() < 10.0 ).output( "ER0411 PSUB_RR SPACE < 10.0" )
+#AA_BGMP.edges.outside_part(  SG).output( "ER0419 AA_BGMP NOT_INSIDE   SG" )
+#AA_BGMN.edges.outside_part(  SG).output( "ER0419 AA_BGMN NOT_INSIDE   SG" )
+#PSUB_MN.drc( space() < 5.0  ).output( "ER0421 PSUB_MN SPACE < 5.0 " )
+#PSUB_RR.drc( space() < 5.0  ).output( "ER0423 PSUB_RR SPACE < 5.0 " )
+# --------- --------- --------- --------- --------- --------- ---------
+CHAN = (SG & L)
+DIFF = (L - SG)
+
+FRGE = SG.drc( enc(L, projection) < 4.0 )  
+FRGE.output("FRINGE #{FRGE}")               
+
+ERROR = (L.edges(concave)).polygons(1)
+
+
+#ERROR = (SG + L).drc( notch(projection) < 3.0 )
+#WIDTH.output("width ")
+ERROR.output("ERROR #{ERROR}  ")

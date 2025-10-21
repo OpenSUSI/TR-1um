@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Show layers in selected instances</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text># Show layers v0.2 Dec. 9th 2022 Copy right Seijiro Moriyama
+module ShowLayers
+ 
+  include MinedaCommon
+
+  class ShowLayers
+    include MinedaCommon
+    #mpc = MinedaPCellCommon::new
+    #mpc.set_technology 'VIS05'
+    #mpc.set_basic_library 'VIS05_Basic'
+    def initialize
+      # cv = ConvertPCells::current_cellview
+      app = RBA::Application.instance
+      mw = app.main_window
+      lv = mw.current_view
+      if lv == nil
+        raise "No view selected"
+      end
+      cv = lv.active_cellview
+      tech =cv.cell.layout.technology
+      lyp_file = File.join(tech.base_path, tech.layer_properties_file)
+      layer_index = MinedaPCell::MinedaPCellCommon::get_layer_index_from_file lyp_file
+      layer_mapping = {}
+      layer_index.each_pair{|l, it|
+        layer_mapping[it[0].to_i] = l
+      }
+      # puts layer_index.inspect
+      # puts layer_mapping.inspect
+      layout = cv.cell.layout
+      instances = []
+      selected_objects = lv.object_selection
+      if selected_objects.size &gt; 0
+        selected_objects.each{|s|
+          instances &lt;&lt; s.inst if s.is_cell_inst?
+        }
+      else
+        cv.cell.each_inst{|inst| instances &lt;&lt; inst}
+      end
+      if cv.cell.bbox.width &gt; cv.cell.bbox.height
+        sorted_instances = instances.sort_by{|inst| inst.bbox.center.x}
+      else
+        sorted_instances = instances.sort_by{|inst| inst.bbox.center.y}.reverse
+      end
+      sorted_instances.each{|inst|
+        puts '[' + inst.cell.name + ']'
+        displayed_layers = []
+        layout.layer_indexes.each{|layer|
+          lay_ind = layout.get_info(layer).layer
+          unless inst.cell.begin_shapes_rec(layer).at_end?
+            # puts "#{layer_mapping[lay_ind]}(#{lay_ind}): #{inst.cell.shapes(layer).size}" # if inst.cell.shapes(layer).size&gt;0
+            displayed_layers &lt;&lt; layer_mapping[lay_ind]
+          end
+        }
+        puts displayed_layers.join(', ')
+      }
+    end
+  end
+  
+  ShowLayers.new  ..
+
+end
+</text>
+</klayout-macro>

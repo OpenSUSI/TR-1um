@@ -1,0 +1,21 @@
+v {xschem version=3.4.4 file_version=1.2
+}
+G {}
+K {type=diode
+format="@spiceprefix@name @pinlist @model m=@m"
+template="name=D1 model=DN m=1"}
+V {}
+S {}
+E {}
+L 4 -10 25 10 25 {}
+L 4 -10 40 10 40 {}
+L 4 -10 40 10 40 {}
+L 4 -10 40 0 25 {}
+L 4 0 25 10 40 {}
+L 4 0 0 0 60 {}
+B 5 -2 58 2 62 {name=PLUS dir=inout}
+B 5 -2 -2 2 2 {name=MINUS dir=inout}
+T {PLUS} 4 51 0 0 0.2 0.2 {layer=13}
+T {MINUS} 5 1 0 0 0.2 0.2 {layer=13}
+T {DN_@name} 6 41 0 0 0.2 0.2 {}
+T {N} -26 25 0 0 0.3 0.3 {layer=4}

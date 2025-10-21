@@ -1,0 +1,96 @@
+# Contact related
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Contact Crossed to L/SG/M1
+# 
+(L ).edges.inside_part(CONT).output("ERR05: CONT crossed L")
+(SG).edges.inside_part(CONT).output("ERR05: CONT crossed SG")
+(M1).edges.inside_part(CONT).output("ERR05: CONT crossed M1")
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Contact NOT outside of L/SG/M1
+# 
+(CONT - (L + SG + M1)).output("ERR05: CONT outside of L/SG/M1")
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Contact on SG/M1
+#
+(CONT).drc( enclosed(SG)   < 0.8 ).output("ERR05: CONT enclosed SG < 0.8")
+(CONT).drc( enclosed(M1)   < 0.8 ).output("ERR05: CONT enclosed M1 < 0.8")
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+# Transistor related
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#
+# CONT on AAMP/MN/GP/GN area == 1.0
+#
+(CONT & AAMP).drc( width != 1.0 ).output("ERR05: CONT on L(MP) != 1.0")
+(CONT & AAMN).drc( width != 1.0 ).output("ERR05: CONT on L(MN) != 1.0")
+(CONT & AAGP).drc( width != 1.0 ).output("ERR05: CONT on L(GP) != 1.0")
+(CONT & AAGN).drc( width != 1.0 ).output("ERR05: CONT on L(GN) != 1.0")
+#
+# CONT to AAMP/MN/GP/GN enclosure < 0.8
+#
+(CONT).drc( enclosed(AAMP) < 0.8 ).output("ERR05: CONT enclosed L(MP) < 0.8")
+(CONT).drc( enclosed(AAMN) < 0.8 ).output("ERR05: CONT enclosed L(MN) < 0.8")
+(CONT).drc( enclosed(AAGP) < 0.8 ).output("ERR05: CONT enclosed L(GP) < 0.8")
+(CONT).drc( enclosed(AAGN) < 0.8 ).output("ERR05: CONT enclosed L(GN) < 0.8")
+#
+#  Contact on AAMP/AAMN to SG separation < 1.0
+# 
+(CONT & AAMP).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(MP) < 1.0")
+(CONT & AAMN).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(MN) < 1.0")
+#
+#  Contact on AAMP/AAMN to Contact
+# 
+(CONT & AAMP).drc( space <  1.0 ).output("ERR05: CONT on L(MP) space <  1.0")
+(CONT & AAMN).drc( space <  1.0 ).output("ERR05: CONT on L(MN) space <  1.0")
+(CONT & AAGP).drc( space <  1.0 ).output("ERR05: CONT on L(GP) space <  1.0")
+(CONT & AAGN).drc( space <  1.0 ).output("ERR05: CONT on L(GN) space <  1.0")
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  Contact size & enclosed special for MPE/MNE (ESD/IO) 
+#
+(CONT & AAPE).drc( width != 3.0 ).output("ERR05: CONT on MP(ESD) != 3.0")
+(CONT & AANE).drc( width != 3.0 ).output("ERR05: CONT on MN(ESD) != 3.0")
+#
+(CONT & AAPE).drc( space <  1.6 ).output("ERR05: CONT space on MP(ESD) <  1.6")
+(CONT & AANE).drc( space <  1.6 ).output("ERR05: CONT space on MN(ESD) <  1.6")
+#
+(CONT).drc( enclosed(AAPE) < 4.0 ).output("ERR05: CONT enclosed MP(ESD) < 4.0") # IGNORE ERMPE31 TATE < 2.5
+(CONT).drc( enclosed(AANE) < 4.0 ).output("ERR05: CONT enclosed MN(ESD) < 4.0") # IGNORE ERMNE32 TATE < 2.5
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  Diode related 
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Contact size & enclosed special for DP/DN 
+#
+(CONT & AADP).drc( width != 1.2 ).output("ERR05: CONT to L(DP) != 1.2")
+(CONT & AADN).drc( width != 1.2 ).output("ERR05: CONT to L(DN) != 1.2")
+#
+(CONT).drc( enclosed(AADP) < 1.2 ).output("ERR05: CONT enclosed L(DP) < 1.2")
+(CONT).drc( enclosed(AADN) < 1.2 ).output("ERR05: CONT enclosed L(DN) < 1.2")
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  Resistor related 
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#
+CONTL = CONT.drc( area > 1.5 )  
+#
+(CONTL).drc( space <  1.6 ).output("ERR05: CONT-L to CONT-L <  1.6")                        # CONTL space
+(CONTL).drc( width(projection, projecting > 1.0 ) < 1.6 ).output("ERR07: CONTL(L) < 1.6")   # CONTL(Long) < 1.6
+#
+#  Contact-L enclosure to L/SG/M1
+#
+(CONTL & SG).output("ERR05: DONOT allow CONT-L on SG")
+(CONTL).drc( enclosed(L)   < 1.2 ).output("ERR05: CONT-L enclosed L  < 1.2")
+(CONTL).drc( enclosed(L)   < 1.2 ).output("ERR05: CONT-L enclosed M1 < 1.2")
+#
+#  Contact-L separation to TC
+#
+(CONTL).drc( sep(TC)    < 1.4 ).output("ERR07: CONT-L sep to TC < 1.4")
+#
+CONTL.forget  # release memory

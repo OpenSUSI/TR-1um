@@ -1,0 +1,40 @@
+# Layer generation
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Input layers
+#
+MASK  = input(63,63)               # DRC check waiver area
+ESD   = input(63,62)               # IO/ESD area recognition
+#
+PSUB  = input(140, 0).not(MASK)    # Nwell/Pwell
+NW    = input(36,  0).not(MASK)    # N-well mask
+HVNW  = input(141, 0).not(MASK)    # HV N-well mask
+L     = input(3,   0).not(MASK)    # Acitive = inverse LOCOS 
+NF    = input(25,  0).not(MASK)    # S/D P+ impla
+PF    = input(26,  0).not(MASK)    # S/D N+ impla
+CL    = input(143, 0).not(MASK)    # CSIO bottom impla
+HPBE  = input(144, 0).not(MASK)    # HV PMOS channel impla
+HNBE  = input(145, 0).not(MASK)    # HV NMOS channel impla
+PBE   = input(146, 0).not(MASK)    # PMOS channel impla
+NBE   = input(147, 0).not(MASK)    # NMOS channel impla
+HPM   = input(33,  0).not(MASK)    # ???
+RHP   = input(148, 0).not(MASK)    # Hi-res impla
+SG    = input(8,   0).not(MASK)    # Salisaide
+PM    = input(35,  0).not(MASK)    # PMOS LDD
+NM    = input(7,   0).not(MASK)    # NMOS LDD
+R     = input(12,  0).not(MASK)    # Resistor
+PSD   = input(9,   0).not(MASK)    # PMOS S/D
+NSD   = input(28,  0).not(MASK)    # NMOS S/D
+CONT  = input(11,  0).not(MASK)    # Contact
+M1    = input(13,  0).not(MASK)    # Metal-1
+TC    = input(19,  0).not(MASK)    # Via1
+M2    = input(20,  0).not(MASK)    # Metal-2
+PRO   = input(14,  0).not(MASK)    # PAD
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Bounding box
+#
+BBOX  = extent

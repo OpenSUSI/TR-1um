@@ -1,0 +1,39 @@
+# ** WIDTH check **
+# by Table 1-5-1 1/4 Jun1okamura
+
+# ----- ------ ----- 
+verbose
+#CH.drc( width < 2.0 ).edges.inside_part(AA).output("ERR CH_L", polygon)
+#CH.drc( width < 2.0 ).edges.inside_part(SG).output("ERR CH_W", polygon)
+
+# How to check chanel L and W 
+#-----
+#CH = AA.and(SG)
+#SD = AA.interacting(SG).not(SG)
+#(SD   ).drc(space < 2.0).output("ERR CH_L")
+#-----
+#CH_WIDTH = CH.edges.inside_part(AA)     # edges
+#drc(CH_WIDTH.length < 2.0).output("ERR CH_W", polygon)
+#log("ch.length=#{CH_WIDTH.length > 4.0} ch.length.size=#{CH_WIDTH.data.size}")
+#-----
+#(PSUB.and(NW)   ).drc( space < 12.0).output("ERR0104", polygon)
+#(PSUB.and(NW)   ).drc( sep(PSUB.and(HVNW)) < 9.5 ).output("ERR0111", polygon)
+#(PSUB.and(HVNW) ).drc( space < 8.0 ).output("ERR0122", polygon)
+
+#AA.drc(enclosed(PBE) < 1.4).output("ERR enclosed < 1.4 PBE")
+#PBE.edges.inside_part(AA).output("ERR PEB crossed AA")
+
+L.drc(enclosed(NBE) < 1.4).output("ERR")
+L.drc(enclosed(PM ) < 1.4).output("ERR")
+L.drc(enclosed(NM ) < 1.4).output("ERR")
+L.drc(enclosed(PSD) < 1.4).output("ERR")
+L.drc(enclosed(NSD) < 1.4).output("ERR")
+
+#NF.not(PSUB & NF & PF).output("ERR NF-PSUB")
+#PF.not(PSUB & NF & PF).output("ERR PF-PSUB")
+#PSUB.not(PSUB & NF & PF).output("ERR PSUB not covering PF&NF")
+
+#PSUB.drc(   if_any( width < 8.0, space < 4.0 )).output("ERR")
+
+#(L & R).drc( enclosed(PBE) < 1.4 ).output("ERR1")
+#(L - R).drc( if_any((enclosed(PBE) < 1.4), not(primary & PBE ) )).output("ERR2")
