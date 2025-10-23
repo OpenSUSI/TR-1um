@@ -1,0 +1,18 @@
+* simulator lang=spectre
+
+* // model DN ////////////////////////////////////////
+.model DN D tnom=27
++ is      =1.0e-17        rs      =47.59     cj      =2.76e-17
++ cjsw    =1.17e-17    imax    =10    imelt   =10    xti=0.492    n=1.00129    ikf=4.051e-5  bv=14.45  ibv=1.0e-6 
+
+  
+* // model DP ////////////////////////////////////////
+.model DP D tnom=27
++ is      =2.3431e-18      rs      =33.71    cj      =4.79e-17
++ cjsw    =3.91e-17       imax    =10   imelt   =10   xti=1.0611  n=1.00066  ik=1.619e-4  bv=10.35  ibv=1.0e-6
+
+
+*// model  DPO   ////////////////////////////////////////
+*model DPO diode \
+*is      =2.3431e-18      rs      =33.71    cj      =4.79e-17 \
+*cjsw    =3.91e-17       imax    =10   imelt   =10   xti=1.0611  n=1.00066  ik=1.619e-4  bv=10.35  ibv=1.0e-6

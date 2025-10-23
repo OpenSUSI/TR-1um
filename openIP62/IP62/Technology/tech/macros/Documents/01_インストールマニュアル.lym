@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>01_インストールマニュアル</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text>module MyMacro
+  MinedaUtility::ViewDoc::view_doc $ip62_docs &amp;&amp; $ip62_docs['インストールマニュアル'] ||
+    File.join('salt/IP62/Technology/doc','OS01_インストールマニュアル_rev1.pdf')
+end
+</text>
+</klayout-macro>

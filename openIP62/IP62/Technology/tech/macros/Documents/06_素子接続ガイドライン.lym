@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>06_素子接続ガイドライン</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text>module MyMacro
+   MinedaUtility::ViewDoc::view_doc $ip62_docs &amp;&amp; $ip62_docs['素子接続ガイドライン'] ||
+    File.join('salt/IP62/Technology/doc','OS06_素子接続ガイドライン_rev1.pdf')
+end
+
+</text>
+</klayout-macro>

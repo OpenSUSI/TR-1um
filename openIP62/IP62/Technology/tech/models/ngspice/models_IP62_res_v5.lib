@@ -1,0 +1,146 @@
+* /// IP62 Model File ///
+* /// models_IP62_res_v5  ///
+* /// 2025.08.19 ARAKAWA Natsuki ///
+
+* simulator lang=spectre
+
+
+*//// RR  ////////////////////////////////////////////////////////////////////////
+
+.subckt F_RR PLUS MINUS SUB
+.param w=1u r=1 l=1u tc1=0 tc2=0 tnom=27
+.if (w == 4u)
+
+r0 PLUS MINUS
++ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
++     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(4-1.09)+(13.3*(9.2/	
++       (4-1.09)+3.38/(4-1.8))+2.79))+(-21*3.95+615.2)))*				
++     (1+(0.000949*log(4)-0.00559)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+			
++     (-3.2478*10**(-6)*log(4)+5.28*10**(-5))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+	
++     (-7.97*10**(-7)*log(4)+3.05*10**(-6))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+	
++     (-3*10**(-9)*log(4)+1.2394*10**(-8))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/	
++     (1+(-0.09)*abs(v(PLUS,MINUS))/(l*10**6)+0.19*(abs(v(PLUS,MINUS))/		
++     (l*10**6))**2+(-0.02)*(abs(v(PLUS,MINUS))/(l*10**6))**3)))'
+
+c_d0 PLUS SUB  c='(7.06*(10**-4)*l*(10**6)+6.89*(10**-3))*10**(-12)'
+c_d1 MINUS SUB c=0
+
+
+.elseif (w == 6u)
+
+r0 PLUS MINUS
++ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
++     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(6-1.09)+			
++       (13.3*(9.2/(6-1.09)+3.38/(6-1.8))+2.79))+(-21*4.0+366.4)))*			
++     (1+(0.000639*log(6)-0.00559)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+			
++     (-1.03248*10**(-6)*log(6)+5.28*10**(-5))*((v(SUB)-(v(MINUS)+		
++     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-9.9798*10**(-7)*log(6)+4.05*10**(-6))*			
++     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-3*10**(-9)*log(6)+1.9394*10**(-8))*	
++     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.1)*abs(v(PLUS,MINUS))/(l*10**6)+	
++     0.25*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.02)*(abs(v(PLUS,MINUS))/		
++     (l*10**6))**3)))'
+
+c_d0 PLUS SUB  c='(8.99*(10**-4)*l*(10**6)+7.98*(10**-3))*10**(-12)' 
+c_d1 MINUS SUB c=0
+
+
+.elseif (w == 12u)
+
+r0 PLUS MINUS
++ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
++     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(12-1.09)+			
++       (13.3*(9.2/(12-1.09)+3.38/(12-1.8))+2.79))+(-21*11.9+368.9)))*		
++     (1+(0.003599*log(12)-0.0129)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+			
++     (1.03248*10**(-5)*log(12)+1.5764*10**(-5))*((v(SUB)-(v(MINUS)+		
++     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-9.9788*10**(-7)*log(12)-9.4884*10**(-7))*((v(SUB)-	
++     (v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(2.1996*10**(-8)*log(12)+1.2939*10**(-7))*	+ 
++     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.21)*abs(v(PLUS,MINUS))/		
++     (l*10**6)+0.44*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.032)*			
++     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
+
+c_d0 PLUS SUB  c='(1.47*(10**-3)*l*(10**6)+1.31*(10**-2))*10**(-12)'
+c_d1 MINUS SUB c=0
+
+
+.elseif (w == 20u)
+
+r0 PLUS MINUS
++ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
++     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(20-1.09)+			
++       (13.3*(9.2/(20-1.09)+3.38/(20-1.8))+2.79))+(-21*20.1+495.8)))*		
++     (1+(0.003499*log(20)-0.01299)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+		
++     (1.73248*10**(-5)*log(20)+4.5764*10**(-5))*((v(SUB)-(v(MINUS)+		
++     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-2.09788*10**(-6)*log(20)-8.4884*10**(-7))*((v(SUB)-	
++     (v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(1.996*10**(-8)*log(20)+5.9395*10**(-8))*		
++     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.15)*abs(v(PLUS,MINUS))/		
++     (l*10**6)+0.46*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.02)*			
++     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
+
+c_d0 PLUS SUB  c='(2.19*(10**-3)*l*(10**6)+2.19*(10**-2))*10**(-12)'
+c_d1 MINUS SUB c=0 
+
+
+.elseif (w == 2.8u)
+
+r0 PLUS MINUS
++ r = '(1+0.00105*(temper-tnom)+2.7*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
++     (v(PLUS,MINUS)/((-0.1716*((l*10**6)**2)+486.5*(l*10**6)-3605.5)*		
++     (1+(0.007099*log(2.8)-0.01299)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+		
++     (3.73248*10**(-5)*log(2.8)+4.0764*10**(-5))*((v(SUB)-(v(MINUS)+		
++     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-1.09788*10**(-6)*log(2.8)-8.4884*10**(-7))*((v(SUB)-	
++     (v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(1.90976*10**(-8)*log(2.8)+1.0839*10**(-7))*	
++     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.17)*abs(v(PLUS,MINUS))/		
++     (l*10**6)+0.19*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.011)*			
++     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
+
+c_d0 PLUS SUB  c='(5.96*(10**-4)*l*(10**6)+8.07*(10**-3))*10**(-12)'
+c_d1 MINUS SUB c=0 
+.endif
+
+.ends F_RR
+
+
+
+* //// RS  ////////////////////////////////////////////////////////////////////////
+
+.subckt F_RS PLUS MINUS
+.param w=1u r=1 l=1u tnom=27
+.if (w == 4u)
+
+r PLUS MINUS 
++ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/4+(2.79+		
++     (705.9*4**(-1.298))))))/(1+(-0.0112)*abs(v(PLUS,MINUS))/(l*10**6)-0.229*	
++     (abs(v(PLUS,MINUS))/(l*10**6))**2+(1.99)*(abs(v(PLUS,MINUS))/		
++     (l*10**6))**3)))'
+.endif
+
+.if (w == 6u)
+
+r PLUS MINUS
++ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/6+(2.79+		
++     (707.5*6**(-1.35))))))/(1+(-0.148)*abs(v(PLUS,MINUS))/(l*10**6)+1.41*	
++     (abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.56)*(abs(v(PLUS,MINUS))/		
++     (l*10**6))**3)))'
+.endif
+
+.if (w == 12u)
+
+r PLUS MINUS
++ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/12+(2.79+		
++     (707.5*12**(-2))+(361/(l*10**6)))))/(1+(-0.156)*abs(v(PLUS,MINUS))/		
++     (l*10**6)+1.96*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.68)*			
++     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
+.endif
+
+.if (w == 20u)
+
+r PLUS MINUS
++ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/20+(2.79+		
++     (701.9*20**(-1.224))))))/(1+(-0.26)*abs(v(PLUS,MINUS))/(l*10**6)+		
++     2.05*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.5)*(abs(v(PLUS,MINUS))/		
++     (l*10**6))**3)))'
+.endif
+
+.ends F_RS
+
+

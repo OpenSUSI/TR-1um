@@ -1,0 +1,36 @@
+v {xschem version=3.4.4 file_version=1.2
+}
+G {}
+K {type=polarized_capacitor
+format="@spiceprefix@name @pinlist @model c=@c x=@x y=@y m=@m"
+tedax_format="footprint @name @footprint 
+value @name @value
+device @name @device
+@comptag"
+verilog_ignore=true
+template="name=XC1
+model=F_CSIO
+c=1u
+x=1u
+y=1u
+m=1"
+footprint=1206
+device=polarized_capacitor
+}
+V {}
+S {}
+E {}
+L 4 -10 20 10 20 {}
+L 4 0 31 0 60 {}
+L 4 -10 31 10 31 {}
+L 4 -0 0 -0 20 {}
+B 5 -2 -2 2 2 {name=1 dir=inout}
+B 5 -2 58 2 62 {name=2 dir=inout}
+B 5 -22.5 27.5 -17.5 32.5 {name=3 dir=inout}
+A 4 0 20 3 0 360 {}
+T {1} 4 2 0 0 0.2 0.2 {layer=13}
+T {2} 5 50 0 0 0.2 0.2 {layer=13}
+T {3} -17 34 0 0 0.2 0.2 {layer=13
+}
+T {CSIO_@name} 12 12 0 0 0.2 0.2 {}
+T {c=@c} 12 27 0 0 0.2 0.2 {}

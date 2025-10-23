@@ -1,0 +1,11 @@
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include ngspice/models_IP62_cap_v5p1.lib
+.include ngspice/models_IP62_diode_v2.lib
+.include ngspice/models_IP62_mos_v2.lib
+.include ngspice/models_IP62_res_v5.lib

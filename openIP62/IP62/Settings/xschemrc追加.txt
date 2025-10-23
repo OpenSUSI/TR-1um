@@ -1,0 +1,25 @@
+##以下のコードをxschemrcの末尾に追加してください　　 ver250819
+##場所： ～/xschem/userConf/xschemrc
+##すでに追加されている方は、set XSCHEM_LIBRARY_PATH {} 以降が以下でない場合、書き換えをお願いします
+
+
+set XSCHEM_LIBRARY_PATH {}
+append XSCHEM_LIBRARY_PATH ";[pwd];"
+set homepath [string map {\\ /} $env(HOME)] 
+
+set PDK "$homepath/KLayout/salt/IP62/Technology/tech"
+append XSCHEM_LIBRARY_PATH "${PDK}/symbols/Xschem;"
+append XSCHEM_LIBRARY_PATH "${PDK}/symbols/Xschem/IP62LIB;"
+
+set PDK_EXTRA "$homepath/KLayout/salt/IP62_extra"
+append XSCHEM_LIBRARY_PATH "${PDK_EXTRA}/symbols/Xschem/IP62LIB;"
+
+append XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/../xschem_library/devices
+set XSCHEM_START_WINDOW ${XSCHEM_SHAREDIR}/../xschem_library/examples/0_examples_top.sch
+ 
+array unset dircolor
+set dircolor(IP62LIB$) blue
+set toolbar_visible 1 ;# Tool bar
+set tabbed_interface 1 ;# Tabbed windows
+set persistent_command 1 ;# continue wiring
+set bespice_listen_port 2022

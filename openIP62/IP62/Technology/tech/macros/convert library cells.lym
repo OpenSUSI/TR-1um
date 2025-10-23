@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text># IP62 convert library cells v1.0, May 26th 2024 copy right Seijiro Moriyama (Anagix Corp.)
+module MyMacro
+  include MinedaCommon
+  go = ConvertPCells.new 'IP62'
+  go.do_convert_library_cells({
+    routing_scale_factor: $rsf || 1.7, pcell_scale_factor: $psf || 1,
+    path: {'ML1' =&gt; {path_width_scale: $ml1_pws || 1.0, path_width_min: $ml1_pwm || 1.8, path_width_max: $ml1_pwx},
+            'ML2' =&gt; {path_width_scale: $ml2_pws || 1.0 , path_width_min: $ml2_pwm || 2.4, path_width_max: $ml2_pwx},
+            'POL' =&gt; {path_width_scale: $pol_pws || 1.0, path_width_min: $pol_pwm || 1.0, path_width_max: $pol_pwx}},
+    force_defaults: [:dg, :use_nwel, :dlwlmn, :dlwlmp, :with_via] #, :with_nsubcont, :with_psubcont]
+  })
+end
+u</text>
+</klayout-macro>

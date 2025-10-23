@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Import netlist into LTspice schematic</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text>module DoImportNetlist
+   # import netlist into LTspice v0.33 Nov. 4th, 2023 copy right Seijiro Moriyama
+  class ImportNetlist
+    include RBA
+    def initialize 
+      @converted = []
+      app = Application.instance
+      @mw = app.main_window
+      @cv = @mw.current_view.active_cellview
+      net = QFileDialog::getOpenFileName(@mw, 'Netlist file', File.dirname(@cv.filename), 'schematic(*.net *.cir *.spice *.sp *.spc)')
+      if net != ''
+        @ba_data = import_netlist net
+        puts "@ba_data: #{@ba_data.to_yaml}"
+      end
+    end
+    def import_netlist file
+      # netlist = File.open(file, 'rb:utf-16LE:utf-8').read
+      netlist = File.read file
+      if netlist.include? 00.chr
+        netlist = File.open(file, 'rb:utf-16LE:utf-8').read
+      end
+      ba_data = {}
+      cname = '.TOP'
+      netlist.each_line{|l|
+        if l.upcase =~ /^\.SUBCKT +(\S+)/
+          cname = $1
+        elsif l =~ /^([Mm]\S+) +\S+ +\S+ +\S+ +\S+ +(\S+) +(.*)$/
+          en = $1
+          current = {model: $2, params: $3.sub(/L *=/, 'l=').sub(/W *=/, 'w=')} # must be lowercase for xschem
+          ba_data[cname] ||= {}
+          ba_data[cname][en] = current      
+        end
+      }
+      ba_data
+    end
+    def do_import
+       sch = QFileDialog::getOpenFileName(@mw, 'Schematic file', File.dirname(@cv.filename), 'schematic(*.asc)')
+       update_schematic sch if sch != ''
+    end
+    def update_symattr symattr, current, prefix, file, id
+      new_netlist = ''
+      if symattr &amp;&amp; symattr != {}
+        if prefix == 'M'
+          devices = @ba_data[File.basename(file).sub('.asc', '').tr("@%-", "$$_").upcase] || @ba_data['.TOP']
+          if current &amp;&amp; new = devices[prefix+id]
+            symattr[:Value2] &amp;&amp; symattr[:Value2].sub!(current[:params],  new[:params])
+            if current[:model]
+              if symattr[:Value]
+                symattr[:Value].sub!(current[:model], new[:model])
+              else
+                symattr[:Value] = "SYMATTR Value #{new[:model]}\n"
+              end
+            else
+              symattr[:Value] = "SYMATTR Value #{new[:model]}\n"
+              symattr[:Prefix] = "SYMATTR Prefix M\n"   # X -&gt; M
+            end
+          end
+        end
+        symattr.values.each{|l|
+          new_netlist &lt;&lt; l if l
+          puts l
+        }
+      end
+      new_netlist
+    end
+    def update_schematic file
+      # netlist = File.open(file, 'r:Windows-1252').read.encode('UTF-8', invalid: :replace)
+      netlist = File.read(file)
+      utf16 = false
+      if netlist.include? 00.chr
+        netlist = File.open(file, 'rb:utf-16LE:utf-8').read.gsub(181.chr(Encoding::UTF_8), 'u').scrub
+        utf16 = true
+      end
+      Dir.chdir(File.dirname file){
+        new_netlist = ''
+        symbol = prefix = id = symattr = current = model = nil
+        netlist.each_line{|l|
+          # puts l
+          l.scrub!('?')
+          if l =~ /^SYMBOL (\S+)/
+            symbol = $1
+            new_netlist &lt;&lt; update_symattr(symattr, {model: model, params: current}, prefix, file, id)
+            symattr = {}
+          elsif l =~ /^SYMATTR InstName X(\d+)/
+            id = $1
+            cell = "#{symbol}.asc"
+            update_schematic(cell) unless @converted.include? cell
+          elsif l =~ /^SYMATTR InstName (\w)(\d+)/
+            prefix = $1
+            id = $2
+            symattr[:InstName] = l
+            next
+          elsif l =~ /^SYMATTR Value2 (.*)$/
+            current = $1
+            symattr[:Value2] = l
+            next
+          elsif l =~ /^SYMATTR Value (.*)$/
+            model = $1
+            symattr[:Value] = l
+            next
+          end
+          new_netlist &lt;&lt; l
+        }
+        new_netlist &lt;&lt; update_symattr(symattr, {model: model, params: current}, prefix, file, id)
+        #File.open(file, 'w:Windows-1252'){|f| f.puts new_netlist}
+        if netlist.include? 00.chr
+          File.open(file, 'wb:utf-16LE'){|f| f.puts new_netlist}
+        else
+          File.open(file, 'w'){|f| f.puts new_netlist}
+        end
+        puts "#{file} updated"
+      }
+      @converted &lt;&lt; file
+    end
+  end
+  imp = ImportNetlist.new
+  imp.do_import
+end
+</text>
+</klayout-macro>

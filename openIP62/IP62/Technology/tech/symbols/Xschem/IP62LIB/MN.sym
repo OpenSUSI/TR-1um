@@ -1,0 +1,33 @@
+v {xschem version=3.4.4 file_version=1.2
+}
+G {}
+K {type=nmos
+format="@spiceprefix@name @pinlist @model w=@w l=@l @extra as=@as ad=@ad ps=@ps pd=@pd nrd=@nrd nrs=@nrs m=@m"
+template="name=XM1 model=NMOS w=3.4u l=1u m=1 as=0 ad=0 ps=0 pd=0 nrd=0 nrs=0"}
+V {}
+S {}
+E {}
+L 4 20 15 40 15 {}
+L 4 40 15 40 30 {}
+L 4 20 0 40 0 {}
+L 4 15 -15 15 15 {}
+L 4 0 0 15 0 {}
+L 4 20 -20 20 20 {fill=true
+}
+L 4 20 -15 40 -15 {}
+L 4 40 -30 40 -15 {name=D dir=inout
+}
+B 5 38 -32 42 -28 {name=D dir=inout}
+B 5 -2 -2 2 2 {name=G dir=inout}
+B 5 38 28 42 32 {name=S dir=inout}
+B 5 38 -2 42 2 {name=BG dir=inout}
+P 4 4 20 -0 26 -4 26 4 20 0 {fill=true
+}
+T {D} 44 -29 0 0 0.2 0.2 {layer=13}
+T {G} 2 2 0 0 0.2 0.2 {layer=13}
+T {S} 44 21 0 0 0.2 0.2 {layer=13}
+T {BG} 41 3 0 0 0.2 0.2 {layer=13}
+T {MN_@name} 48 -18 0 0 0.2 0.2 {}
+T {w=@w
+l=@l
+m=@m} 56 19 0 0 0.2 0.2 {}

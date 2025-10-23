@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>IP62</description>
+ <version/>
+ <category/>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>ruby</interpreter>
+ <dsl-interpreter-name/>
+ <text># coding: cp932
+# IP62 PDK PCells v0.943 Aug. 25th, 2025 by S. Moriyama (Anagix Corp.)
+# based on OpenRule1um_v2 PCells v2.7 Dec. 20th 2023 
+
+module IP62
+  include MinedaPCell
+  mpc = MinedaPCellCommon::new
+  mpc.set_alias IP62: {Nch: 'MN', Pch: 'MP'}
+  mpc.set_technology 'IP62'
+  mpc.set_basic_library 'IP62_Basic'
+
+  # Remove any definition of our classes (this helps when 
+  # reexecuting this code after a change has been applied)
+  IP62.constants.member?(:Label1) &amp;&amp; remove_const(:Label1)
+  IP62.constants.member?(:Label2) &amp;&amp; remove_const(:Label2)
+  IP62.constants.member?(:Nch) &amp;&amp; remove_const(:Nch)
+  IP62.constants.member?(:Pch) &amp;&amp; remove_const(:Pch)
+  IP62.constants.member?(:MN) &amp;&amp; remove_const(:MN)
+  IP62.constants.member?(:MP) &amp;&amp; remove_const(:MP)
+  IP62.constants.member?(:RS) &amp;&amp; remove_const(:RS)
+  IP62.constants.member?(:RR) &amp;&amp; remove_const(:RR)
+#  IP62.constants.member?(:R_poly) &amp;&amp; remove_const(:R_poly)
+#  IP62.constants.member?(:R_ndiff) &amp;&amp; remove_const(:R_ndiff)
+#  IP62.constants.member?(:R_pdiff) &amp;&amp; remove_const(:R_pdiff)
+#  IP62.constants.member?(:Poly_cap) &amp;&amp; remove_const(:Poly_cap)
+# IP62.constants.member?(:Ndiff_cap) &amp;&amp; remove_const(:Ndiff_cap)  
+# IP62.constants.member?(:Pdiff_cap) &amp;&amp; remove_const(:Pdiff_cap)
+  IP62.constants.member?(:CSIO) &amp;&amp; remove_const(:CSIO)
+#  IP62.constants.member?(:Fill_box) &amp;&amp; remove_const(:Fill_box)
+  IP62.constants.member?(:BGMN_ring) &amp;&amp; remove_const(:BGMN_ring)
+  IP62.constants.member?(:BGMP_ring) &amp;&amp; remove_const(:BGMP_ring)
+  IP62.constants.member?(:BGRR_ring) &amp;&amp; remove_const(:BGRR_ring)
+  IP62.constants.member?(:Psub_ring) &amp;&amp; remove_const(:Psub_ring)
+  IP62.constants.member?(:Nsub_ring) &amp;&amp; remove_const(:Nsub_ring)
+  IP62.constants.member?(:BGMN_line) &amp;&amp; remove_const(:BGMN_line)
+  IP62.constants.member?(:BGMP_line) &amp;&amp; remove_const(:BGMP_line)
+  IP62.constants.member?(:BGRR_line) &amp;&amp; remove_const(:BGRR_line)
+  IP62.constants.member?(:Psub_line) &amp;&amp; remove_const(:Psub_line)
+  IP62.constants.member?(:Nsub_line) &amp;&amp; remove_const(:Nsub_line)
+  IP62.constants.member?(:Nsub_filler) &amp;&amp; remove_const(:Nsub_filler)
+  IP62.constants.member?(:WLRR) &amp;&amp; remove_const(:WLRR)
+  IP62.constants.member?(:WLMP) &amp;&amp; remove_const(:WLMP)
+  IP62.constants.member?(:WLMN) &amp;&amp; remove_const(:WLMN)
+  IP62.constants.member?(:PCells) &amp;&amp; remove_const(:PCells)
+  
+  class Label &lt; MinedaPCellCommon
+   
+    include RBA
+    def initialize width=10.0, sp=2.0, lib='IP62_Characters1'
+      @width = width
+      @lib = lib
+      @space = sp
+      super()
+      param(:label, TypeString, "Label", :default =&gt; 'abc')
+      param(:space, TypeDouble, "Space", :default =&gt; @space)
+      param(:scale, TypeDouble, "Scale", :default =&gt; 1)
+    end
+   
+    def produce_impl
+      s = (space/layout.dbu).to_i
+      width = (@width/layout.dbu).to_i
+      x = 0.0
+      label &amp;&amp; label.each_byte{|a|
+        if a_index = library_cell(a.chr.upcase, @lib, layout)
+          insert_cell a_index, x, 0
+          x = x + width + s
+        end
+      }
+    end
+  end   
+    
+  # The PCell declaration for the IP62 MOSFET
+  class Nch &lt; MinedaNch
+    include RBA
+    def initialize
+      super
+      param(:w, TypeDouble, "Nch w", :default =&gt; 3.4.um)
+      param(:l, TypeDouble, "Nch l", :default =&gt; 1.0.um)
+      param(:ld_length, TypeDouble, "Left dumy max length", :default =&gt; 0.0)
+      param(:rd_length, TypeDouble, "Right dumy max length", :default =&gt; 0.0)
+      # param(:n, TypeInt, "Number of fingers", :default =&gt; 1)
+      param(:m1_width, TypeDouble, "Metal width for S/D fingers", :default =&gt; 1.8.um, :hidden =&gt; true)
+      param(:m1cnt_width, TypeDouble, "Metal width over S/D contacts", :default =&gt; 2.6.um, :hidden =&gt; true)
+      param(:dg, TypeDouble, "Dumbbell gap", :default =&gt; 0.2.um, :hidden =&gt; true)
+      param(:with_pcont, TypeBoolean, "Use polysilicon contact", :default =&gt; true)
+      param(:with_via, TypeBoolean, "Put Via over contacts", :default =&gt; false, :hidden =&gt; true)
+      param(:with_sdcont, TypeBoolean, "Use source/drain contact", :default =&gt; true)   
+      param(:use_pwell, TypeBoolean, "Use pwell", :default =&gt; true, :hidden =&gt; true)  
+      param(:with_psubcont, TypeBoolean, "Use psub contact", :default =&gt; true, :hidden =&gt; false)
+      param(:wide_metal, TypeBoolean, "Wide metal entry?", :default =&gt; false, :hidden =&gt; false)
+      param(:dlwlmn, TypeBoolean, "Dummy layer for WLMN", :default =&gt; false, :hidden =&gt; false)
+      # param(:dlbgmn, TypeBoolean, "Dummy layer for BGMN", :default =&gt; false, :hidden =&gt; false)
+      param(:wtot, TypeDouble, "Total width", :default =&gt; 0, :hidden=&gt; true)
+    end
+    
+    def coerce_parameters_impl
+      l &lt; 1.0 &amp;&amp; set_l(1.0)
+      l &gt; 30.0 &amp;&amp; set_l(30.0)
+      w &lt; 3.4 &amp;&amp; set_w(3.4)
+      w &gt; 60.0 &amp;&amp; set_w(60.0)
+      m1_width &gt; m1cnt_width &amp;&amp; set_m1_width(m1cnt_width)
+      super
+    end
+
+    def produce_impl # NMOS
+      nwl_index = get_layer_index 'NWL'
+      diff_index = get_layer_index 'DIFF'
+      pol_index = get_layer_index 'POL'
+      m1_index = get_layer_index 'ML1'
+      parea_index = get_layer_index 'Parea'
+      narea_index = get_layer_index 'Narea'
+      via_index = library_cell('Via', 'IP62_Basic', layout)
+      dcont_index = library_cell('dcont', 'IP62_Basic', layout)
+      pcont_index = library_cell('pcont', 'IP62_Basic', layout)
+      # nsubcont_index = library_cell('nsubcont', 'IP62_Basic', layout)
+      psubcont_index = library_cell('psubcont', 'IP62_Basic', layout) 
+      # dlbgmn = get_layer_index 'DLBGMN'
+      indices = {pol: pol_index, diff: diff_index, nwl: nwl_index,
+        parea: parea_index, narea: narea_index, m1: m1_index, via: via_index,
+        dcont: dcont_index, pcont: pcont_index, psubcont: psubcont_index}
+      s = 2.6.um # dcont size (fixed)
+      self.class.set_vs vs = (s/layout.dbu).to_i
+      grid = 1.0.um
+      self.class.set_u1 u1 = (grid/layout.dbu).to_i
+      dcont_pitch = 2*u1
+     # metal1width = 1.0.um
+     # m1w = (metal1width/layout.dbu).to_i    
+      super indices, vs, u1, {xshift: 0, yshift: 0, wm_offset: vs-2*u1,
+                              m1_width: (m1_width/layout.dbu).to_i, m1cnt_width: (m1cnt_width/layout.dbu).to_i,
+                              pol_width: u1, gate_ext: u1+u1/5, pcont_dy:  (0.4.um/layout.dbu).to_i, 
+                              vs_extra: -(vs - dcont_pitch), dcont_offset: (vs - dcont_pitch)/2,
+                              psubcont_dx: u1/4, psubcont_dy: u1+(u1/10)*8, narea_bw: u1+(u1/10)*4,
+                              # psubcont_bbox: dlbgmn
+                              }
+      overcoat get_layer_index('NBE'), narea_index
+      overcoat get_layer_index('HPM'), narea_index
+      overcoat get_layer_index('PM'), narea_index
+      overcoat get_layer_index('DLMN'), narea_index
+      if dlwlmn
+        x1, y1, x2, y2 = boxes_bbox(narea_index)
+        u86 = (u1*8.6).to_i
+        create_box(get_layer_index('DLWLMN'), x1 - u86, y1 - u86, x2 + u86, y2 + u86)
+      end
+    end
+  end
+
+  class Pch &lt; MinedaPch
+    include RBA
+    def initialize
+      super
+      param(:w, TypeDouble, "Pch w", :default =&gt; 3.4)
+      param(:l, TypeDouble, "Pch l", :default =&gt; 1.0)
+      param(:ld_length, TypeDouble, "Left dumy max length", :default =&gt; 0.0)
+      param(:rd_length, TypeDouble, "Right dumy max length", :default =&gt; 0.0)
+      param(:m1_width, TypeDouble, "Metal width for S/D fingers", :default =&gt; 1.8.um, :hidden =&gt; true)
+      param(:m1cnt_width, TypeDouble, "Metal width over S/D contacts", :default =&gt; 2.6.um, :hidden =&gt; true)
+      param(:dg, TypeDouble, "Dumbbell gap", :default =&gt; 0.2.um, :hidden =&gt; true)
+      param(:with_pcont, TypeBoolean, "Use polysilicon contact", :default =&gt; true)
+      param(:with_via, TypeBoolean, "Put Via over contacts", :default =&gt; false, :hidden =&gt; true)
+      param(:with_sdcont, TypeBoolean, "Use source/drain contact", :default =&gt; true)
+      param(:use_nwell, TypeBoolean, "Use nwell", :default =&gt; false, :hidden =&gt; false) 
+      param(:with_nsubcont, TypeBoolean, "Use nwell contact", :default =&gt; false, :hidden =&gt; false)
+      param(:wide_metal, TypeBoolean, "Wide metal entry?", :default =&gt; false)
+      param(:dlwlmp, TypeBoolean, "Dummy layer for WLMP", :default =&gt; false, :hidden =&gt; false)
+      param(:wtot, TypeDouble, "Total width", :default =&gt; 0, :hidden=&gt; true)
+    end
+       
+    def coerce_parameters_impl
+      l &lt; 1.0 &amp;&amp; set_l(1.0)
+      l &gt; 30.0 &amp;&amp; set_l(30.0)
+      w &lt; 3.4 &amp;&amp; set_w(3.4)
+      w &gt; 60.0 &amp;&amp; set_w(60.0)
+      m1_width &gt; m1cnt_width &amp;&amp; set_m1_width(m1cnt_width)
+      super
+    end
+    
+    def produce_impl # PMOS
+      nwl_index = get_layer_index 'NWL'
+      diff_index = get_layer_index 'DIFF'
+      pol_index = get_layer_index 'POL'
+      m1_index = get_layer_index 'ML1'
+      parea_index = get_layer_index 'Parea'
+      narea_index = get_layer_index 'Narea'
+      via_index = library_cell('Via', 'IP62_Basic', layout)
+      dcont_index = library_cell('dcont', 'IP62_Basic', layout)
+      pcont_index = library_cell('pcont', 'IP62_Basic', layout)
+      nsubcont_index = library_cell('nsubcont', 'IP62_Basic', layout)
+      # psubcont_index = library_cell('psubcont', 'IP62_Basic', layout) 
+
+      indices = {pol: pol_index, diff: diff_index, nwl: nwl_index,
+        parea: parea_index, narea: narea_index, m1: m1_index, via: via_index,
+        dcont: dcont_index, pcont: pcont_index, nsubcont: nsubcont_index}
+      s = 2.6.um # dcont size (fixed)
+      self.class.set_vs vs = (s/layout.dbu).to_i
+      grid = 1.0.um
+      self.class.set_u1 u1 = (grid/layout.dbu).to_i
+      dcont_pitch = 2*u1
+     # metal1width = 1.0.um
+     # m1w = (metal1width/layout.dbu).to_i    
+      super indices, vs, u1, {xshift: 0, yshift: 0, wm_offset: vs-2*u1,
+                              m1_width: (m1_width/layout.dbu).to_i, m1cnt_width: (m1cnt_width/layout.dbu).to_i,
+                              pol_width: u1, gate_ext: u1+u1/5, pcont_dy: -(0.4.um/layout.dbu).to_i, 
+                              vs_extra: -(vs - dcont_pitch), dcont_offset: (vs - dcont_pitch)/2,
+                              nsubcont_dx: 0, nsubcont_dy: (1.8.um/layout.dbu).to_i, 
+                              pex_delta: 0, parea_bw: u1+(u1/10)*4, nwl_bw: 8.5*u1} # nwl_bw: 7*u1 -&gt; 8.5*u1 2024/5/8
+      overcoat get_layer_index('PBE'), parea_index
+      overcoat get_layer_index('HPM'), parea_index
+      overcoat get_layer_index('NM'), parea_index
+      overcoat get_layer_index('DLMP'), parea_index
+      if use_nwell
+        dlwlmp_index = get_layer_index('DLWLMP')
+        overcoat dlwlmp_index, nwl_index if dlwlmp
+        x1, y1, x2, y2 = boxes_bbox(parea_index)
+        u56 = (u1*5.6).to_i   # u41: u1*4.1 -&gt; u56: u1*5.6 change 2024/5/8
+        psub_index = get_layer_index('PSUB')
+        create_box(psub_index, x1 - u56, y1 - u56, x2 + u56, y2 + u56)
+        overcoat get_layer_index('PF'), psub_index
+        overcoat get_layer_index('NF'), psub_index
+      end
+    end    
+  end
+
+  class Rs &lt;  MinedaResistorType2
+    def initialize
+      @type ||= 'RS'
+      super
+      param(:l, TypeDouble, "#{@type} resistor length", :default =&gt; 20.0.um)
+      param(:w, TypeDouble, "#{@type} resistor width", :default =&gt; 6.0.um)
+      param(:ns, TypeInt, "Number of segments", :default =&gt; 1)
+      param(:ss, TypeDouble, "Space between segments", :default =&gt; 2.0.um)
+      param(:parallel, TypeBoolean, "Parallel connection?", :default =&gt; false)
+      param(:rval, TypeDouble, "Resistor value", :default =&gt; 0, :hidden=&gt; true)
+    end
+    
+    def produce_impl indices={}
+      s = 2.0.um # dcont size (fixed)
+      vs = (s/layout.dbu).to_i
+      grid = 1.0.um
+      u1 = (grid/layout.dbu).to_i
+      cs = u1 # contact size 0.5um fixed
+      ol = u14 = (u1/10)*8
+      delta = 0
+      indices[:pol] ||= get_layer_index 'POL'
+      indices[:res] = get_layer_index 'RES'
+      super indices, vs, u1, cs, ol, delta, 0, 
+              {ml1_cnt: u14, cnt_margin: (u1/10)*3}, 'RS'
+      x1, y1, x2, y2 = boxes_bbox indices[:pol]
+      u14 = (u1/10)*14
+      create_box get_layer_index('Narea') , x1-u14, y1-u14, x2+u14, y2+u14
+      create_box get_layer_index('DLRS') , x1-u14, y1-u14, x2+u14, y2+u14      
+      create_box get_layer_index('NM') , x1-u14, y1-u14, x2+u14, y2+u14
+      create_box get_layer_index('PM') , x1-u14, y1-u14, x2+u14, y2+u14
+      create_box get_layer_index('HPM') , x1-u14, y1-u14, x2+u14, y2+u14
+    end 
+      
+    def coerce_parameters_impl
+      ss &lt; 2.0 &amp;&amp; set_ss(2.0)
+      l &lt; 15.0 &amp;&amp; set_l(15.0)
+      l &gt; 100.0 &amp;&amp; set_l(100.0)
+      if w &lt; 6.0
+        set_w(4.0)
+      elsif w &gt;= 6.0 &amp;&amp; w &lt;12.0  
+        set_w(6.0)
+      elsif w &gt;= 12.00 &amp;&amp; w &lt;20.0
+        set_w(12.0)
+      elsif w &gt; 20.0 
+        set_w(20.0)
+      end
+      sheet_resistance = 120
+      # set_rval(sheet_resistance * l / w)
+      if w == 4.0
+        set_rval((95.00*l/w) + 2.79 + (705.9*w**(-1.298)))
+      elsif w == 6.0           
+        set_rval((95.00*l/w) + 2.79 + (707.5*w**(-1.35)))
+      elsif w == 12.0
+        set_rval((95.00*l/w) + 2.79 + 707.5*w**(-2.0)+361/l)
+      elsif w == 20.0  
+        set_rval((95.00*l/w) + 2.79 + (701.9*w**(-1.224)))
+      end
+    end
+    
+    def display_text_impl
+      super 'RS'
+    end
+  end
+  
+  class TR_resistor &lt; MinedaPCellCommon
+    def produce_impl_core type, delta_fact = 0
+      grid = 1.0.um
+      oo_layout_dbu = 1 / layout.dbu
+      u1 = (grid * oo_layout_dbu).to_i
+      delta = u1 * delta_fact
+      length = (l * oo_layout_dbu).to_i
+      width = (w * oo_layout_dbu).to_i
+      diff_index = get_layer_index 'DIFF'
+      res_index = get_layer_index 'RES'
+      m1_index = get_layer_index 'ML1'
+      cnt_index = get_layer_index 'CNT'
+      x1= y1 = 0
+      x2 = width
+      ol = u1 + u1/2 # 1.5.um
+      cs = u1
+      y2 = (ol + cs + delta)*2 + length
+      diff_points = [[u1, 0], [x2-u1,0], [x2, u1], [x2, ol + cs], [0, ol + cs], [0, u1], [u1, 0]]
+      cell.shapes(diff_index).insert(Polygon::new(diff_points.map{|a| Point::new(a[0], a[1])}))
+      another_points = diff_points.map{|x, y| [x, y2 - y]}
+      cell.shapes(diff_index).insert(Polygon::new(another_points.map{|a| Point::new(a[0], a[1])}))
+      create_box res_index, 0, ol + cs, x2, y2 - ol - cs, type
+      u12 = u1 + u1/5
+      if type == 'RR'
+        u12 = u1 - u1/10 if w == 2.8.um
+      end
+      cnt_points = [[u12, ol], [x2 - u12, ol], [x2 - u12, ol + cs], [u12, ol + cs], [u12, ol]]
+      cell.shapes(cnt_index).insert(Polygon::new(cnt_points.map{|a| Point::new(a[0], a[1])}))
+      another_points = cnt_points.map{|x, y| [x, y2 - y]}
+      cell.shapes(cnt_index).insert(Polygon::new(another_points.map{|a| Point::new(a[0], a[1])}))
+      create_box diff_index, 0, ol + cs, x2, y2 - ol - cs  # , type
+      u2 = u1*2
+      if type == 'RR'
+        create_box m1_index, -u1, -u1, x2 + u1, y2 - ol - cs - u2 - u1 - u1/5
+        create_box m1_index, -u1, y2 - ol - cs - u1 - u1/5, x2 + u1, y2 + u1 #, 'RR'
+        cell.shapes(cnt_index).insert_text(Text::new '+', another_points[0][0], another_points[0][1]) 
+        area_index = parea_index = get_layer_index 'Parea'
+        create_box parea_index, x1-u2, y1-u2, x2+u2, y2+u2
+        overcoat get_layer_index('R'), parea_index
+      end
+
+      overcoat get_layer_index('NM'), area_index
+      overcoat get_layer_index('PM'), area_index
+      overcoat get_layer_index('HPM'), area_index 
+
+      pol_index = get_layer_index 'POL'
+      points = [[x1 - u2 - u1, y1 - u2], [x2 + u2, y1 - u2], [x2 + u2, y2 + u2],
+                   [x1 - u2, y2 + u2], [x1 - u2, y1 - u2 + u1]]
+      cell.shapes(pol_index).insert(Path::new(points.map{|a| Point::new(a[0], a[1])}, u1*2, 0, 0))
+      if ['RR'].include? type
+        dl_res_index = get_layer_index('DL' + type)
+        create_box dl_res_index, x1-u2-u1, y1-u2-u1, x2+u2+u1, y2+u2+u1
+      end
+      yield x1-u1, y1-u1, x2+u1, y2+u1, u1, ol, cs, delta
+    end
+    
+    def display_text_impl
+      @type ||= 'Resistor'
+      "#{@type}\r\n(L=#{l.round(3)}um,W=#{w.round(3)}um, R=#{rval.round(3)})"
+    end
+    
+    def draw_wlrh x1, y1, x2, y2, u1
+      psub_index = get_layer_index 'PSUB'
+      hvnw_index = get_layer_index 'HVNW'
+      u15 = u1*15 + u1 + u1
+      create_box psub_index, x1 - u15, y1 - u15, x2 + u15, y2 + u15
+      overcoat get_layer_index('NF'), psub_index
+      u1515 = u15 + u1 + u1/2
+      create_box hvnw_index, x1 - u1515, y1 - u1515, x2 + u1515, y2 + u1515
+      hvnw_index # return for RNHV to draw DLRNHV
+    end
+  end
+
+  class Rr &lt; TR_resistor
+    def initialize
+      @type = 'RR'
+      super
+      param(:l, TypeDouble, "RR resistor length", :default =&gt; 15.0.um)
+      param(:w, TypeDouble, "RR resistor width", :default =&gt; 6.0.um)
+      param(:rval, TypeDouble, "RR resistor value", :default =&gt; 0, :hidden=&gt; true)
+      param(:with_WLRR, TypeBoolean, "Use WLRR", :default =&gt; false)
+    end
+    def produce_impl
+      delta_fact = 0 # 4.2
+      produce_impl_core('RR', delta_fact){|x1, y1, x2, y2, u1, ol, cs, delta_dummy|
+        delta = (4.2/layout.dbu).to_i
+        narea_index = get_layer_index 'Narea'
+        # create_box narea_index, x1-u1, y1-u1, x2+u1, y2+u1
+        create_box narea_index, x1-u1, y1+u1+ol+cs+delta, x2+u1, y2-u1-ol-cs-delta
+        if with_WLRR &amp;&amp; hvnw_index = draw_wlrh(x1, y1, x2, y2, u1)
+          overcoat get_layer_index('DLWLRR'), hvnw_index
+        end   
+      }
+    end
+    def coerce_parameters_impl
+      l &lt; 13.0 &amp;&amp; set_l(13.0)
+      l &gt; 100.0 &amp;&amp; set_l(100.0)
+      if w &lt; 4.0
+        set_w(2.8)
+      elsif w &gt;= 4 &amp;&amp; w &lt; 6.0
+        set_w(4.0)
+      elsif w &gt;=6.0 &amp;&amp; w &lt;12.0  
+        set_w(6.0)
+      elsif w &gt;=12.00 &amp;&amp; w &lt;20.0
+        set_w(12.0)
+      elsif w &gt; 20.0 
+        set_w(20.0)
+      end
+      sheet_resistance = 1000
+      
+      #set_rval(sheet_resistance * l / w)
+      
+      if w == 2.8
+        set_rval(-0.1716*(l**2)+486.5*l-3605.5)
+      elsif w == 4.0
+        set_rval(834.54*(l-9.2)/(w-1.09) + 13.3*(9.2/(w-1.09)+3.38/(w-1.8)) + 2.79 - 21.06*3.95 + 615.2)
+      elsif w == 6.0
+        set_rval(834.54*(l-9.2)/(w-1.09) + 13.3*(9.2/(w-1.09)+3.38/(w-1.8)) + 2.79 - 21.0*4.0 + 366.4)
+      elsif w == 12.0
+        set_rval(834.54*(l-9.2)/(w-1.09) + 13.3*(9.2/(w-1.09)+3.38/(w-1.8)) + 2.79 - 21.0*11.9 + 368.9)
+      elsif w == 20.0
+        set_rval(834.54*(l-9.2)/(w-1.09) + 13.3*(9.2/(w-1.09)+3.38/(w-1.8)) + 2.79 - 21.0*20.1 + 495.8)
+      
+      end
+    end
+  end
+  
+  class Poly_cap &lt; MinedaPoly_cap
+      def initialize
+      # Important: initialize the super class
+      super
+      param(:l, TypeDouble, "Capacitor length", :default =&gt; 10.0.um)
+      param(:w, TypeDouble, "Capacitor width", :default =&gt; 10.0.um)
+      param(:cval, TypeDouble, "Capacitor value", :default =&gt; 0, :hidden=&gt; true)
+    end
+    
+    def display_text_impl
+      # Provide a descriptive text for the cell
+      "Poly Capacitor\r\n(L=#{l.round(3)}um,W=#{w.round(3)}um,C=#{cval.round(3)})"
+    end
+    
+    def coerce_parameters_impl
+      area_cap = 0.028e-15 
+      set_cval(area_cap * l * w)
+    end
+    
+    def produce_impl
+      grid = 1.0.um
+      u1 = (grid/layout.dbu).to_i
+      s = 2.0.um # via size (fixed)
+      vs = (s/layout.dbu).to_i
+      pol_index = get_layer_index 'POL'
+      m1_index = get_layer_index 'ML1'
+      # m2_index = layout.insert_layer(LayerInfo::new(10, 0))
+      cap_index = get_layer_index 'CAP'
+      via_index = library_cell('Via', 'IP62_Basic', layout)
+      dcont_index = library_cell('dcont', 'IP62_Basic', layout)
+      pcont_index = library_cell('pcont', 'IP62_Basic', layout)
+      indices = {m1: m1_index,  cap: cap_index, # m2 : m2_index, 
+                 via: via_index, pol: pol_index, dcont: dcont_index,
+                 pcont: pcont_index}
+      super indices, vs, u1
+    end
+  end
+
+  class Diff_cap &lt; MinedaDiff_cap
+    def initialize
+      # Important: initialize the super class
+      super
+      param(:l, TypeDouble, "Capacitor length", :default =&gt; 10.0.um)
+      param(:w, TypeDouble, "Capacitor width", :default =&gt; 10.0.um)
+      param(:cval, TypeDouble, "Capacitor value", :default =&gt; 0, :hidden=&gt; true)
+    end
+
+    def produce_impl area_index=nil, well_index=nil
+      grid = 1.0.um
+      u1 = (grid/layout.dbu).to_i
+      u2 = u1 + u1
+      s = 2.0.um # via size (fixed)
+      vs = (s/layout.dbu).to_i
+      diff_index = get_layer_index 'DIFF'    
+      pol_index = get_layer_index 'POL'
+      m1_index = get_layer_index 'ML1'
+      m2_index = get_layer_index 'ML2'
+      cap_index = get_layer_index 'CAP'
+     via_index = library_cell('Via', 'IP62_Basic', layout)
+      dcont_index = library_cell('dcont', 'IP62_Basic', layout)
+      pcont_index = library_cell('pcont', 'IP62_Basic', layout)
+      nsubcont_index = library_cell('nsubcont', 'IP62_Basic', layout)
+      indices = {diff: diff_index, pol: pol_index, m1: m1_index, m2: m2_index, 
+                cap: cap_index, via: via_index, dcont: dcont_index,
+                pcont: pcont_index, nsubcont: nsubcont_index}
+      super indices, vs, u1, area_index, well_index, {wd_enc: u1 * 2, nsub_cont: defined?(nsub_cont)&amp;&amp;nsub_cont}
+    end
+  end
+  
+  class Ndiff_cap &lt; Diff_cap
+
+    def coerce_parameters_impl
+      area_cap = 2.6e-15
+      set_cval(area_cap * l * w)
+    end
+
+    def produce_impl
+      narea_index = get_layer_index 'Narea'
+      super narea_index
+    end
+  end
+  
+  class Pdiff_cap &lt; Diff_cap
+    def initialize
+      super
+      param(:nsub_cont, TypeBoolean, "Use nwell contact", :default =&gt; false, :hidden =&gt; false) 
+    end 
+    
+    def coerce_parameters_impl
+      area_cap = 2.6e-15
+      set_cval(area_cap * l * w)
+    end
+
+    def produce_impl
+      parea_index = get_layer_index 'Parea'
+      nwl_index = get_layer_index 'NWL'
+      super parea_index, nwl_index
+    end
+  end
+  
+  class CSIO &lt; MinedaPCellCommon
+    def initialize
+      super
+      param(:l, TypeDouble, "CSIO capacitor length", :default =&gt; 28.5.um)
+      param(:w, TypeDouble, "CSIO capacitor width", :default =&gt; 28.5.um)
+      param(:mg, TypeDouble, "Metal gap", :default =&gt; 10.0.um, :hidden =&gt; true)
+      param(:mc, TypeBoolean, "Metal over 2nd contacts", :default =&gt; true, :hidden =&gt; false)
+      param(:sc, TypeBoolean, "Put 2nd contacts", :default =&gt; false, :hidden =&gt; true)
+      param(:cval, TypeDouble, "Capacitor value", :default =&gt; 0, :hidden =&gt; true)
+    end
+
+    def display_text_impl
+      # Provide a descriptive text for the cell
+      "CSIO Capacitor\r\n(L=#{l.round(3)}um,W=#{w.round(3)}um,C=#{cval.to_s})"
+    end
+       
+    def coerce_parameters_impl
+      set_sc(mc)
+      l &lt; 28.5 &amp;&amp; set_l(28.5)
+      w &lt; 28.5 &amp;&amp; set_w(28.5)
+      l &gt; 120.0 &amp;&amp; set_l(120.0)
+      w &gt; 120.0 &amp;&amp; set_w(120.0)
+      area_cap = 0.615e-15 # changed from 0.6 to 0.615 on 2024/8/19
+      set_cval(area_cap * l * w)
+    end
+    def produce_impl
+      indices = {}
+      indices[:m1] = get_layer_index 'ML1'
+      indices[:pol] = get_layer_index 'POL'
+      indices[:cnt] = get_layer_index 'CNT'
+      indices[:diff] = get_layer_index 'DIFF'
+      indices[:narea] = get_layer_index 'Narea'
+      indices[:parea] = get_layer_index 'Parea'
+      indices[:nwl] = get_layer_index 'NWL'
+      indices[:nf] = get_layer_index 'NF'
+      indices[:dlcsio] = get_layer_index 'DLCSIO'
+      s = 2.4.um # cnt pitch
+      vs = (s/layout.dbu).to_i
+      grid = 1.0.um
+      u1 = (grid/layout.dbu).to_i
+      length = (l/layout.dbu).to_i
+      width = (w/layout.dbu).to_i
+      metal_gap = (mg/layout.dbu).to_i
+      delta = vs - u1
+      create_box indices[:diff], -width/2, -length/2, width/2, length/2, 'CSIO'
+      create_box indices[:pol],-width/2 - delta, -length/2 - delta, width/2 + delta, length/2 + delta
+      overcoat indices[:parea], indices[:pol]
+      overcoat get_layer_index('CL'), indices[:pol]
+      create_box indices[:m1], -width/2 + delta, -length/2 + delta, width/2 - delta, length/2 - delta 
+      fill_area([-width/2+delta +u1, -length/2+delta+u1, width/2-delta-u1, length/2-delta-u1], vs, nil){|x, y|
+        create_box indices[:cnt], x - vs/4, y - vs/4, x + vs/4, y + vs/4
+      }
+      delta = (vs-u1)*2 + vs/2 + vs/4
+      create_loop indices[:diff], width/2+delta, length/2+delta, width+2*delta, length+2*delta, vs+vs/2
+    
+      points =   [Point::new(-metal_gap/2, -length/2 - delta),
+                  Point::new(-width/2 - delta, -length/2 - delta), 
+                  Point::new(-width/2 - delta,  length/2 + delta), 
+                  Point::new(width/2 + delta,  length/2 + delta),
+                  Point::new(width/2 + delta, -length/2 - delta),
+                  Point::new(metal_gap/2, -length/2 - delta)]
+      cell.shapes(indices[:m1]).insert(Path::new(points, vs +  vs/2, 0, 0).simple_polygon) if mc
+      if sc 
+        [[-width/2-delta-vs, length/2+delta-vs, width/2+delta+vs, length/2+delta+vs, vs/2],
+         [-width/2-delta-vs, -length/2-delta-vs, -metal_gap/2, -length/2-delta+vs, vs/2],
+         [metal_gap/2, -length/2-delta-vs, width/2+delta+vs, -length/2- delta+vs, vs/2],
+         [-width/2-delta-vs, -length/2-delta, -width/2-delta+vs, length/2+delta, vs/2] ,
+         [width/2+delta-vs, -length/2-delta, width/2+delta+vs, length/2+delta, vs/2]      
+        ].each{|area|
+          fill_area(area, vs, nil){|x, y|
+            create_box indices[:cnt], x - vs/4, y - vs/4, x + vs/4, y + vs/4
+          } 
+        }
+      end
+      delta = 5*u1 + (vs -u1)*2
+      create_box indices[:narea], -width/2 - delta, -length/2 - delta, width/2 + delta, length/2 + delta
+      overcoat get_layer_index('HPM'), indices[:narea]
+      overcoat get_layer_index('NM'), indices[:narea]
+      overcoat get_layer_index('PM'), indices[:narea]
+      delta = 8*u1 + vs - u1
+      create_box indices[:nf], -width/2 - delta, -length/2 - delta, width/2 + delta, length/2 + delta
+      overcoat get_layer_index('PSUB'), indices[:nf]
+      delta = 9*u1 + u1/2 + vs - u1
+      create_box indices[:nwl], -width/2 - delta, -length/2 - delta, width/2 + delta, length/2 + delta
+      overcoat indices[:dlcsio], indices[:nwl]
+    end  
+  end
+     
+  class IP62_ring &lt; MinedaFillRing
+    def initialize 
+      super
+      param(:sq_size, TypeDouble, "Square size", :default =&gt; 2.0.um, :hidden =&gt; false)
+      param(:sq_fit, TypeBoolean, "Fit fixed point", :default =&gt; true, :hidden =&gt; false)
+    end  
+    def produce_impl fill_cell = 'psubcont'
+      fillcell_index = library_cell(fill_cell, 'IP62_Basic', layout) 
+      m1_index = get_layer_index 'ML1'
+      diff_index = get_layer_index 'DIFF'
+      corner_gap = cng/layout.dbu
+      center_gap = ctg/layout.dbu
+      x1 = x2 = 0
+      if cng &gt; 0 #corner gap
+        x2 =  (cng/layout.dbu).to_i
+      elsif ctg &gt; 0 #cener gap
+        x1 =  (w/layout.dbu).to_i/2 - (ctg/layout.dbu).to_i/2
+        x2 =   (w/layout.dbu).to_i/2 + (ctg/layout.dbu).to_i/2
+      end
+      super fillcell_index,  (sq_size/layout.dbu).to_i, [diff_index],  (l/layout.dbu).to_i,  (w/layout.dbu).to_i, x1, x2, ['ML1', 'CNT', 'DIFF']
+    end
+  end
+  
+  class BGMN_ring &lt;IP62_ring
+    def produce_impl
+      super 'BGMN'
+    end
+  end
+  class BGMP_ring &lt;IP62_ring
+    def produce_impl
+      super 'BGMP'
+    end
+  end
+
+  class BGRR_ring &lt;IP62_ring
+    def produce_impl
+      super 'BGRR'
+    end
+  end
+  
+  class Psub_ring &lt; MinedaFillRing
+    def initialize
+      super
+      param(:sq_size, TypeDouble, "Square size", :default =&gt; 2.0.um, :hidden =&gt; false)
+      param(:sq_fit, TypeBoolean, "Fit fixed point", :default =&gt; true, :hidden =&gt; false)
+    end  
+    def produce_impl
+      psubcont_index = library_cell('psubcont', 'IP62_Basic', layout) 
+      m1_index = get_layer_index 'ML1'
+      diff_index = get_layer_index 'DIFF'
+      corner_gap = cng/layout.dbu
+      center_gap = ctg/layout.dbu
+      x1 = x2 = 0
+      if cng &gt; 0 #corner gap
+        x2 =  (cng/layout.dbu).to_i
+      elsif ctg &gt; 0 #cener gap
+        x1 =  (w/layout.dbu).to_i/2 - (ctg/layout.dbu).to_i/2
+        x2 =   (w/layout.dbu).to_i/2 + (ctg/layout.dbu).to_i/2
+      end
+      super psubcont_index,  (sq_size/layout.dbu).to_i, [diff_index],  (l/layout.dbu).to_i,  (w/layout.dbu).to_i, x1, x2, ['ML1', 'CNT', 'DIFF']
+    end
+  end
+
+  class Nsub_ring &lt; MinedaFillRing
+    def initialize
+      super
+      param(:sq_size, TypeDouble, "Square size", :default =&gt; 2.6.um, :hidden =&gt; false)
+      param(:sq_fit, TypeBoolean, "Fit fixed point", :default =&gt; true, :hidden =&gt; false)
+    end
+    def produce_impl
+      nsubcont_index = library_cell('nsubcont', 'IP62_Basic', layout) 
+      m1_index = get_layer_index 'ML1'
+      diff_index = get_layer_index 'DIFF'
+      corner_gap = cng/layout.dbu
+      center_gap = ctg/layout.dbu
+      x1 = x2 = 0
+      if cng &gt; 0 #corner gap
+        x2 =  (cng/layout.dbu).to_i
+      elsif ctg &gt; 0 #cener gap
+        x1 =  (w/layout.dbu).to_i/2 - (ctg/layout.dbu).to_i/2
+        x2 =   (w/layout.dbu).to_i/2 + (ctg/layout.dbu).to_i/2
+      end
+      super nsubcont_index,  (sq_size/layout.dbu).to_i, [diff_index],  (l/layout.dbu).to_i,  (w/layout.dbu).to_i, x1, x2, ['ML1', 'CNT', 'DIFF']
+      nwl_index =  get_layer_index 'NWL'
+      super nil,  (4.0/layout.dbu).to_i, nwl_index,  (l/layout.dbu).to_i,  (w/layout.dbu).to_i
+    end  
+  end
+
+  class IP62_line &lt; MinedaFillLine
+    def initialize
+      super
+      param(:sq_size, TypeDouble, "Square size", :default =&gt; 2.0.um, :hidden =&gt; false)
+      param(:sq_fit, TypeBoolean, "Fit fixed point", :default =&gt; true, :hidden =&gt; false)
+    end 
+    def produce_impl fill_cell = 'psubcont'
+      fillcell_index = library_cell(fill_cell, 'IP62_Basic', layout) 
+      m1_index = get_layer_index 'ML1'
+      diff_index = get_layer_index 'DIFF'
+      sum = 0
+      gap_pattern = (gp || '').split(/[ ,] */).map{|a| sum = sum + (a.to_f/layout.dbu).to_i}
+      super fillcell_index,  (sq_size/layout.dbu).to_i, [diff_index], nil, (l/layout.dbu).to_i,  (w2/layout.dbu).to_i, gap_pattern, ['ML1', 'CNT', 'DIFF']
+    end
+    def display_text_impl
+      "Guard line\r\n(length=#{l.round(3)}um)"
+    end
+  end
+  
+  class BGMN_line &lt;IP62_line
+    def produce_impl
+      super 'BGMN'
+    end
+  end
+  class BGMP_line &lt;IP62_line
+    def produce_impl
+      super 'BGMP'
+    end
+  end
+
+  class BGRR_line &lt;IP62_line
+    def produce_impl
+      super 'BGRR'
+    end
+  end
+  
+  class Psub_line &lt; MinedaFillLine
+    def initialize
+      super
+      param(:sq_size, TypeDouble, "Square size", :default =&gt; 2.0.um, :hidden =&gt; false)
+      param(:sq_fit, TypeBoolean, "Fit fixed point", :default =&gt; true, :hidden =&gt; false)
+    end 
+    def produce_impl
+      psubcont_index = library_cell('psubcont', 'IP62_Basic', layout) 
+      m1_index = get_layer_index 'ML1'
+      diff_index = get_layer_index 'DIFF'
+      sum = 0
+      gap_pattern = (gp || '').split(/[ ,] */).map{|a| sum = sum + (a.to_f/layout.dbu).to_i}
+      super psubcont_index,  (sq_size/layout.dbu).to_i, [diff_index], nil, (l/layout.dbu).to_i,  (w2/layout.dbu).to_i, gap_pattern, ['ML1', 'CNT', 'DIFF']
+    end
+    def display_text_impl
+      "Psub line\r\n(length=#{l.round(3)}um)"
+    end
+  end
+
+  class Nsub_line &lt; MinedaFillLine
+    def initialize
+      super
+      param(:sq_size, TypeDouble, "Square size", :default =&gt; 2.6.um, :hidden =&gt; false)
+      param(:sq_fit, TypeBoolean, "Fit fixed point", :default =&gt; true, :hidden =&gt; false)
+    end
+    def produce_impl
+      nsubcont_index = library_cell('nsubcont', 'IP62_Basic', layout) 
+      m1_index = get_layer_index 'ML1'
+      diff_index = get_layer_index 'DIFF'
+      sum = 0
+      gap_pattern = (gp || '').split(/[ ,] */).map{|a| sum = sum + (a.to_f/layout.dbu).to_i}
+      super nsubcont_index,  (sq_size/layout.dbu).to_i, [diff_index], nil, (l/layout.dbu).to_i,  (w2/layout.dbu).to_i, gap_pattern, ['ML1', 'CNT', 'DIFF']
+      nwl_index =  get_layer_index 'NWL'
+      #                   index, bw, fillers, length, gap_pattern, off_layers_on_gap=[]
+      super nil,  (4.0/layout.dbu).to_i, nwl_index, nil, (l/layout.dbu).to_i,  (w2/layout.dbu).to_i
+    end  
+    def display_text_impl
+      "Nsub line\r\n(length=#{l.round(3)}um)"
+    end
+  end
+
+  class Nsub_filler &lt; MinedaFillBox
+    def produce_impl
+      nsubcont_index = library_cell('nsubcont', 'IP62_Basic', layout) 
+      @region = nil
+      if defined?(merge_layers) and merge_layers
+        @region = {}
+        layout.cell(nsubcont_index).layout.layer_indexes.each{|layer|
+          lay_ind = layout.get_info(layer).layer
+          @region[lay_ind] = Region::new()
+        }
+      end
+      area = [0, 0, (l/layout.dbu).to_i, (w/layout.dbu).to_i]
+      fill_area(area,  (2.6/layout.dbu).to_i, nil){|x, y|
+        insert_cell nsubcont_index, x, y
+      }
+      @region &amp;&amp; @region.each_pair{|lay_ind, region_shapes|
+        lay_index = layout.cell(nsubcont_index).layout.layer(lay_ind, 0)
+        cell.shapes(lay_index).insert(region_shapes.merge)
+      }    
+    end
+  end
+
+  class Fill_box &lt; MinedaFillBox
+    def produce_impl
+      narea_index = get_layer_index 'Narea'
+      area = [0, 0, l/layout.dbu, w/layout.dbu]
+      fill_area(area, 0, narea_index)
+    end
+  end
+  
+  class Wlrh &lt; MinedaFillBox
+    def initialize name = 'WLRH'
+      super 41.0.um, 61.4.um, @name = name
+    end
+    def produce_impl
+      rnhv_index = get_layer_index 'HVNW'
+      area = [0, 0, l/layout.dbu, w/layout.dbu]
+      fill_area(area, 0, rnhv_index)
+      x1, y1, x2, y2 = boxes_bbox(rnhv_index)
+      u15 = 1.5.um/layout.dbu
+      psub_index = get_layer_index('PSUB')
+      create_box psub_index, x1+u15, y1+u15, x2-u15, y2-u15
+      overcoat get_layer_index('NF'), psub_index
+      overcoat get_layer_index('DL' + @name), rnhv_index
+    end
+  end  
+  
+  class Wlmp&lt; MinedaFillBox
+    def initialize
+      super 41.0.um, 61.4.um, @name = 'WLMP'
+    end
+    def produce_impl
+      rlmp_index = get_layer_index 'NWL'
+      area = [0, 0, l/layout.dbu, w/layout.dbu]
+      fill_area(area, 0, rlmp_index)
+      x1, y1, x2, y2 = boxes_bbox(rlmp_index)
+      u15 = 1.5.um/layout.dbu
+      psub_index = get_layer_index('PSUB')
+      create_box psub_index, x1+u15, y1+u15, x2-u15, y2-u15
+      overcoat get_layer_index('NF'), psub_index
+      overcoat get_layer_index('PF'), psub_index
+      overcoat get_layer_index('DL' + @name), rlmp_index
+   end
+  end
+  
+  class Wlmn&lt; MinedaFillBox
+    def initialize
+      super 41.0.um, 61.4.um, @name = 'WLMN'
+    end
+    def produce_impl
+      dlwlmn_index = get_layer_index 'DL'+@name
+      area = [0, 0, l/layout.dbu, w/layout.dbu]
+      fill_area(area, 0, dlwlmn_index)
+    end
+  end
+  
+  class IP62 &lt; Library
+
+    def initialize  
+    
+      # 説明を設定
+      self.description = "IP62 PCells"
+      
+      # PCell宣言を作成する
+      layout.register_pcell("Label1", Label::new)
+      layout.register_pcell("Label2", Label::new(30.0, 4.0, 'IP62_Characters2'))
+      layout.register_pcell("Nch", Nch::new)
+      layout.register_pcell("Pch", Pch::new)
+      layout.register_pcell("MN", Nch::new)
+      layout.register_pcell("MP", Pch::new)
+      # layout.register_pcell("R_poly", R_poly::new)
+      # layout.register_pcell("R_ndiff", R_ndiff::new)
+      # layout.register_pcell("R_pdiff", R_pdiff::new)
+      layout.register_pcell("RS", Rs::new)
+      layout.register_pcell("RR", Rr::new)
+      # layout.register_pcell("Poly_cap", Poly_cap::new)
+      # layout.register_pcell("Ndiff_cap", Ndiff_cap::new)
+      # layout.register_pcell("Pdiff_cap", Pdiff_cap::new)      
+      layout.register_pcell("CSIO", CSIO::new)  
+      layout.register_pcell("BGMN_ring", BGMN_ring::new)      
+      layout.register_pcell("BGMP_ring", BGMP_ring::new)      
+      layout.register_pcell("BGRR_ring", BGRR_ring::new)      
+      layout.register_pcell("Psub_ring", Psub_ring::new)      
+      layout.register_pcell("Nsub_ring", Nsub_ring::new) 
+      layout.register_pcell("BGMN_line", BGMN_line::new)      
+      layout.register_pcell("BGMP_line", BGMP_line::new)      
+      layout.register_pcell("BGRR_line", BGRR_line::new) 
+      layout.register_pcell("Psub_line", Psub_line::new)      
+      layout.register_pcell("Nsub_line", Nsub_line::new) 
+      layout.register_pcell("Nsub_filler", Nsub_filler::new)
+      # layout.register_pcell("Fill_box", Fill_box::new)      
+      layout.register_pcell("WLRR", Wlrh::new('WLRR'))
+      layout.register_pcell("WLMP", Wlmp::new)
+      layout.register_pcell("WLMN", Wlmn::new)
+
+      # "IP62"という名前で登録します。
+      # その名前のライブラリがすでに存在していた場合は、その時点で置き換えられます。
+      register("PCells_IP62")
+      
+    end
+  end
+  
+  # ライブラリをインスタンス化して登録する
+  IP62::new
+  
+end
+
+
+</text>
+</klayout-macro>

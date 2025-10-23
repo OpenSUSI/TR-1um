@@ -1,0 +1,1074 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>DRC for IP62</description>
+ <version/>
+ <category>drc</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>drc_scripts</group-name>
+ <menu-path>tools_menu.drc.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>drc-dsl-xml</dsl-interpreter-name>
+ <text># coding: cp932
+#　DRC v0.85 August 24th,  2025 Copy Right: Seijiro Moriyama and Natsuki Arakawa
+#          merged with Arakawa-san's common rules (Copy Right: Natsuki Arakawa (Tokai-Rika))
+#  partly based on Rxxxx drc v0.7  April 20th, 2023 Copy right: Seijiro Moriyama &amp; Chikau Takahashi
+report("Output database")
+# tiles(1000.0.um)
+dh = MinedaCommon::DRC_helper.new
+# dh.find_cells_to_exclude [63, 63], '^(a[np]5g|hdio|hvpnp|zdio)', 0
+exclude = input 63, 63
+mi = MinedaCommon::MinedaInput::new source
+nwl = input(*mi.index('NWL')).not(exclude)
+diff = input(*mi.index('DIFF')).not(exclude)
+pol = input(*mi.index('POL')).not(exclude)
+cnt = input(*mi.index('CNT')).not(exclude)
+cnt_text = labels(*mi.index('CNT'))
+ml1 = input(*mi.index('ML1')).not(exclude)
+via1 = input(*mi.index('VIA1')).not(exclude)
+via1_text = labels(*mi.index('VIA1'))
+ml2 = input(*mi.index('ML2')).not(exclude)
+via2 = input(*mi.index('VIA2')).not(exclude)
+ml3 = input(*mi.index('ML3')).not(exclude)
+narea = input(*mi.index('Narea')).not(exclude)
+parea = input(*mi.index('Parea')).not(exclude)
+nsd = parea # for Arakawa-san rules
+psd = narea # for Arakawa-san rules
+psub = input(*mi.index('PSUB')).not(exclude)
+r = input(*mi.index('R')).not(exclude)
+nbe = input(*mi.index('NBE')).not(exclude)
+pbe = input(*mi.index('PBE')).not(exclude)
+hpbe = input(*mi.index('HPBE')).not(exclude)
+hnbe = input(*mi.index('HNBE')).not(exclude)
+hpm = input(*mi.index('HPM')).not(exclude)
+rhp = input(*mi.index('RHP')).not(exclude)
+pm = input(*mi.index('PM')).not(exclude)
+nm = input(*mi.index('NM')).not(exclude)
+nf = input(*mi.index('NF')).not(exclude)
+pf = input(*mi.index('PF')).not(exclude)
+cl = input(*mi.index('CL')).not(exclude)#241004
+r = input(*mi.index('R')).not(exclude)#241004
+pro =input(*mi.index('PRO')).not(exclude)
+
+bgmn = input(*mi.index('DLBGMN')).not(exclude) # for Arakawa-san
+bgmp = input(*mi.index('DLBGMP')).not(exclude) # for Arakawa-san
+bgmpo = input(*mi.index('DLBGMPO')).not(exclude) # for Arakawa-san
+bgrn = input(*mi.index('DLBGRN')).not(exclude) # for Arakawa-san
+bgrh = input(*mi.index('DLBGRH')).not(exclude) # for Arakawa-san
+bgrr = input(*mi.index('DLBGRR')).not(exclude) # for Arakawa-san
+
+dlbgmn = input(*mi.index('DLBGMN')).not(exclude)
+dlbgmp = input(*mi.index('DLBGMP')).not(exclude)
+dlbgmpo = input(*mi.index('DLBGMPO')).not(exclude)
+dlbgrn = input(*mi.index('DLBGRN')).not(exclude)
+dlbgrh = input(*mi.index('DLBGRH')).not(exclude)
+dlbgrr = input(*mi.index('DLBGRR')).not(exclude)
+
+###res = input(*mi.index('RES')) 
+###res_text = labels(*mi.index('RES'))
+
+###rh = res.interacting(res_text.texts('RH')) 
+hvnw = input(*mi.index('HVNW')).not(exclude)
+dlrn = input(*mi.index('DLRN')).not(exclude)
+dlrh = input(*mi.index('DLRH')).not(exclude)
+dlrhhv = input(*mi.index('DLRHHV')).not(exclude)
+dlrnhv = input(*mi.index('DLRNHV')).not(exclude)
+dlrr = input(*mi.index('DLRR')).not(exclude)
+dlrs = input(*mi.index('DLRS')).not(exclude)
+dlmno = input(*mi.index('DLMNO')).not(exclude)
+dlmpo = input(*mi.index('DLMPO')).not(exclude)
+dlmn = input(*mi.index('DLMN')).not(exclude)
+dlmp = input(*mi.index('DLMP')).not(exclude)
+dlcsio = input(*mi.index('DLCSIO')).not(exclude)
+
+dlwlmp = input(*mi.index('DLWLMP')).not(exclude)
+dlwlmn = input(*mi.index('DLWLMN')).not(exclude)
+dlwlrr = input(*mi.index('DLWLRR')).not(exclude)
+dlwlrh = input(*mi.index('DLWLRH')).not(exclude)
+dlwlrn = input(*mi.index('DLWLRN')).not(exclude)
+dldp = input(*mi.index('DLDP')).not(exclude)
+dldn = input(*mi.index('DLDN')).not(exclude)
+dldpe = input(*mi.index('DLDPE')).not(exclude)
+dldne = input(*mi.index('DLDNE')).not(exclude)
+
+hv_nwl = input(*mi.index('HVNW')).not(exclude)
+
+#dlmne = input(*mi.index('DLMNE')).not(exclude) # not used but temporarily use to avoid execution error
+#dlmpe = input(*mi.index('DLMPE')).not(exclude) # not used but temporarily use to avoid execution error
+diff_outside_nwl  = diff - nwl - hv_nwl#250314
+ndiff             = diff_outside_nwl &amp; narea#250314
+ngate             = ndiff &amp; pol#250314
+emcnt = cnt.with_area(8.9.um,  9.1.um)#250314
+diff_in_nwl  = diff &amp; nwl#250314
+pdiff       = diff_in_nwl &amp; parea#250314
+pgate       = pdiff &amp; pol#250314
+
+aal=diff.overlapping(cnt)#250314
+amp=diff&amp;pbe #250314
+aampe_1=(amp&amp;aal).overlapping(emcnt)#250314
+mpe=aampe_1&amp;pol#250314
+ampe=nsd.interacting(mpe) #250314
+amn=diff&amp;nbe #250314
+aamne_1=(amn&amp;aal).overlapping(emcnt)#250314
+mne=aamne_1&amp;pol #250314
+amne=psd.interacting(mne) #250314
+
+cnts=cnt.drc(area &lt; 1.5)#241004
+cntl=cnt-cnts#241004
+cnt_dp=cnt.inside(dldp)#241004
+cntl_pol=cntl.outside(pol)#241004
+cntl_mpe=cntl_pol.inside(ampe)#250314
+cntl_dpe=cntl.inside(dldpe)#241004
+
+dm_via1= via1.interacting(via1_text.texts('dm_via1')).sized(1.0)
+dm_pcn = cnt.interacting(cnt_text.texts('dm_pcn')).sized(0.8)
+dm_dcn = cnt.interacting(cnt_text.texts('dm_dcn')).sized(0.8)
+dm_nscn = cnt.interacting(cnt_text.texts('dm_nscn')).sized(7.3)
+dm_pscn = cnt.interacting(cnt_text.texts('dm_pscn')).sized(2.25)
+
+ndiff = diff &amp; narea
+pdiff = diff &amp; parea
+nmos = ndiff &amp; pol
+pmos = pdiff &amp; pol
+mos = nmos | pmos
+#hipol = hpol &amp; pol
+
+#素子の定義
+diff_pol=diff.overlapping(pol)#241004
+mpo=diff_pol.inside(dlmpo)#241004 --- conflict mpo = (diff &amp; pol).inside(dlmpo)
+mp=diff_pol.inside(dlmp)#241004  --- conflict mp = (diff &amp; pol).inside(dlmp)
+mno=diff_pol.inside(dlmno)#241004 --- conflict mno = (diff &amp; pol).inside(dlmno)
+mn=diff_pol.inside(dlmn)#250311-2
+
+rh= diff.inside(dlrh)#241004 --- used by Moriyama
+csio=diff.inside(dlcsio)#241004 --- used by Moriyama
+rhhv=diff.inside(dlrhhv)#241004 --- used by Moriyama
+diff_dlrr=diff &amp; dlrr#241004
+rr=diff_dlrr.inside(dlrr)#241004 --- used by Moriyama
+diff_dlrnhv=diff &amp; dlrnhv#241004
+rnhv=diff_dlrnhv.inside(dlrnhv)#241004 --- used by Moriyama
+dp=diff.inside(dldp)#250303 --- used by Moriyama
+dn=diff.inside(dldn)#250303 --- used by Moriyama
+
+#素子毎のPSUB/diff/dlmnoを作成
+psub_mpo=psub.covering(mpo)#241004
+psub_mp=psub.covering(mp)#241004
+psub_mno=psub.overlapping(mno)#241004
+psub_rh=psub.covering(rh)#241004
+psub_rr=psub.covering(rr)#241004
+psub_csio=psub.covering(csio)#241004
+psub_rhhv=psub.covering(rhhv)#241004
+psub_rnhv=psub.covering(rnhv)#241004
+psub_dp=psub.covering(dp)#250303
+hpm_mno=hpm.covering(mno)#241004
+diff_rn=diff.inside(dlrn)#241004
+diff_mn=diff.inside(dlmn)#241004
+diff_mpo=diff.inside(dlmpo)#241004
+diff_mp=diff.inside(dlmp)#241004
+diff_mpe=diff.interacting(ampe)#250314
+diff_mne=diff.interacting(amne)#250314
+diff_bgmn=diff.inside(dlbgmn)#241004
+diff_dlbgmn=diff.overlapping(dlbgmn)#241004
+diff_dlmno=diff.inside(dlmno)#241004
+diff_dlbgmn=diff.inside(dlbgmn)#241004
+diff_dlbgmp=diff.inside(dlbgmp)#241004
+diff_dlbgmpo=diff.inside(dlbgmpo)#241004
+diff_dlbgrh=diff.inside(dlbgrh)#241004
+diff_dlbgrn=diff.inside(dlbgrn)#241004
+diff_dlbgrr=diff.inside(dlbgrr)#241004
+diff_mno=diff_dlmno-diff_dlbgmn#241004
+diff_rr=diff.inside(dlrr)#241004
+diff_bgrr=diff.inside(dlbgrr)#241004
+diff_rh=diff.inside(dlrh)#241004
+diff_bgrh=diff.inside(dlbgrh)#241004
+diff_bgrn=diff.inside(dlbgrn)#241004
+diff_rhhv=diff.inside(dlrhhv)#241004
+diff_bgmp=diff.inside(dlbgmp)#241004
+diff_bgmpo=diff.inside(dlbgmpo)#241004
+
+diff_mos=diff_mp + diff_mn + diff_mpo + diff_mno + diff_mpe + diff_mne#241004
+
+chipring = pro.holes - diff.holes#250303
+
+#3-layer metal option
+metal3layer = via2.outside(chipring) &amp; ml3.outside(chipring)#250311
+metal3layer.output("3-layer metal option")#250303
+
+#puts 'Check GAP'
+nwl.space(4.um).output("ER0026:NW SP ER 4.0")#241004
+nwl.notch(4.um).output("ER0026:NW SP ER 4.0")#250303
+hvnw.space(4.um).output("ER0027:HVNW SP ER 4.0")#241004
+hvnw.notch(4.um).output("ER0027:HVNW SP ER 4.0")#250303
+
+diff.space(1.4.um).output("ER0028:L SP ER 1.4")#250314
+diff.notch(1.4.um).output("ER0028:L SP ER 1.4")#250314
+
+pol.space(1.2.um).output("ER0038:SG SP ER 1.2")#250314
+pol.notch(1.2.um).output("ER0038:SG SP ER 1.2")#250314
+ml1.space(1.4.um).output("ER0045:M1 SP ER 1.4")#250314
+ml1.notch(1.4.um).output("ER0045:M1 SP ER 1.4")#250314
+ml1.space(1.4.um).output("ER1404:M1(W10UNDER) SP ER 1.4")#241004
+ml1over10 = ml1.sized(-5.0.um).sized(5.0.um)#250303
+ml1.separation(ml1over10, 2.0.um).output("ER1402:M1(W10OVER&amp;MIX) SP ER 2.0")
+ml1over10.space(2.0.um).output("ER1402:M1(W10OVER&amp;MIX) SP ER 2.0")#250303
+ml1over10.notch(2.0.um).output("ER1402:M1(W10OVER&amp;MIX) SP ER 2.0")#250303
+ml2.space(2.um).output("ER0047:M2 SP ER 2.0")#250314
+ml2.notch(2.um).output("ER0047:M2 SP ER 2.0")#250314
+ml3.space(2.um).output("ER0074:M3 SP ER 2.0")#250314
+ml3.notch(2.um).output("ER0074:M3 SP ER 2.0")#250314
+
+pol.separation(diff.inside(dlbgmn), 0.4.um).output("ERWLMN06:SG-L(BGMN) SP ER 0.4")
+pol.separation(diff.inside(dlbgmp), 0.4.um).output("ERWLMP05:SG-L(BGMP) SP ER 0.4")
+pol.separation(diff.inside(dldp), 0.4.um).output("ERDP01:SG-L(DP) SP ER 0.4")
+pol.separation(diff.inside(dldn), 0.4.um).output("ERWLMN08:SG-L(DN) SP ER 0.4")
+
+via1.separation(cnt, 1.0.um).output("ER1506:TC-CONTS SP ER 1.0")
+via1.separation(pol, 1.2.um).output("ER1508:TC-SG SP ER 1.2")
+
+cnt.space(1.0.um).output("ER0044:CONT SP ER 1.0")
+cnt.notch(1.0.um).output("ER0044:CONT SP ER 1.0")#250303
+psub.space(4.0.um).output("ER0025:PSUB SP ER 4.0")#250303
+psub.notch(4.0.um).output("ER0025:PSUB SP ER 4.0")#250303
+nf.space(2.0.um).output("ER0029:NF SP ER 2.0")#250303
+nf.notch(2.0.um).output("ER0029:NF SP ER 2.0")#250303
+pf.space(2.um).output("ER0030:PF SP ER 2.0")#241004
+pf.notch(2.um).output("ER0030:PF SP ER 2.0")#241004
+cl.space(3.um).output("ER0031:CL SP ER 3.0")#241004
+cl.notch(3.um).output("ER0031:CL SP ER 3.0")#250303
+hpbe.space(2.6.um).output("ER0032:HPBE SP ER 2.6")#241004
+hpbe.notch(2.6.um).output("ER0032:HPBE SP ER 2.6")#250303
+hnbe.space(2.6.um).output("ER0033:HNBE SP ER 2.6")#241004
+hnbe.notch(2.6.um).output("ER0033:HNBE SP ER 2.6")#250303
+pbe.space(2.6.um).output("ER0034:PBE SP ER 2.6")
+pbe.notch(2.6.um).output("ER0034:PBE SP ER 2.6")#250303
+nbe.space(2.6.um).output("ER0035:NBE SP ER 2.6")
+nbe.notch(2.6.um).output("ER0035:NBE SP ER 2.6")#250303
+hpm.space(2.6.um).output("ER0036:HPM SP ER 2.6")
+hpm.notch(2.6.um).output("ER0036:HPM SP ER 2.6")#250303
+rhp.space(2.6.um).output("ER0037:RHP SP ER 2.6")
+rhp.notch(2.6.um).output("ER0037:RHP SP ER 2.6")#250303
+pm.space(2.6.um).output("ER0039:PM SP ER 2.6")
+pm.notch(2.6.um).output("ER0039:PM SP ER 2.6")#250303
+nm.space(2.6.um).output("ER0040:NM SP ER 2.6")
+nm.notch(2.6.um).output("ER0040:NM SP ER 2.6")#250303
+r.space(2.6.um).output("ER0041:R SP ER 2.6")#241004
+r.notch(2.6.um).output("ER0041:R SP ER 2.6")#250303
+narea.space(2.2.um).output("ER0042:PSD SP ER 2.2") # psd 2.2#250314
+narea.notch(2.2.um).output("ER0042:PSD SP ER 2.2") #250314
+parea.space(2.6.um).output("ER0043:NSD SP ER 2.6") # nsd  2.6#250314
+parea.notch(2.6.um).output("ER0043:NSD SP ER 2.6") #250314
+pro.space(20.um).output("ER0048:PRO SP ER 20.0")#241004
+pro.notch(20.um).output("ER0048:PRO SP ER 20.0")#250303
+
+psub.separation(ndiff.interacting(mn), 10.0.um).output("ER0127:PSUB-L(MN) SP ER 10.0")#250311-2
+psub.separation(diff.inside(bgmn), 5.0.um).output("ER0421:L(BGMN)-PSUB SP ER 5.0")#250303
+psub.separation(diff_rn, 10.um).output("ER0128:PSUB-L(RN) SP ER 10.0")#241004
+
+
+pdiff.interacting(mp).separation(diff.inside(dlbgmp), 2.8.um).output("ERWLMP04:L(MP)-L(MPBG) SP ER 2.8")#250314
+pdiff.interacting(mp).separation(diff.inside(dldp), 2.8).output("ERWLMP08:L(MP)-L(DP) SP ER 2.8")#250314
+dp.separation(diff.inside(dlbgmp), 2.8).output("ERWLMP09:L(DP)-L(BGMP) SP ER 2.8")
+(diff.covering(mpe)).separation(diff.inside(dldp), 2.8.um).output("ERWLMP27:L(MPE)-L(DP) SP ER 2.8") #0312
+
+ndiff.interacting(mn).separation(diff.inside(dlbgmn), 2.8.um).output("ERWLMN05:L(MN)-L(BGMN) SP ER 2.8") #250314
+ndiff.interacting(mn).separation(diff.inside(dldn), 2.8.um).output("ERWLMN10:L(MN)-L(DN) SP ER 2.8")#250314
+diff.inside(dldn).separation(diff.inside(dlbgmn), 2.8.um).output("ERWLMN11:L(DN)-L(BGMN) SP ER 2.8")
+psub.separation(diff.covering(mne), 10.0.um).output("ERWLMN12:PSUB-L(MNE) SP ER 10.0")#0312
+(diff.covering(mne)).separation(diff.inside(dldn), 2.8.um).output("ERWLMN18:L(MNE)-L(DN) SP ER 2.8")#0312
+
+diff.inside(dlrr).space(4.0.um).output("ERWLRR03:L(RR) SP ER 4.0")
+
+diff.inside(dlrr).separation(diff.inside(dlbgrr), 4.0.um).output("ERWLRR04:L(RR)-L(BGRR) SP ER 4.0")
+
+psub.inside(dlwlmp.covering(dlmp)).space(12.0.um).output("ER0104:PSUB(MP) SP ER 12.0")
+psub_mp.separation(psub_rh, 9.5.um).output("ER0110:PSUB(MP)-PSUB(RH) SP ER 9.5")#250303
+psub_mp.separation(psub_rr, 9.5.um).output("ER0111:PSUB(MP)-PSUB(RR) SP ER 9.5")#250303
+
+dpe = (diff &amp; dldpe).inside(dldpe)
+psub_dpe = psub.covering(dpe.sized(0.1.um))
+psub_dpe.space(12.0.um).output("ER0135:PSUB(DPE) SP ER 12.0")
+psub_dpe.separation(psub_mp, 12.0).output("ER0136:PSUB(DPE)-PSUB(MP) SP ER 12.0")
+psub_dpe.separation(psub_mpo, 9.5).output("ER0137:PSUB(DPE)-PSUB(MPO) SP ER 9.5")
+psub_dpe.separation(psub_csio, 12.0).output("ER0138:PSUB(DPE)-PSUB(CSIO) SP ER 12.0")
+
+psub_dp.space(12.0.um).output("ER0139:PSUB(DP) SP ER 12.0")
+psub_dp.separation(psub_mp, 12.0.um).output("ER0140:PSUB(DP)-PSUB(MP) SP ER 12.0")
+psub_dp.separation(psub_mpo, 9.5.um).output("ER0141:PSUB(DP)-PSUB(MPO) SP ER 9.5")
+psub_dp.separation(psub_csio, 12.0.um).output("ER0142:PSUB(DP)-PSUB(CSIO) SP ER 12.0")
+
+
+diff_mn.separation(psub_mp, 10.um).output("ER0406:L(MN)-PSUB(MP) SP ER 10.0")#241004
+
+psub_csio.separation(diff_bgmn, 5.um).output("ER0201:PSUB(CSIO)-L(BGMN) SP ER 5.0")#241004
+
+er0301=pf-psub#241004
+er0301.output("ER0301:PF NOT INSIDE PSUB ER")#241004
+er0304=nf-psub#241004
+er0304.output("ER0304:NF NOT INSIDE PSUB ER")#241004
+
+
+#素子毎のGAP
+psub_mpo.space(8.um).output("ER0103:PSUB(MPO) SP ER 8.0")#241004
+psub_mpo.separation(psub_mp, 9.5.um).output("ER0105:PSUB(MPO)-PSUB(MP) SP ER 9.5")#241004
+psub_mpo.separation(psub_rh, 8.um).output("ER0107:PSUB(MPO)-PSUB(RH) SP ER 8.0")#241004
+psub_mpo.separation(psub_rr, 8.um).output("ER0108:PSUB(MPO)-PSUB(RR) SP ER 8.0")#241004
+psub_mpo.separation(psub_rnhv, 8.um).output("ER0109:PSUB(MPO)-PSUB(RNHV) SP ER 8.0")#241004
+psub_mp.separation(psub_rnhv, 8.um).output("ER0112:PSUB(MP)-PSUB(RNHV) SP ER 8.0")#241004
+dlmno.separation(psub_mp, 9.5.um).output("ER0114:DLMNO-PSUB(MP) SP ER 9.5")#250314
+dlmno.separation(psub_mpo, 6.5.um).output("ER0115:DLMNO-PSUB(MPO) SP ER 6.5")#250314
+dlmno.space(5.um).output("ER0116:DLMNO SP ER 5.0")#250303
+dlmno.separation(psub_rh, 6.5.um).output("ER0117:DLMNO-PSUB(RH) SP ER 6.5")#241004
+dlmno.separation(psub_rr, 6.5.um).output("ER0118:DLMNO-PSUB(RR) SP ER 6.5")#241004
+dlmno.separation(psub_rnhv, 6.5.um).output("ER0119:DLMNO-PSUB(RNHV) SP ER 6.5")#250314
+psub_rh.space(8.um).output("ER0121:PSUB(RH) SP ER 8.0")#241004
+psub_rr.space(8.um).output("ER0122:PSUB(RR) SP ER 8.0")#241004
+psub_rnhv.space(8.um).output("ER0123:PSUB(RNHV) SP ER 8.0")#241004
+psub_rr.separation(psub_rh, 8.um).output("ER0124:PSUB(RR)-PSUB(RH) SP ER 8.0")#241004
+psub_rr.separation(psub_rnhv, 8.um).output("ER0125:PSUB(RR)-PSUB(RNHV) SP ER 8.0")#241004
+psub_rh.separation(psub_rnhv, 8.um).output("ER0126:PSUB(RH)-PSUB(RNHV) SP ER 8.0")#241004
+
+psub_csio.space(12.um).output("ER0129:PSUB(CSIO) SP ER 12.0")#241004
+psub_csio.separation(psub_mp, 12.um).output("ER0130:PSUB(CSIO)-PSUB(MP) SP ER 12.0")#241004
+psub_csio.separation(psub_rh, 9.5.um).output("ER0131:PSUB(CSIO)-PSUB(RH) SP ER 9.5")#241004
+psub_csio.separation(psub_rr, 9.5.um).output("ER0132:PSUB(CSIO)-PSUB(RR) SP ER 9.5")#241004
+psub_csio.separation(psub_mno, 9.5.um).output("ER0133:PSUB(CSIO)-PSUB(MNO) SP ER 9.5")#241004
+psub_csio.separation(psub_mpo, 9.5.um).output("ER0134:PSUB(CSIO)-PSUB(MPO) SP ER 9.5")#241004
+
+diff_mn.separation(psub_mno, 10.um).output("ER0407:L(MN)-PSUB(MNO) SP ER 10.0")#241004
+diff_mn.separation(dlmno, 8.5.um).output("ER0408:L(MN)-DLMNO SP ER 8.5")#241004
+diff_mn.separation(psub_mpo, 10.um).output("ER0409:L(MN)-PSUB(MPO) SP ER 10.0")#241004
+diff_mn.separation(psub_rh, 10.um).output("ER0410:L(MN)-PSUB(RH) SP ER 10.0")#241004
+diff_mn.separation(psub_rr, 10.um).output("ER0411:L(MN)-PSUB(RR) SP ER 10.0")#241004
+diff_mpo.space(5.um).output("ER0414:L(MPO) SP ER 5.0")#241004
+
+er0418=diff_mp.separation(pol, 0.4)#241004
+er0418.output("ER0418:L(MOS)-SG SP ER 0.4")#241004
+er0418=diff_mn.separation(pol, 0.4)#241004
+er0418.output("ER0418:L(MOS)-SG SP ER 0.4")#241004
+er0418=diff_mpo.separation(pol, 0.4)#241004
+er0418.output("ER0418:L(MOS)-SG SP ER 0.4")#241004
+er0418=diff_mno.separation(pol, 0.4)#241004
+er0418.output("ER0418:L(MOS)-SG SP ER 0.4")#241004
+er0418=diff_mpe.separation(pol, 0.4)#241004
+er0418.output("ER0418:L(MOS)-SG SP ER 0.4")#241004
+er0418=diff_mne.separation(pol, 0.4)#241004
+er0418.output("ER0418:L(MOS)-SG SP ER 0.4")#241004
+er0419_1=diff_bgmn &amp; pol#241004
+er0419_2=diff_bgmp &amp; pol#241004
+er0419_3=diff_bgmpo &amp; pol#241004
+er0419_4=diff_bgrh &amp; pol#241004
+er0419_5=diff_bgrn &amp; pol#241004
+er0419_6=diff_bgrr &amp; pol#241004
+er0419=er0419_1 + er0419_2 + er0419_3 + er0419_4 + er0419_5 + er0419_6#241004
+er0419.output("ER0419:L(BG) ON SG ER")#241004
+er0420=diff_mp.width(1.4.um)#241004
+er0420.output("ER0420:L(MOS) WIDTH ER 1.4")#241004
+er0420=diff_mn.width(1.4.um)#241004
+er0420.output("ER0420:L(MOS) WIDTH ER 1.4")#241004
+er0420=diff_mpo.width(1.4.um)#241004
+er0420.output("ER0420:L(MOS) WIDTH ER 1.4")#241004
+er0420=diff_mno.width(1.4.um)#241004
+er0420.output("ER0420:L(MOS) WIDTH ER 1.4")#241004
+er0420=diff_mpe.width(1.4.um)#241004
+er0420.output("ER0420:L(MOS) WIDTH ER 1.4")#241004
+er0420=diff_mne.width(1.4.um)#241004
+er0420.output("ER0420:L(MOS) WIDTH ER 1.4")#241004
+
+diff_bgmn.separation(psub_rh, 5.um).output("ER0422:L(BGMN)-PSUB(RH) SP ER 5.0")#241004
+diff_bgmn.separation(psub_rr, 5.um).output("ER0423:L(BGMN)-PSUB(RR) SP ER 5.0")#241004
+diff_bgmn.separation(psub_rhhv, 5.um).output("ER0424:L(BGMN)-PSUB(RHHV) SP ER 5.0")#241004
+diff_mn.separation(psub_rhhv, 10.um).output("ER0425:L(MN)-PSUB(RHHV) SP ER 10.0")#241004
+diff_bgmn.separation(psub_mno, 5.um).output("ER0426:L(BGMN)-PSUB(MNO) SP ER 5.0")#241004
+diff_mno.separation(diff_bgmn, 4.um).output("ER0427:L(MNO)-L(BGMN) SP ER 4.0")#241004
+
+# Checking crossing DIFF(L)
+er=diff - chipring#250303
+er0054_1=er-parea#250303
+er0054_2=parea - dlmno#250311
+er0054_3=er.inside(er0054_2)#250311
+er0054_4=er.overlapping(er0054_2)#250311
+er0054_5=er0054_4-er0054_3#250311
+er0054_5.output("ER0054:PSD CROSS L ER")#250311
+
+er0055_1=er-psub#250303
+er0055_2=psub - dlmno#250311
+er0055_3=er.inside(er0055_2)#250311
+er0055_4=er.overlapping(er0055_2)#250311
+er0055_5=er0055_4-er0055_3#250311
+er0055_5.output("ER0055:PSUB CROSS L ER")#250311
+
+er0056_1=er-nwl#241004
+nwl.interacting(er0056_1).output("ER0056:NW CROSS L ER")#241004
+
+er0057_1=er-hvnw#250303
+er0057_2=hvnw - dlmno#250311
+er0057_3=er.inside(er0057_2)#250311
+er0057_4=er.overlapping(er0057_2)#250311
+er0057_5=er0057_4-er0057_3#250311
+er0057_5.output("ER0057:HVNW CROSS L ER")#250311
+
+er0058_1=er-nf#250303
+er0058_2=nf - dlmno#250311
+er0058_3=er.inside(er0058_2)#250311
+er0058_4=er.overlapping(er0058_2)#250311
+er0058_5=er0058_4-er0058_3#250311
+er0058_5.output("ER0058:NF CROSS L ER")#250311
+
+er0059_1=er-pf#241004
+pf.interacting(er0059_1).output("ER0059:PF CROSS L ER")#241004
+
+er0060_1=er-cl#241004
+cl.interacting(er0060_1).output("ER0060:CL CROSS L ER")#241004
+
+er0061_1=er-hpbe#241004
+hpbe.interacting(er0061_1).output("ER0061:HPBE CROSS L ER")#241004
+
+er0062_1=er-hnbe#250303
+er0062_2=hnbe - dlmno#250311
+er0062_3=er.inside(er0062_2)#250311
+er0062_4=er.overlapping(er0062_2)#250311
+er0062_5=er0062_4-er0062_3#250311
+er0062_5.output("ER0062:HNBE CROSS L ER")#250311
+
+er0063_1=er-pbe#241004
+pbe.interacting(er0063_1).output("ER0063:PBE CROSS L ER")#241004
+
+er0064_1=er-nbe#241004
+nbe.interacting(er0064_1).output("ER0064:NBE CROSS L ER")#241004
+
+er0065_1=er-hpm#241004
+hpm.interacting(er0065_1).output("ER0065:HPM CROSS L ER")#241004
+
+er0066_1=er-rhp#241004
+rhp.interacting(er0066_1).output("ER0066:RHP CROSS L ER")#241004
+
+er0067_1=er-pm#241004
+pm.interacting(er0067_1).output("ER0067:PM CROSS L ER")#241004
+
+er0068_1=er-nm#241004
+nm.interacting(er0068_1).output("ER0068:NM CROSS L ER")#241004
+
+er0069_1=er-r#241004
+r.interacting(er0069_1).output("ER0069:R CROSS L ER")#241004
+
+er0070_1=er-narea#250311
+er0070_2=narea - (dlmpo+dlmno+dlrh+dlrr+dlrhhv)#250311 #250314
+er0070_3=er.inside(er0070_2)#250311
+er0070_4=er.overlapping(er0070_2)#250311
+er0070_5=er0070_4-er0070_3#250311
+er0070_5.output("ER0070:PSD CROSS L ER")#250311
+
+cnt.and(via1).output("ER1513:TC ON CONT ER")
+pol.and(via1).output("ER1514:TC ON SG ER")
+
+chipring2 = chipring.sized(6.6.um)
+nwl.outside(chipring).width(8.um).output("ER0002:NW WIDTH ER 8.0")#250303
+hvnw.width(8.um).output("ER0003:HVNW WIDTH ER 8.0")#241004
+diff.width(1.4.um).output("ER0004:L WIDTH ER 1.4")#241004
+pf.width(3.um).output("ER0006:PF WIDTH ER 3.0")#241004
+cl.outside(chipring2).width(3.um).output("ER0007:CL WIDTH ER 3.0")#250303
+hpbe.outside(chipring2).width(4.2.um).output("ER0008:HPBE WIDTH ER 4.2")#250303
+hnbe.outside(chipring2).width(4.2.um).output("ER0009:HNBE WIDTH ER 4.2")#250303
+rhp.outside(chipring2).width(4.2.um).output("ER0013:RHP WIDTH ER 4.2")#250303
+pol.width(1.um).output("ER0014:SG WIDTH ER 1.0")#241004
+r.outside(chipring2).width(4.um).output("ER0017:R WIDTH ER 4.0")#250303
+narea.width(3.5.um).output("ER0018:PSD WIDTH ER 3.5")# 3.8 -&amp;gt; 3.5#241004
+parea.width(2.6.um).output("ER0019:NSD WIDTH ER 2.6")#241004
+cnt.width(1.um).output("ER0020:CONT WIDTH ER 1.0")#241004
+ml1.width(1.8.um).output("ER0021:M1 WIDTH ER 1.8")#241004
+via1.width(1.4.um).output("ER0022:TC WIDTH ER 1.4")#241004
+
+if metal3layer.is_empty?
+  ml2.width(3.0.um).output("ER0023:M2 WIDTH ER 3.0")#241004 #2層配線時　限定ルール　2層用の時だけ有効にする
+else
+  ml2.width(2.4.um).output("ER0023:M2 WIDTH ER 2.4")#250303 #3層配線時　限定ルール　3層用の時だけ有効にする
+end
+
+pro.width(10.um).output("ER0024:PRO WIDTH ER 10.0")#241004
+via2.width(1.4.um).output("ER0071:TC23 WIDTH ER 1.4")#250303
+ml3.width(3.um).output("ER0072:M3 WIDTH ER 3.0")#250303
+
+via1.width(1.4.um).output("ER1501:TC MIN WIDTH ER 1.4")#241004
+
+cnt_pol=cnt.outside(pol)#241004
+cnt_bgrn=cnt_pol.inside(dlbgrn)#241004
+
+er0701_1=pol &amp; diff_mos#241004
+er0701_1.width(1.um).output("ER0701:SG(MOS) WIDTH ER 1.0")#241004
+er0704=pol.outside(cnt)#241004
+er0704.output("ER0704:SG NOT ON CONT WARNING")#241004
+
+#sidemetal
+sidemetal1=ml1.overlapping(chipring)#241004
+sidemetal2=ml2.overlapping(chipring)#241004
+sidemetal=sidemetal1 | sidemetal2#241004
+
+#pad定義
+pro_via1=pro.overlapping(via1)#241004
+ml1_ml2=ml1 &amp; ml2#250303
+pro_via1_ml1_ml2=pro_via1 &amp; ml1_ml2#241004
+pad_metal=ml1_ml2.overlapping(pro_via1_ml1_ml2)#250303
+pad_10=pro_via1.sized(10.um)-pad_metal
+
+if pad_10.is_empty?
+    pad=pro_via1_ml1_ml2.sized(10.um)
+else
+    pad=pro_via1_ml1_ml2.sized(5.um)
+end
+
+er1502_1=via1.outside(pad)-via1.inside(sidemetal)#250303
+er1502_2=er1502_1.drc(width &gt; 1.42)#250303
+er1502_2.output("ER1502:TC MAX WIDTH ER 1.42")#250303
+via1.separation(cntl, 1.4.um).output("ER1507:TC-CONTL SP ER 1.4")#241004
+er1511=via1.drc(area &lt; 1.96 )#241004
+er1511.output("ER1511:TC MIN AREA 1.96UM2 UNDER ER")#241004
+er1512_1=via1.outside(pad)-via1.inside(sidemetal)#250303
+er1512_2=er1512_1.drc(area &gt; 2.00 )#241004
+er1512_2.output("ER1512:TC MAX AREA 2.00UM2 OVER ER")#241004
+er1515=via1 - ml1_ml2#241004
+er1515.output("ER1515:TC NOT ON M1/M2 ER")#241004
+pro_pad = pro - pro.interacting(chipring)
+er1706=pro_pad - ml1_ml2#250303
+
+ml1_ml2_ml3=ml1_ml2 &amp; ml3#250303
+pro_via2=pro_via1.overlapping(via2)#241004
+pro_via2_ml1_ml2_ml3=pro_via2 &amp; ml1_ml2_ml3#250303
+pad3=ml1_ml2_ml3.overlapping(pro_via2_ml1_ml2_ml3)#250303
+er1706_3=pro_pad - ml1_ml2_ml3#250303
+
+if metal3layer.is_empty?
+  er1706.output("ER1706:PRO NOT ON M1/M2 ER")#241004#2層配線時　限定ルール 2層用の時だけ有効にする
+else
+  er1706_3.output("ER1706:PRO NOT ON M1/M2/M3 ER")#250303#3層配線時　限定ルール 3層用の時だけ有効にする
+end
+
+via2.outside(chipring).separation(via1, 1.4.um).output("ER2001:TC-TC23 SP ER 1.4")#250303#3層配線時ルール
+ml2_2=ml2.overlapping(ml3)#250303
+ml3_2=ml3.overlapping(ml2)#250303
+ml2_ml3=ml2_2 &amp; ml3_2#250303
+er2002=via2 - ml2_ml3#250303
+er2002.output("ER2002:TC23 NOT ON M2/M3 ER")#250303#3層配線時ルール
+er2003=via1.outside(pad) &amp; (via2).outside(pad)
+er2003.output("ER2003:TC23 ON TC ER")#250303#3層配線時ルール
+
+ermp13_1=pol.interacting(diff_mp)&amp;diff_mp#250314
+ermp13_2=ermp13_1.inside(diff_mp)#250314
+ermp13_3=ermp13_2.edges.inside(diff_mp.edges)#250314
+ermp13_3.width(3.4.um).output("ERMP13:L(MP) WIDTH ER 3.4")#250314
+
+ermn15_1=pol.interacting(diff_mn)&amp;diff_mn#250314
+ermn15_2=ermn15_1.inside(diff_mn)#250314
+ermn15_3=ermn15_2.edges.inside(diff_mn.edges)#250314
+ermn15_3.width(3.4.um).output("ERMN15:L(MN) WIDTH ER 3.4")#250314
+
+psub.outside(chipring).width(8.0.um).output("ER0001:PSUB WIDTH ER 8.0")#250303
+nf.outside(chipring).width(8.0.um).output("ER0005:NF WIDTH ER 8.0")#250303
+pbe.outside(chipring2).width(4.2.um).output("ER0010:PBE WIDTH ER 4.2")#250303
+nbe.outside(chipring2).width(4.2.um).output("ER0011:NBE WIDTH ER 4.2")#250303
+hpm.width(4.2.um).output("ER0012:HPM WIDTH ER 4.2")
+pm.width(4.2.um).output("ER0015:PM WIDTH ER 4.2")
+nm.width(4.2.um).output("ER0016:NM WIDTH ER 4.2")
+
+(pol &amp; dlrs).space(2.0.um).output("ERRS04:SG SP ER 2.0")
+
+#puts 'Check Enclose'
+nwl.enclosing(pdiff, 8.5.um).output("Pdiff enclosure in NWL(NW) &lt; 8.5")  # 7.0 -&gt; 8.5 2024/5/8
+diff.enclosing(cnt, 0.8.um).output("ER0049:L-CONT ENC ER 0.8")#250303
+pol.enclosing(cnt, 0.8.um).output("ER0050:SG-CONT ENC ER 0.8")#250303
+ml1.enclosing(cnt, 0.8.um).output("ER0051:M1-CONT ENC ER 0.8")#250303
+ml1.enclosing(via1, 1.um).output("ER0052:M1-TC ENC ER 1.0")#250303
+ml2.enclosing(via1, 1.um).output("ER0053:M2-TC ENC ER 1.0")#250303
+ml2.enclosing(via2, 1.um).output("ER0075:M2-TC23 ENC ER 1.0")#250303
+ml3.enclosing(via2, 1.um).output("ER0076:M3-TC23 ENC ER 1.0")#250303
+hvnw.enclosing(psub_mpo, 1.5.um).output("ER0113:HVNW-PSUB(MPO) SP ER 1.5")#241004
+hvnw.enclosing(psub_mno, 1.5.um).output("ER0120:HVNW-PSUB(MNO) SP ER 1.5")#241004
+ml1.enclosing(pro, 5.um).output("ER1703:M1-PRO ENC ER 5.0")#241004
+ml2.enclosing(pro, 5.um).output("ER1704:M2-PRO ENC ER 5.0")#241004
+ml3.enclosing(pro, 5.um).output("ER1708:M3-PRO ENC ER 5.0")#241004
+
+#protect warning
+#PMOS
+cnt_pol=cnt.outside(pol)#241004
+cnt_mp=cnt_pol.inside(dlmp)#241004
+cnt_dlmpo=cnt.inside(dlmpo)#241004
+diff_dlmpo=diff.inside(dlmpo)#241004  
+cnt_mpo=cnt_dlmpo &amp; diff_dlmpo#241004
+cnts=cnt.drc(area &lt; 1.5)#241004
+cntl=cnt-cnts#241004
+cnt_dp=cnt.inside(dldp)#241004
+cntl_pol=cntl.outside(pol)#241004
+cntl_mpe=cntl_pol.inside(ampe)#250314
+cntl_dpe=cntl.inside(dldpe)#241004
+cnt_pol=cnt.outside(pol)#241004
+cnt_bgmp=cnt_pol.inside(dlbgmp)#241004
+cnt_dlbgmpo=cnt.inside(dlbgmpo)#241004
+cnt_bgmpo=cnt_dlbgmpo &amp; dlbgmpo#241004
+
+#NMOS
+cnt_mn=cnt_pol.inside(dlmn)#241004
+cnt_dlmno=cnt.inside(dlmno)#241004
+diff_dlmno=diff.inside(dlmno)#241004
+cnt_mno=cnt_dlmno &amp; diff_dlmno#241004
+cnt_dn=cnt.inside(dldn)#241004
+cntl_mne=cntl_pol.inside(amne)#250314
+cntl_dne=cntl.inside(dldne)#241004
+cnt_bgmn=cnt_pol.inside(dlbgmn)#241004
+cnt_mpe=cntl.outside(pol)#241004
+cntl_dpe_a=cnt_mpe.inside(ampe)#241004
+parea_dldpe=parea.inside(dldpe)#241004
+diff_dpe_a=diff &amp; parea_dldpe#241004
+narea_dldpe=narea &amp; dldpe#241004
+diff_dpe_k=cntl &amp; narea_dldpe#241004
+cntl_dpe_a=cntl.inside(diff_dpe_a)#241004
+cntl_dpe_k=cntl.inside(diff_dpe_k)#241004
+cntl_dpe=cntl.inside(dldpe)#241004
+
+er1001_1=pol.overlapping(diff_mp)#241004
+er1001_2=er1001_1 &amp; cnt#241004
+er1001_3=ml1.overlapping(er1001_2)#241004
+er1001_4=er1001_3.overlapping(cnt_mp)#241004
+er1001_5=er1001_3.overlapping(cnt_mpo)#241004
+er1001_6=er1001_3.overlapping(cnt_dp)#241004
+er1001_7=er1001_3.overlapping(cntl_mpe)#241004
+er1001_8=er1001_3.overlapping(cntl_dpe)#241004
+er1001_9=er1001_3.overlapping(cnt_bgmp)#241004
+er1001_10=er1001_3.overlapping(cnt_bgmp)#241004
+er1001_11=er1001_3.overlapping(cnt_bgmpo)#241004
+er1001_12 = (er1001_4 | er1001_5 | er1001_6 | er1001_7 | er1001_8 | er1001_9 | er1001_10 | er1001_11)#250311
+er1001=er1001_3 - er1001_12#241004
+er1001.output("ER1001:PMOS GATE PROTECT WARNING")#241004
+
+er1002_1=pol.overlapping(diff_mn)#241004
+er1002_2=er1002_1 &amp; cnt#241004
+er1002_3=ml1.overlapping(er1002_2)#241004
+er1002_4=er1002_3.overlapping(cnt_mn)#241004
+er1002_5=er1002_3.overlapping(cnt_mno)#241004
+er1002_6=er1002_3.overlapping(cnt_dn)#241004
+er1002_7=er1002_3.overlapping(cntl_mne)#241004
+er1002_8=er1002_3.overlapping(cntl_dne)#241004
+er1002_10=er1002_3.overlapping(cnt_bgmn)#241004
+er1002_11=(er1002_4 | er1002_5 | er1002_6 | er1002_7 | er1002_8 | er1002_10)#250314
+er1002=er1002_3 - er1002_11#241004
+er1002.output("ER1002:NMOS GATE PROTECT WARNING")#241004
+
+er1003_1=pol.overlapping(diff_mpo)#241004
+er1003_2=er1003_1 &amp; cnt#241004
+er1003_3=ml1.overlapping(er1003_2)#241004
+er1003_4=er1003_3.overlapping(cnt_mpo)#241004
+er1003_5=er1003_3.overlapping(cnt_mp)#241004
+er1003_6=er1003_3.overlapping(cnt_dp)#241004
+er1003_7=er1003_3.overlapping(cntl_mpe)#241004
+er1003_8=er1003_3.overlapping(cntl_dpe)#241004
+er1003_10=er1003_3.overlapping(cnt_bgmp)#241004
+er1003_11=er1003_3.overlapping(cnt_bgmpo)#241004
+er1003_12=(er1003_4 | er1003_5 | er1003_6 | er1003_7 | er1003_8 | er1003_10 | er1003_11)#250311
+er1003=er1003_3 - er1003_12#241004
+er1003.output("ER1003:HVPMOS GATE PROTECT WARNING")#241004
+
+er1004_1=pol.overlapping(diff_mno)
+er1004_2=er1004_1 &amp; cnt
+er1004_3=ml1.overlapping(er1004_2)
+er1004_4=er1004_3.overlapping(cnt_mno)
+er1004_5=er1004_3.overlapping(cnt_mn)
+er1004_6=er1004_3.overlapping(cnt_dn)
+er1004_7=er1004_3.overlapping(cntl_mne)
+er1004_8=er1004_3.overlapping(cntl_dne)
+er1004_10=er1004_3.overlapping(cnt_bgmn)
+er1004_11=(er1004_4 | er1004_5 | er1004_6 | er1004_7 | er1004_8 | er1004_10)#25034
+er1004=er1004_3 - er1004_11
+er1004.output("ER1004:HVNMOS GATE PROTECT WARNING")
+
+er1104_1=diff_rr.separation(diff_bgrr, 4.um)#241004
+er1104_2=diff_rh.separation(diff_bgrh, 4.um)#241004
+er1104_3=diff_rn.separation(diff_bgrn, 4.um)#241004
+er1104=er1104_1 + er1104_2 + er1104_3#241004
+er1104.output("ER1104:L(RR)-L(BGRR),L(RH)-L(BGRH),L(RN)-L(BGRN) SP 4.0")#250314
+
+er1105_1=diff_rhhv.separation(diff_bgrr, 5.5.um)#241004
+er1105_2=diff_rhhv.separation(diff_bgrh, 5.5.um)#241004
+er1105=er1105_1 + er1105_2#241004
+er1105.output("ER1105:L(RHHV)-L(BGRR,BGRH) SP 5.5")#241004
+
+#CONT
+er1202=cnt.drc(area&lt;1.0)#241004
+er1202.output("ER1202:MINMUM CONT ER 1.0")#241004
+cnts.space(1.um).output("ER1203:CONTS SP ER 1.0")#241004
+ml1.enclosing(cnts, 0.8.um).output("ER1204:M1-CONTS ENC ER 0.8")#241004
+diff.enclosing(cnts, 0.8.um).output("ER1205:L-CONTS ENC ER 0.8")#241004
+pol.enclosing(cnts, 0.8.um).output("ER1206:SG-CONTS ENC ER 0.8")#241004
+#er1301_1=diff.inside(dlmpo)+diff.inside(dlmno)#250303#250409
+#er1301_2=er1301_1.sized(-2.um).sized(2.um)#250303#250409
+#er1301_3=diff+er1301_2#250303#250409
+#er1301_3.enclosing(cntl, 1.2.um).output("ER1301:L-CONTL ENC ER 1.2")#250303#250409
+er1301_1=diff - diff.inside(dlmno)#250409
+er1301_1.enclosing(cntl, 1.2.um).output("ER1301:L-CONTL ENC ER 1.2")#250409
+cntl.separation(cntl, 1.6.um).output("ER1303:CONTL-CONT SP ER 1.6")#250303
+cntl.separation(cnts, 1.6.um).output("ER1303:CONTL-CONT SP ER 1.6")#250303
+ml1.enclosing(cntl, 1.2.um).output("ER1305:M1-CONTL ENC ER 1.2")#241004
+er1307=cntl &amp; pol#241004
+er1307.output("ER1307:CONTL ON SG ER")#241004
+diff_ml1=diff &amp; ml1#241004
+pol_ml1=pol &amp; ml1#241004
+diffml1_polml1=diff_ml1 + pol_ml1#241004
+er1207=cnt - diffml1_polml1#241004
+er1207.output("ER1207:CONT NOT ON L/SG/M1 ER")#241004
+
+
+###polygon_height
+def polygon_height(polygon)#250303
+  bbox = polygon.bbox#250303
+  [bbox.height, bbox.width].max#250303
+end#250303
+
+###polygon_width
+def polygon_width(polygon)#250303
+  bbox = polygon.bbox#250303
+  [bbox.height, bbox.width].min#250303
+end#250303
+
+
+er1302 = cntl.select do |polygon|#250303
+  polygon_height(polygon) &gt; 97.001#250303
+end#250303
+er1302.outside(chipring).output("ER1302:BIG CONT(L=97) OVER ER")#250303
+
+#pad
+ml1_chip=ml1.outside(sidemetal)#250303
+er1801=ml1_chip.separation(pad, 14.um)#250303
+er1801.output("ER1801:M1 PAD SP ER 14.0")#241004
+ml2_chip=ml2.outside(sidemetal)#250303
+er1802=ml2_chip.separation(pad, 14.um)#250303
+er1802.output("ER1802:M2 PAD SP ER 14.0")#241004
+er1807=pad.separation(pol, 14.um).output("ER1807:PAD METAL-SG SP ER 14.0")
+
+er1803_1 = pad.sized(14.um)#250303
+er1803_2 = er1803_1 - pad#250303
+er1803_3 = er1803_2 &amp; ml1_chip#250303
+er1803_4 = er1803_3.select do |polygon|#250303
+  polygon_height(polygon) &lt; 39.999#250824
+end#250303
+er1803_4.output("ER1803:M1 H14xW40 UNDER WIDTH ER")#250303
+er1803_5 = er1803_3.select do |polygon|#250303
+  polygon_width(polygon) &lt; 13.999#250824
+end#250303
+er1803_5.output("ER1803:M1 H14xW40 UNDER WIDTH ER")#250303
+
+er1804_1 = pad.sized(14.um)#250303
+er1804_2 = er1804_1 - pad#250303
+er1804_3 = er1804_2 &amp; ml2_chip#250303
+er1804_4 = er1804_3.select do |polygon|#250303
+  polygon_height(polygon) &lt; 39.999#250824
+end#250303
+er1804_4.output("ER1804:M2 H14xW40 UNDER WIDTH ER")#250303
+er1804_5 = er1804_3.select do |polygon|#250303
+  polygon_width(polygon) &lt; 13.999#250824
+end#250303
+er1804_5.output("ER1804:M2 H14xW40 UNDER WIDTH ER")#250303
+
+pad.separation(er, 14.um).output("ER1808:PAD METAL-L SP ER 14.0")#250303
+pro_pad=pro &amp; pad#241004
+pro_pad.width(70.um).output("ER1809:PAD PRO WIDTH ER 70.0")#241004
+pro_pad.space(64.um).output("ER1810:PAD PRO SP ER 64.0")#241004
+ml1_pad=ml1.overlapping(pad)#250303
+via1_pad=via1 &amp; pad#241004
+er1811=ml1_pad.enclosing(via1_pad, 15.um)#241004
+er1811.output("ER1811:PAD M1-TC ENC ER 15.0")#241004
+ml2_pad=ml2.overlapping(pad)#250303
+er1812=ml2_pad.enclosing(via1_pad, 15.um)#241004
+er1812.output("ER1812:PAD M2-TC ENC ER 15.0")#241004
+via2_pad=via2 &amp; pad#250303
+er1814=ml2_pad.enclosing(via2_pad, 10.um)#250303
+er1814.output("ER1814:PAD M2-TC23 ENC ER 10.0")#250303
+ml3_pad=ml3.overlapping(pad)#250303
+er1815=ml3_pad.enclosing(via2_pad, 10.um)#250303
+er1815.output("ER1815:PAD M3-TC23 ENC ER 10.0")#250303
+
+#チップ周辺
+ml1.separation(sidemetal, 5.um).output("ER1901:SIDEMETAL M1 SP 5.0")#241004
+ml2.separation(sidemetal, 5.um).output("ER1902:SIDEMETAL M2 SP 5.0")#241004
+ml3.separation(sidemetal, 5.um).output("SIDEMETAL M3 SP 5.0")#250303
+
+#puts 'Check MOS gate extension'
+nwl.interacting(dlwlmp).enclosing(psub, 1.5.um).output("ERWLMP01:NW(WLMP)-PSUB ENC ER 1.5")#250314
+
+#pol.enclosing(diff_mos, 2.4.um).output("attention!!:ER0901 is not being checked.(SG-L ENDCAP ER 2.4)")#250314
+diff_cmos = diff_mp + diff_mn#250721
+er0901_1 = pol.interacting(diff_cmos) - diff_cmos#250721
+er0901_2 = diff_cmos - pol#250721
+er0901_3 = diff_cmos &amp; pol#250721
+er0901_4 = er0901_1.edges &amp; er0901_3#250721
+er0901_5 = er0901_4.extended_in(2.3)#250721
+er0901_6 = er0901_1 - er0901_5#250721
+
+er0901_7 = er0901_6.select do |polygon|#250721
+  polygon_width(polygon) &lt; 0.101#250721
+end#250721
+
+er0901_8 = er0901_1 - er0901_1.interacting(er0901_7)#250721
+er0901_9 = er0901_5 &amp; er0901_8#250721
+er0901_10 = er0901_9.separation(er0901_2, 1.201, projection)#250721
+er0901_10.output("ER0901:SG-L ENDCAP ER 2.4")#250721
+er0901_10.output("ER0901:   If the SG-L space is 1.2 µm on only one side,")#250721
+er0901_10.output("ER0901:   an ENDCAP of 1.2 µm or greater is considered acceptable.")#250721
+
+pol.enclosing(diff_mos, 1.2.um).output("ER0902:SG-L ENDCAP ER 1.2")#250314
+nwl.enclosing(psub_mp, 1.5.um).outside(chipring2).output("ER0102:NW-PSUB(MP) ENC ER 1.5")#250314
+
+(psub &amp; dlwlmp).enclosing(diff.inside(dlmp), 7.0.um).output("ERWLMP02:PSUB(WLMP)-L(MP) ENC ER 7.0")
+(psub &amp; dlwlmp).enclosing(diff.inside(dlbgmp), 5.0.um).output("ERWLMP03:PSUB(WLMP)-L(BGMP) ENC ER 5.0")
+(psub &amp; dlwlmp).enclosing(diff.inside(dldp), 7.0.um).output("ERDP25:PSUB(WLMP)-L(DP) ENC ER 7.0")
+
+psub.enclosing(diff.inside(dlbgrr), 10.0).output("ERWLRR01:PSUB-L(BGRR) ENC ER 10.0")
+psub.enclosing(diff.inside(diff.and(dlrr).inside(dlrr)), 10.0).output("ERWLRR02:PSUB-L(RR) ENC ER 10.0")
+
+#puts 'Check stand-alone Cont/Via'
+dmcnt1 = dm_dcn | dm_pcn
+dmcnt2 = dmcnt1 | dm_nscn
+dmcnt = dmcnt2 | dm_pscn | dlbgmp|dlbgmn|dlbgmpo|dlbgrr|dlbgrh|dlbgrn
+cnt1p0 = cnt.squares.with_area(1.0)
+cnt1p0.outside(dmcnt | dlrr | dlrs).not_inside(ml1 &amp; (pol | diff)).output("Stand alone Cont")
+via1.squares.with_perimeter(5..6).outside(dm_via1).output("Stand alone VIA1(TC)")
+
+# Checking non-MOS POL touching DIFF (DM_dcon)
+pol_diff_edge = (dm_dcn.raw.edges &amp; pol.edges)
+pol_mos_edge  = (dm_dcn.raw.edges &amp; mos.edges)
+(pol_diff_edge - pol_mos_edge).output("dcont touches non-MOS Poly")
+
+er1903_1=ml1 - sidemetal - dlcsio #250408
+er1903_2=er1903_1 - pro#241004
+er1903_3=er1903_2.sized(-22.5.um)#241004
+er1903=er1903_3.sized(22.5.um)#241004
+er1903.output("ER1903:M1 MAXWIDTH 45.0")#241004
+
+er1904_1=ml2 - sidemetal#241004
+er1904_2=er1904_1 - pro#241004
+er1904_3=er1904_2.sized(-22.5.um)#241004
+er1904=er1904_3.sized(22.5.um)#241004
+er1904.output("ER1904:M2 MAXWIDTH 45.0")#241004
+
+er1905_1=ml3 - sidemetal#250303
+er1905_2=er1905_1 - pro#250303
+er1905_3=er1905_2.sized(-22.5.um)#250303
+er1905=er1905_3.sized(22.5.um)#250303
+er1905.output("ER1905:M3 MAXWIDTH 45.0")#250303
+
+#再素子認識
+mn = (diff &amp; pol).inside(dlmn)  #  MN = geomInside(geomOverlap(L SG) DLMN)
+mno =  diff.overlapping(pol).inside(dlmno)
+mp = (diff &amp; pol).inside(dlmp) # MP = geomInside(geomOverlap(L SG) DLMP)
+mpo =  diff.overlapping(pol).inside(dlmpo)
+
+mp.not(dlwlmp).output("ERMP14:MP NOT ON DLWLMP ER") #geomAndNot(MP DLWLMP) 
+mp.not(psub).output("ERMP15:MP NOT ON PSUB ER") #geomAndNot(MP PSUB)
+mp.not(nwl).output("ERMP16:MP NOT ON NW ER") #geomAndNot(MP NW)
+mp.not(nf).output("ERMP17:MP NOT ON NF ER") #geomAndNot(MP NF)
+mp.not(pf).output("ERMP18:MP NOT ON PF ER") #geomAndNot(MP PF)
+mp.interacting(hvnw).output("ERMP23:MP ON HVNW ER")
+mp.interacting(cl).output("ERMP24:CL ON MP ER")
+mp.interacting(hpbe).output("ERMP25:HPBE ON MP ER")
+mp.interacting(hnbe).output( "ERMP26:HNBE ON MP ER")
+mp.interacting(nbe).output("ERMP27:NBE ON MP ER")
+mp.interacting(pm).output("ERMP28:PM ON MP ER")
+mp.interacting(r).output("ERMP29:R ON MP ER")
+mp.interacting(narea).output("ERMP30:PSD ON MP ER")
+
+mn.interacting(psub).output("ERMN16:MN ON PSUB ER")
+mn.interacting(nwl).output("ERMN17:MN ON NW ER")
+mn.interacting(nf).output("ERMN18:MN ON NF ER")
+mn.interacting(pf).output("ERMN19:MN ON PF ER")
+mn.interacting(hvnw).output("ERMN24:MN ON HVNW ER")
+mn.interacting(cl).output("ERMN25:CL ON MN ER")
+mn.interacting(hpbe).output("ERMN26:HPBE ON MN ER")
+mn.interacting(hnbe).output("ERMN27:HNBE ON MN ER")
+mn.interacting(pbe).output("ERMN28:PBE ON MN ER")
+mn.interacting(nm).output("ERMN29:NM ON MN ER")
+mn.interacting(r).output("ERMN30:R ON MN ER")
+mn.interacting(parea).output("ERMN31:NSD ON MN ER")
+mn.not(dlwlmn).output("ERMN32:MN NOT ON WLMN ER") #geomOutside(MN DLWLMN) -&gt; SHOULD BE geomAntNot(MN DLWLMN)
+dldn.not(dlwlmn).output("ERMN33:DN NOT ON WLMN ER") #geomOutside(DN DLWLMN) -&gt; SHOULD BE geomAntNot(DN DLWLMN) 
+
+bgmn = diff.inside(dlbgmn)
+bgmn.interacting(psub).output("ERBGMN12:BGMN ON PSUB ER")
+bgmn.interacting(nwl).output("ERBGMN13:BGMN ON NW ER")
+bgmn.interacting(nf).output("ERBGMN14:BGMN ON NF ER")
+bgmn.interacting(pf).output("ERBGMN15:BGMN ON PF ER")
+bgmn.interacting(hvnw).output("ERBGMN16:BGMN ON HVNW ER")
+bgmn.interacting(cl).output("ERBGMN17:CL ON BGMN ER")
+bgmn.interacting(hpbe).output("ERBGMN18:HPBE ON BGMN ER")
+bgmn.interacting(hnbe).output("ERBGMN19:HNBE ON BGMN ER")
+bgmn.interacting(pbe).output("ERBGMN20:PBE ON BGMN ER")
+bgmn.interacting(nbe).output("ERBGMN21:NBE ON BGMN ER")
+bgmn.interacting(r).output("ERBGMN22:R ON BGMN ER")
+bgmn.interacting(narea).output("ERBGMN23:PSD ON BGMN ER")
+
+dn = diff.inside(dldn)
+dn.interacting(psub).output("ERDN09:DN ON PSUB ER")
+dn.interacting(nwl).output("ERDN10:DN ON NW ER")
+dn.interacting(nf).output("ERDN11:DN ON NF ER")
+dn.interacting(pf).output("ERDN12:DN ON PF ER")
+dn.interacting(hvnw).output("ERDN13:DN ON HVNW ER")
+dn.interacting(cl).output("ERDN14:DN ON CL ER")
+dn.interacting(hpbe).output("ERDN15:HPBE ON DN ER")
+dn.interacting(hnbe).output("ERDN16:HNBE ON DN ER")
+dn.interacting(pbe).output("ERDN17:PBE ON DN ER")
+dn.interacting(nbe).output("ERDN18:NBE ON DN ER")
+dn.interacting(r).output("ERDN20:R ON DN ER")
+dn.interacting(parea).output("ERDN21:NSD ON DN ER")
+psub.separation(diff.inside(dldn), 10.0.um).output("ERDN24:PSUB-L(DN) SP ER 10")
+
+bgmp = diff.inside(dlbgmp)
+bgmp.not(psub).output("ERBGMP13:BGMP NOT ON PSUB ER") #geomAndNot(BGMP PSUB)
+bgmp.not(nwl).output("ERBGMP14:BGMP NOT ON NW ER") #geomAndNot(BGMP NW)
+bgmp.not(nf).output("ERBGMP15:BGMP NOT ON NF ER") #geomAndNot(BGMP NF)
+bgmp.not(pf).output("ERBGMP16:BGMP NOT ON PF ER") #geomAndNot(BGMP PF)
+bgmp.interacting(hvnw).output("ERBGMP17:BGMP ON HVNW ER")
+bgmp.interacting(cl).output("ERBGMP18:CL ON BGMP ER")
+bgmp.interacting(hpbe).output("ERBGMP19:HPBE ON BGMP ER")
+bgmp.interacting(hnbe).output("ERBGMP20:HNBE ON BGMP ER")
+bgmp.interacting(pbe).output("ERBGMP21:PBE ON BGMP ER")
+bgmp.interacting(nbe).output("ERBGMP22:NBE ON BGMP ER")
+bgmp.interacting(r).output("ERBGMP23:R ON BGMP ER")
+bgmp.interacting(parea).output("ERBGMP24:NSD ON BGMP ER")
+
+dp = diff.inside(dldp)
+dp.not(psub).output("ERDP10:DP NOT ON PSUB ER") #geomAndNot(DP PSUB) 
+dp.not(nwl).output("ERDP11:DP NOT ON NW ER") #geomAndNot(DP NW)
+dp.not(nf).output("ERDP12:DP NOT ON NF ER") #geomAndNot(DP NF)
+dp.not(pf).output("ERDP13:DP NOT ON PF ER") #geomAndNot(DP PF)
+dp.interacting(hvnw).output("ERDP14:DP ON HVNW ER")
+dp.interacting(cl).output("ERDP15:CL ON DP ER")
+dp.interacting(hpbe).output("ERDP16:HPBE ON DP ER")
+dp.interacting(hnbe).output("ERDP17:HNBE ON DP ER")
+dp.interacting(pbe).output("ERDP18:PBE ON DP ER")
+dp.interacting(nbe).output("ERDP19:NBE ON DP ER")
+dp.interacting(r).output("ERDP21:R ON DP ER")
+dp.interacting(narea).output("ERDP22:PSD ON DP ER")
+
+dlwlmn.enclosing(diff.inside(dlmn), 10.0.um).output("ERWLMN02:DLWLMN-L(MN) ENC ER 10.0")
+dlwlmn.enclosing(diff.inside(dlbgmn), 5.0.um).output("ERWLMN04:DLWLMN-L(BGMN) ENC ER 5.0")
+
+dlrr.not(psub).output("ERRR18:RR NOT ON PSUB ER") #geomAndNot(RR PSUB)
+dlrr.not(hvnw).output("ERRR19:RR NOT ON HVNW ER") #geomAndNot(RR HVNW)
+dlrr.not(nf).output("ERRR20:RR NOT ON NF ER") #geomAndNot(RR NF)
+
+rr = (diff &amp; dlrr).inside(dlrr)
+rr.interacting(nwl).output("ERRR27:RR ON NW ER")
+rr.interacting(pf).output("ERRR28:RR ON PF ER")
+rr.interacting(cl).output("ERRR29:CL ON RR ER")
+rr.interacting(hpbe).output("ERRR30:HPBE ON RR ER")
+rr.interacting(hnbe).output("ERRR31:HNBE ON RR ER")
+rr.interacting(pbe).output("ERRR32:PBE ON RR ER")
+rr.interacting(nbe).output("ERRR33:NBE ON RR ER")
+rr.interacting(rhp).output("ERRR34:RHP ON RR ER")
+sg_rr = pol &amp; dlrr
+sg_rr.interacting(cnt).output("ERRR36:SG(RR) ON CONT ER")
+
+bgrr = (diff &amp; dlbgrr).inside(dlbgrr)
+bgrr.not(psub).output("ERBGRR11:BGRR NOT ON PSUB ER") #geomAndNot(BGRR PSUB)
+bgrr.not(hvnw).output("ERBGRR12:BGRR NOT ON HVNW ER") #geomAndNot(BGRR HVNW)
+bgrr.interacting(nwl).output("ERBGRR13:BGRR ON NW ER") #geomAnd(BGRR NW)
+bgrr.not(nf).output("ERBGRR14:BGRR NOT ON NF ER") #geomAndNot(BGRR NF)
+bgrr.interacting(pf).output("ERBGRR15:BGRR ON PF ER") #geomAnd(BGRR PF)
+bgrr.interacting(cl).output("ERBGRR16:CL ON BGRR ER") #geomAnd(BGRR CL)
+bgrr.interacting(hpbe).output("ERBGRR17:HPBE ON BGRR ER")
+bgrr.interacting(hnbe).output("ERBGRR18:HNBE ON BGRR ER")
+bgrr.interacting(pbe).output("ERBGRR19:PBE ON BGRR ER")
+bgrr.interacting(nbe).output("ERBGRR20:NBE ON BGRR ER")
+bgrr.interacting(r).output("ERBGRR21:R ON BGRR ER")
+bgrr.interacting(parea).output("ERBGRR22:NSD ON BGRR ER")
+bgrr.interacting(rhp).output("ERBGRR23:RHP ON BGRR ER")
+
+pf.interacting(csio).output("ERCSIO25:CSIO ON PF ER")
+hpbe.interacting(csio).output("ERCSIO27:HPBE ON CSIO ER")
+hnbe.interacting(csio).output("ERCSIO28:HNBE ON CSIO ER")
+pbe.interacting(csio).output("ERCSIO29:PBE ON CSIO ER")
+nbe.interacting(csio).output("ERCSIO30:NBE ON CSIO ER")
+r.interacting(csio).output("ERCSIO31:R ON CSIO ER")
+rhp.interacting(csio).output("ERCSIO32:RHP ON CSIO ER")
+
+psub.covering(dlrr).and(dlwlrh | dlwlrn | dlrnhv | dlrs).output("ER1106:PSUB(RR) IN OTHER R ER")
+psub.covering(dlrh).and(dlrhhv | dlwlrn | dlrnhv | dlrs | dlwlrr).output("ER1107:PSUB(RH) IN OTHER R ER")
+psub.covering(dlrhhv).and(dlrh | dlwlrn | dlrnhv | dlrs | dlwlrr).output("ER1108:PSUB(RHHV) IN OTHER R ER")
+
+via1.space(1.5.um).output("ER0046:TC SP ER 1.5")
+via2.space(1.5.um).output("ER0073:TC23 SP ER 1.5")
+
+cont_csio_cl    = cnt.inside(cl &amp; dlcsio)
+cont_csio_ring  = cnt.inside(dlcsio).not(cont_csio_cl)
+cont_csio = cont_csio_cl | cont_csio_ring
+cont_csio.without_perimeter(4.8.um).output("ERCSIO01:CONT(CSIO) WIDTH MUST 1.2")
+ml1.enclosing(cont_csio_ring, 1.2.um).output("ERCSIO02:M1-CONT(CSIO RING) ENC ER 1.2")
+cont_csio.space(1.2.um).output("ERCSIO14:CONT SP ER 1.2" )
+l_csio_ring = diff.inside(dlcsio).not(diff &amp; pol &amp; dlcsio)
+m1_csio_ring    =ml1.and(dlcsio).not(ml1.and(dlcsio).overlapping(pol.and(dlcsio))).and(l_csio_ring)
+diff_csio=diff.interacting(dlcsio)
+diff_csio_ring=diff_csio.interacting(m1_csio_ring)
+ercsio06_0=diff_csio_ring - m1_csio_ring
+#ercsio06_0.output("attention!!:ERCSIO06 is not being checked.(M1(CSIO CL) SP MUST 10.0)")#250314
+
+ercsio06_1 = ercsio06_0.select do |polygon|#250721
+  polygon_height(polygon) &lt; 9.999#250721
+end#250721
+ercsio06_1.output("ERCSIO06:M1(CSIO CL) SP MUST 10.0")#250721
+
+ercsio06_1 = ercsio06_0.select do |polygon|#250721
+  polygon_height(polygon) &gt; 10.001#250721
+end#250721
+ercsio06_1.output("ERCSIO06:M1(CSIO CL) SP MUST 10.0")#250721
+
+dlcsio.interacting(hvnw).output("ERCSIO17:CSIO ON HVNW ER")
+
+er0705_1 = pol.overlapping(dlrh) &amp; cnt
+er0705_2 = ml1.overlapping(er0705_1)
+er0705_2.outside(cnt.outside(pol).inside(dlbgrh)).output("ER0705:SG(RH) NOT CONNECT BGRH" )
+
+er0706_1 = pol.overlapping(dlrr) &amp; cnt
+er0706_2 = ml1.overlapping(er0706_1)
+er0706_2.outside(cnt.outside(pol).inside(dlbgrr)).output("ER0706:SG(RR) NOT CONNECT BGRR" )
+
+er0707_1 = pol.overlapping(dlrn) &amp; cnt
+er0707_2 = ml1.overlapping(er0707_1)
+er0707_2.outside(cnt.outside(pol).inside(dlbgrn)).output("ER0707:SG(RN) NOT CONNECT BGRN")
+
+er0708_1 = pol.overlapping(dlrhhv) &amp; cnt
+er0708_2 = ml1.overlapping(er0708_1)
+er0708_2.outside(cnt.outside(pol).inside(dlbgrh)).output("ER0708:SG(RHHV) NOT CONNECT BGRH")
+
+sg_rr = pol &amp; dlrr
+errr37_1 = pol.covering(sg_rr)
+errr37 = errr37_1.not(pol.covering(cnt))
+errr37.output("ERRR37:SG(RR) CONNECT TO SG NOT ON CONT ER")
+
+mpe.and(hvnw).output("ERMPE23:MPE ON HVNW ER")
+mpe.and(cl).output("ERMPE24:CL ON MPE ER")
+mpe.and(hpbe).output("ERMPE25:HPBE ON MPE ER")
+mpe.and(hnbe).output("ERMPE26:HNBE ON MPE ER")
+mpe.and(nbe).output("ERMPE27:NBE ON MPE ER")
+mpe.and(pm).output("ERMPE28:PM ON MPE ER")
+mpe.and(r).output("ERMPE29:R ON MPE ER")
+mpe.and(narea).output("ERMPE30:PSD ON MPE ER")
+
+mne.and(psub).output("ERMNE16:MNE ON PSUB ER")
+mne.and(nwl).output("ERMNE17:MNE ON NW ER")
+mne.and(nf).output("ERMNE18:MNE ON NF ER")
+mne.and(pf).output("ERMNE19:MNE ON PF ER")
+mne.and(cl).output("ERMNE25:CL ON MNE ER")
+mne.and(hpbe).output("ERMNE26:HPBE ON MNE ER")
+mne.and(hnbe).output("ERMNE27:HNBE ON MNE ER")
+mne.and(pbe).output("ERMNE28:PBE ON MNE ER")
+mne.and(r).output("ERMNE29:R ON MNE ER")
+mne.and(parea).output("ERMNE30:NSD ON MNE ER")
+mne.and(hvnw).output("ERMNE31:MNE ON HVNW ER")
+
+if defined? extra_drc_check
+  extra_drc_check mpo, psub, hvnw, nf, nwl, pf, cl, hnbe, hpbe, pbe, nbe, hpm, r, rhp, diff,
+      dlmpo, dlbgmpo, narea, parea, dlmno, mno, dlbgmn, dlrh, dlbgrh, bgrh, rhhv, pol, dlrhhv, dlrn, dlbgrn,
+      rnhv, dlrnhv, cnt
+end</text>
+</klayout-macro>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>LVS for IP62</description>
+ <version/>
+ <category>lvs</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>lvs_scripts</group-name>
+ <menu-path>tools_menu.lvs.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>lvs-dsl-xml</dsl-interpreter-name>
+ <text># LVS v0.641 IP62 August 26th, 2025 Copy Right: Seijiro Moriyama
+deep
+report_lvs
+
+mi = MinedaCommon::MinedaInput::new source
+reference, output, settings = mi.start(input)
+if File.exist? reference
+  lvs_rescap3, reference = mi.has_rescap3 reference
+  schematic reference
+end
+
+# Drawing layers
+
+nwl = input(*mi.index('NWL'))
+diff = input(*mi.index('DIFF'))
+diff_text = labels(*mi.index('DIFF'))
+pol = input(*mi.index('POL'))
+pol_text = labels(*mi.index('POL'))
+cnt = input(*mi.index('CNT'))
+cnt_text = labels(*mi.index('CNT'))
+ml1 = input(*mi.index('ML1'))
+txm1 = input(*mi.index('TXM1'))
+#ml1_text = labels(*mi.index('ML1'))
+via1 = input(*mi.index('VIA1'))
+ml2 = input(*mi.index('ML2'))
+via2 = input(*mi.index('VIA2'))
+ml3 = input(*mi.index('ML3'))
+#text = input(*mi.index('TEXT'))
+#frame = input(*mi.index('FRAME'))
+#res = input(*mi.index('RES'))
+#cap = input(*mi.index('CAP'))
+#dio = input(*mi.index('DIO'))
+parea = input(*mi.index('Parea'))
+narea = input(*mi.index('Narea'))
+
+hv_nwl = input(*mi.index('HVNW'))
+hnbe = input(*mi.index('HNBE'))
+res = input(*mi.index('RES')) 
+res_text = labels(*mi.index('RES'))
+hnbe = input(*mi.index('HNBE'))
+dion = input(*mi.index('DION'))
+rhp = input(*mi.index('RHP'))
+
+# Bulk layer for terminal provisioning
+bulk        = polygon_layer
+
+# -------------------------------------------------------------------
+# Device extraction
+# Resistors extraction
+
+resistors =['RR', 'RS']
+sheet_rho = {RR: 1000, RS: 120}
+if defined? set_HV_res
+  resistors, sheet_rho = set_HV_res resistors, sheet_rho
+end
+res_body = {}
+res_cap = {}
+ta = {}
+tb = {}
+resistors.each{|res_name|
+  res_body[res_name] = res.interacting(res_text.texts(res_name))
+  if res_name == 'RS'
+    pol_not_res = pol.interacting(res_body['RS'])
+    res_cap[res_name] = pol_not_res - res_body['RS']
+    ta[res_name] = res_cap[res_name].interacting(cnt_text.texts('+'))
+    tb[res_name] = res_cap[res_name].not_interacting(cnt_text.texts('+'))
+    pol = pol - pol_not_res
+    extract_devices(resistor(res_name, sheet_rho[res_name.to_sym]),
+         {"R" =&gt;  res_body[res_name], "C" =&gt; res_cap[res_name], 'tA' =&gt; ta[res_name], 'tB'=&gt; tb[res_name] })
+    
+  elsif res_name == 'RR'
+    res_cap[res_name] = (diff - res_body[res_name]).covering(cnt.interacting(res_body[res_name]))
+    ta[res_name] = res_cap[res_name].interacting(cnt_text.texts('+'))
+    tb[res_name] = res_cap[res_name].not_interacting(cnt_text.texts('+'))
+    diff = diff - diff.interacting(res_cap[res_name])
+    if lvs_rescap3
+      extract_devices(resistor_with_bulk(res_name, sheet_rho[res_name.to_sym]),
+           {"R" =&gt;  res_body[res_name], "C" =&gt; res_cap[res_name], 'tA' =&gt; ta[res_name], 'tB'=&gt; ta[res_name], "W" =&gt; hv_nwl  })
+    else
+      extract_devices(resistor(res_name, sheet_rho[res_name.to_sym]),
+           {"R" =&gt;  res_body[res_name], "C" =&gt; res_cap[res_name], 'tA' =&gt; ta[res_name], 'tB'=&gt; tb[res_name] })
+    end
+  elsif defined? extract_HV_res
+    diff = extract_HV_res res_name, res_body, res_cap, ta, tb, cnt_text, diff, narea, cnt, sheet_rho, rhp, lvs_rescap3, hv_nwl, bulk
+  end
+
+}
+#Capacitors extraction
+csio_text = diff_text.texts('CSIO')
+csio_cap = diff.interacting(csio_text)
+pol_cap = pol.interacting(csio_text)
+pol = pol - pol_cap
+diff = diff - csio_cap
+area_cap = 0.615e-15 # changed from 0.6 to 0.615 on 2024/8/19
+if lvs_rescap3
+  extract_devices(capacitor_with_bulk('CSIO', area_cap), {'P1'=&gt; csio_cap, 'P2'=&gt;pol_cap, 
+                                              'tA' =&gt; nwl, 'tB' =&gt; pol_cap, 'W' =&gt; bulk}) 
+else
+  extract_devices(capacitor('CSIO', area_cap), {'P1'=&gt; csio_cap, 'P2'=&gt;pol_cap, 
+                                              'tA' =&gt; nwl, 'tB' =&gt; pol_cap}) 
+end
+#csio_cap.output(164, 0)
+#pol_cap.output(165, 0)
+
+# DIODE extraction
+pdio_text = diff_text.texts('PDIO')
+pdio = diff.interacting(pdio_text)
+diff = diff - pdio
+extract_devices(diode('PDIO'), {"P" =&gt; pdio, "N" =&gt; nwl})
+ndio_text = diff_text.texts('NDIO')
+ndio = diff.interacting(ndio_text)
+diff = diff - ndio
+extract_devices(diode('NDIO'), {"P" =&gt; dion, "N"  =&gt; ndio})
+
+#  MOSFETs extraction
+# Computed layers
+diff_in_nwl  = diff &amp; nwl
+diff_inside_hv_nwl = diff.inside(hv_nwl)
+
+pdiff       = diff_in_nwl &amp; parea
+pgate       = pdiff &amp; pol
+psd         = pdiff.covering(cnt) - pgate
+ntie        = diff_in_nwl &amp; narea
+
+ntie_hv_nwl = diff_inside_hv_nwl &amp; narea &amp; cnt
+
+diff_outside_nwl  = diff - nwl - hv_nwl
+ndiff             = diff_outside_nwl &amp; narea
+ngate             = ndiff &amp; pol
+nsd               = ndiff.covering(cnt) - ngate
+ptie              = diff_outside_nwl &amp; parea
+
+emcnt = cnt.with_area(8.9.um,  9.1.um)
+
+# PMOS transistor device extraction                        
+pgate_mpe = pgate.covering(emcnt)
+
+extract_devices(mos4("MPE"), { "SD" =&gt; psd, "G" =&gt; pgate_mpe, "W" =&gt; nwl, 
+                                "tS" =&gt; psd, "tD" =&gt; psd, "tG" =&gt; pol, "tW" =&gt; nwl })
+pgate = pgate - pgate_mpe
+extract_devices(mos4("PMOS"), { "SD" =&gt; psd, "G" =&gt; pgate, "W" =&gt; nwl, 
+                                "tS" =&gt; psd, "tD" =&gt; psd, "tG" =&gt; pol, "tW" =&gt; nwl })
+
+# NMOS transistor device extraction
+ngate_mne = ngate.covering(emcnt)
+
+extract_devices(mos4("MNE"), { "SD" =&gt; nsd, "G" =&gt; ngate_mne, "W" =&gt; bulk, 
+                               "tS" =&gt; nsd, "tD" =&gt; nsd, "tG" =&gt; pol, "tW" =&gt; bulk })
+ngate = ngate - ngate_mne
+extract_devices(mos4("NMOS"), { "SD" =&gt; nsd, "G" =&gt; ngate, "W" =&gt; bulk, 
+                               "tS" =&gt; nsd, "tD" =&gt; nsd, "tG" =&gt; pol, "tW" =&gt; bulk })
+if defined? extract_HV_MOS
+  extract_HV_MOS diff, diff_text, pol, narea, hv_nwl, bulk, cnt, hnbe
+end
+# -------------------------------------------------------------------
+# Connectivity
+
+# Inter-layer
+resistors.each{|res_name|
+  connect(ta[res_name], cnt) if ta[res_name]
+  connect(tb[res_name], cnt) if tb[res_name]
+}
+connect(pol_cap, cnt)
+
+resistors.each{|res_name|
+  connect(res_cap[res_name], cnt) # if res_name != 'R'
+}
+
+connect(pdio, cnt)
+connect(ndio, cnt)
+
+connect(psd,  cnt)
+connect(nsd,  cnt)
+
+connect(pol,   cnt)
+connect(ntie,  cnt)
+connect(nwl,   ntie)
+connect(ntie_hv_nwl, cnt)
+connect(hv_nwl, ntie_hv_nwl)
+connect(ptie,  cnt)
+connect(cnt,   ml1)
+connect(ml1,   via1)
+connect(via1,  ml2)
+connect(ml2, via2)
+connect(via2, ml3)
+connect(pol_text, pol)
+
+connect(txm1, ml1)
+
+# Global
+connect_global(bulk, "SUBSTRATE")
+connect_global(ptie, "SUBSTRATE")
+connect_global(dion, "SUBSTRATE")
+
+#Virtual connection
+mi.exec {vc_settings if defined?(vc_settings)}
+
+# equivalent pins for standard cells
+equivalent_pins("AND2_X1", "A", "B")
+equivalent_pins("AND3_X1", "A", "B", "C")
+equivalent_pins("AND4_X1", "A", "B", "C", "D")
+equivalent_pins("MUX2", "A", "B")
+equivalent_pins("NAND2", "A", "B")
+equivalent_pins("NAND3", "A", "B", "C")
+equivalent_pins("NAND4", "A", "B", "C", "D")
+equivalent_pins("NOR2", "A", "B")
+equivalent_pins("NOR3", "A", "B", "C")
+equivalent_pins("NOR4", "A", "B", "C", "D")
+equivalent_pins("OR2", "A", "B")
+equivalent_pins("OR3", "A", "B", "C")
+equivalent_pins("OR4", "A", "B", "C", "D")
+equivalent_pins("XNOR2", "A", "B")
+equivalent_pins("XOR2", "A", "B")
+
+same_circuits 'MPEDI_06_00_int', 'MPEDI_06_00'
+same_circuits 'MPEDI_08_00_int', 'MPEDI_08_00'
+same_circuits 'MPEDI_12_00_int', 'MPEDI_12_00'
+
+# -------------------------------------------------------------------
+# Netlist and compare
+
+netlist.purge
+
+target_netlist(output, write_spice, "Created by KLayout")
+
+mi.lvs(reference, output, lvs_data, l2n_data, is_deep?) {
+  if settings
+    lvs_settings
+  end
+  compare
+  error_devices = mi.check_polarity lvs_data, mi.tweak([:RR, :CSIO])
+  if error_devices.size &gt; 0
+    mi.polarity_error_dialog error_devices
+  end 
+}
+mi.make_symlink output
+</text>
+</klayout-macro>
