@@ -1,6 +1,6 @@
 # Chapter 1 : 00_Layers.drc and 01_Basics.drc
 
-## 00_Layers.drc
+## [00_Layers.drc](../tech/drc/00_Layers.drc)
 
 Loading layer by layer GDSII data while implementing **waiver** capability to ignore the DRC checking area, such as the Shield Ring. **ESD** is also a recognition area, especially for ESD device, which has special rules. I would respect the original "TR-1um MASK Layer name" as an implementation to avoid further confusion. 
 
@@ -29,7 +29,7 @@ BBOX  = extent
 ```
 **BBOX** is boundary box of GDSII active area to generate inverse data from the original shape.
 
-## 01_Basics.drc
+## [01_Basics.drc](../tech/drc/00_Basics.drc)
 
 Loading layer by layer GDSII data while implementing **waiver** capability to ignore the DRC checking area, such as the Shield Ring. **ESD** is also a recognition area, especially for ESD device, which has special rules. I would respect the original "TR-1um MASK Layer name" as an implementation to avoid further confusion. 
 

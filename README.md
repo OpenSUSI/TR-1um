@@ -24,5 +24,8 @@ Working directry for Open Source Silicon community to exchange new idea and curr
 Preserved.
 
 ## Document
-Preserved.
+
+[Tutorial for DRC](Document/Tutorial_DRC.md) project is on going, welcome to join as always.
+
+
 
