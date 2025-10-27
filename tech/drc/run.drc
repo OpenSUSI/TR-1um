@@ -3,7 +3,7 @@
 # LICENSE: Apache License Version 2.0, January 2004,
 #          http://www.apache.org/licenses/
 # ----- ------ ----- 
-source($input, "TOP")
+# source($input, "TOP")
 report("TR-1um DRC",  $output)
 #----
 # %include 00_Layers.drc
