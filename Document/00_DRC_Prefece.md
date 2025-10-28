@@ -1,4 +1,6 @@
-## Preface: run.drc
+# Preface: run.drc
+
+## [run.drc](../tech/drc/run.drc)
 
 It seems **run.drc** file is cached in the KLayout once it is launched, so it has to be edited in the tools for debugging. It is not a convenient way, and it should be much easier to split it into each of check categories, like layer-based, to edit. So my **run.drc** only includes **report** for output and a couple of **# %include** commands, as shown below.
 
