@@ -15,11 +15,11 @@
 #  NF, PF must cross PSUB
 #
 (PSUB).edges.inside_part(NF).output("ERR03: NF crossed PSUB")
-(PSUB).edges.inside_part(PF).output("ERR03: NF crossed PSUB")
-#
+(PSUB).edges.inside_part(PF).output("ERR03: PF crossed PSUB")
+# ----- ------ ----- 
 # NF, PF enclosure to PSUB ???
 #
-(PF).drc(enclosed(PSUB) < 0.0).output("ERR03: NF enclosed PSUB < 0.0")  # There is NO L to PF rules...
+(PF).drc(enclosed(PSUB) < 0.0).output("ERR03: NF enclosed PSUB < 0.0")  # There is NO L to NF rules...
 (NF).drc(enclosed(PSUB) < 0.0).output("ERR03: PF enclosed PSUB < 0.0")  # There is NO L to PF rules...
 #
 # (NF  ).not_in(PSUB).output("ERR03: NF not match to PSUB")     # Much more make sense in terms of the process assamption
