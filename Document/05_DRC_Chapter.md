@@ -77,7 +77,9 @@ Minimum enclosure **CONT** to **SG/M1** is 0.8um.
 
 ### CONT on ESD transistors
 
-**CONT** size to MOS transistors are fixed to 3.0um and minimum separation is 1.6um, and minimum enclosure **CONT** to **L** is 4.0um. NOTE: The document mentioned **CONT** to **L** enclosure has a two-dimensional definition as TATE 2.5um vs YOKO 4.0um. I have no logical idea why it has been separated, nor how to distinguish it using the DRC command, so the worst value is described below.
+**CONT** size to MOS transistors are fixed to 3.0um and minimum separation is 1.6um, and minimum enclosure **CONT** to **L** is 4.0um. 
+
+_**NOTE**: The document mentioned **CONT** to **L** enclosure has a two-dimensional definition as TATE 2.5um vs YOKO 4.0um. I have no logical idea why it has been separated, nor how to distinguish it using the DRC command, so the worst value is described below._
 
 ```
 # ===== ====== ===== ====== ===== ====== ===== ====== =====
