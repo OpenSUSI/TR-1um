@@ -45,14 +45,14 @@ Minimum enclosure **CONT** to **SG/M1** is 0.8um.
 # Transistor related
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #
-# CONT on AAMP/MN/GP/GN area == 1.0
+# CONT on AAMP/AAMN/AAGP/AAGN area == 1.0
 #
 (CONT & AAMP).drc( width != 1.0 ).output("ERR05: CONT on L(MP) != 1.0")
 (CONT & AAMN).drc( width != 1.0 ).output("ERR05: CONT on L(MN) != 1.0")
 (CONT & AAGP).drc( width != 1.0 ).output("ERR05: CONT on L(GP) != 1.0")
 (CONT & AAGN).drc( width != 1.0 ).output("ERR05: CONT on L(GN) != 1.0")
 #
-# CONT to AAMP/MN/GP/GN enclosure < 0.8
+# CONT to AAMP/AAMN/AAGP/AAGN enclosure < 0.8
 #
 (CONT).drc( enclosed(AAMP) < 0.8 ).output("ERR05: CONT enclosed L(MP) < 0.8")
 (CONT).drc( enclosed(AAMN) < 0.8 ).output("ERR05: CONT enclosed L(MN) < 0.8")
@@ -135,7 +135,7 @@ CONTL = CONT.drc( area > 1.5 )
 #
 (CONTL & SG).output("ERR05: DONOT allow CONT-L on SG")
 (CONTL).drc( enclosed(L)   < 1.2 ).output("ERR05: CONT-L enclosed L  < 1.2")
-(CONTL).drc( enclosed(L)   < 1.2 ).output("ERR05: CONT-L enclosed M1 < 1.2")
+(CONTL).drc( enclosed(M1)  < 1.2 ).output("ERR05: CONT-L enclosed M1 < 1.2")
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #  Contact/Contact-L separation to TC
 #
