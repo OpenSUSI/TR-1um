@@ -1,4 +1,4 @@
-# Chapter 4 : 03_Chec4.drc
+# Chapter 4 : 04_Check.drc
 
 ## [04_Check.drc](../tech/drc/04_Check.drc)
 

@@ -25,7 +25,7 @@ Preserved.
 
 ## Document
 
-[Tutorial for DRC](Document/Tutorial_DRC.md) project is on going, welcome to join as always.
+Since the original DRC cannot check full-custom layout other than PCEL, new DRC runset development is ongoing under the tech/drc directory. Also, the [Tutorial for DRC](Document/Tutorial_DRC.md) project is as well; welcome to join as always.
 
 
 
