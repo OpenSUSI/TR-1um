@@ -11,7 +11,7 @@ TR-1um -- openIP62 -- AnagixLoader
 
 Since the original DRC cannot check a full-custom layout, such as Standard Cell development, except for PCEL use, new DRC runset development is ongoing under the tech/drc directory. Additionally, the [Tutorial: How to make DRC runset for KLayout](Document/Tutorial_DRC.md) project is also ongoing; feel free to join as always. We welcome your feedback on the DRC result and bug report as well.
 
-## openIP62 
+## openIP62 (AS-IS)
 The directory contains the original PDKs provided by **Tokai Rika**. It includes two main subdirectories: **AnagixLoader** and **IP62**. Detailed documentation and installation manuals (in Japanese) can be found in: **openIP62/IP62/Technology/doc**
 
 ## GDSII

@@ -62,7 +62,7 @@ AANE.drc(sep(AAGN) <  10.0).output("ERR04: L(MNE) to L(GN) < 10.0")
 #
 ```
 
-### L(AA) corner trim ( elcetic filed relief? )
+### L(AA) corner trim ( elctrical field relief? )
 
 The document requested that the **L** corner be trimmed diagonally to relieve the electrical field for both ESD and RR, see [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf) section 6. Probably because **RR** can handle high voltages without the option process as well. Regarding the DRC check for trim, it is a little tricky: first, count the edges to ensure the octagonal shape, then subtract each trim area to determine whether it meets the spec.
 
