@@ -37,8 +37,8 @@ There is no **M1/M2** crossing **PAD** and **PAD** without **M1/M2**.
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #  TC(PRO) to M1/M2 enclosure
 #
-(TC & PRO).drc( enclosed(M1) <  14.0 ).output("ERR09: TC(PRO) enclosed M1 < 14.0")
-(TC & PRO).drc( enclosed(M2) <  14.0 ).output("ERR09: TC(PRO) enclosed M2 < 14.0")
+(TC & PRO).drc( enclosed(M1) <  15.0 ).output("ERR09: TC(PRO) enclosed M1 < 15.0")
+(TC & PRO).drc( enclosed(M2) <  15.0 ).output("ERR09: TC(PRO) enclosed M2 < 15.0")
 #
 ```
 
