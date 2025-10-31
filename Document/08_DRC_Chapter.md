@@ -6,7 +6,7 @@ In here, **M1/TC/M2** related rules, so called BEOL, are described.
 
 ### Fatal combination check
 
-There is no **SG/CONT/M1/M2** crossing **TC** and TC without **M1/M2**.
+There is no **SG/CONT/M1/M2** crossing **TC** and **TC** without **M1/M2**.
 
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
@@ -41,7 +41,9 @@ _**NOTE:** IMHO: maximum **TC** under **PAD** should be checked because of avoid
 
 ### TC to SG/CONT separation and TC to M1/M2 enclosure
 
-**TC** to **SG/CONT** separations are 1.2um and 1.0um, may be because avoiding non-homogeneous M1 surface near **SG** and **CONT** which is emphasized by the reflow process.
+**TC** to **SG/CONT** separations are 1.2um and 1.0um, may be because avoiding non-homogeneous M1 surface near **SG** and **CONT** which is emphasized by the reflow process. **TC** to **M1/M2** enclosures are both 1.0um.
+
+_**NOTE:** IMHO: Even **TC** to **M1/M2** enclosures are same, the it's number 1.0um is NOT make sense because of **M2** L/S 3.0u/2.0u and **M1** L/S 1.8u/1.4. To maximize routing capability, enclosure should be 0.8um then 1.4u + 0.8um + 0.8um = 3.0um which same as M2 Line width._
 
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
