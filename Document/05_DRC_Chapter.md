@@ -70,8 +70,8 @@ Minimum enclosure **CONT** to **SG/M1** is 0.8um.
 # 
 (CONT & AAMP).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(MP) < 1.0")
 (CONT & AAMN).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(MN) < 1.0")
-(CONT & AAGP).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(GP) < 1.0")
-(CONT & AAGN).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(GN) < 1.0")
+(CONT & AAGP).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(GP) < 1.0")   # Yet this is not defined in the Document.
+(CONT & AAGN).drc( sep(SG) <  1.0 ).output("ERR05: CONT to SG(GN) < 1.0")   # Yet this is not defined in the Document.
 #
 ```
 

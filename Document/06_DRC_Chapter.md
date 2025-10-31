@@ -1,8 +1,14 @@
-# Salisaide Gate related
-# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
-# Original version was made by jun1okamura from TokaiRika's document 
-# LICENSE: Apache License Version 2.0, January 2004,
-#          http://www.apache.org/licenses/
+# Chapter 6 : 06_Check.drc
+
+## [06_Check.drc](../tech/drc/06_Check.drc)
+
+In here, **SG** related rules are described. 
+
+### Electrical connection 
+
+Regarding the antenna check, at first, the electrical connection is defined as follows.
+
+```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #  Electrical connection definition
 # 
@@ -25,6 +31,13 @@ connect(CONT, M1)           # CONT-M1
 connect(M1,   TC)           # M1-TC
 connect(TC,   M2)           # TC-M2
 #
+```
+
+### SG to L/CONT Separation
+
+Minimum separation of **SG** to **L** is 0.4um in general, yet in **RR** it is 1.0um, perhaps because of **SG** on **RR** behaving as a Field Transistor Gate tied to GND to ensure electrical separation between **RR** vs next **RR**. Also, the minimum separation between **SG** and **CONT** on the MOS Transistor is 1.0 μm.
+
+```
 # ===== ====== ===== ====== ===== ====== ===== ====== =====
 #  SG to L Separation
 # 
@@ -37,6 +50,17 @@ connect(TC,   M2)           # TC-M2
 (CONT & AAMP).drc( sep( SG , projection ) < 1.0 ).output("ERR06: SG to CONT(MP) < 1.0") # 
 (CONT & AAMN).drc( sep( SG , projection ) < 1.0 ).output("ERR06: SG to CONT(MN) < 1.0") # 
 #
+```
+
+### SG for ESD device
+
+In general, the ESD device, a diode-connected MOS transistor, is unsymmetrical for S/D to ensure sufficient parallel Drain resistance and a large L shape to protect against surge current. Therefore, we need to distinguish between Drain and Source in some way; here, we tried to use electrical connections, but it is also applicable to use a _recognition_ layer.
+
+Due to the diode-connected MOS transistor being connected to GND or VDD for ESD protection, the Source can be identified through its electrical connection to the PSUB or VDD via AAGP or AAGN.
+
+**SG** width for ESD device is 2.0um, and mimimum sepration **CONT** to **SG** are 3.0um for Source and 7.0um for Drain. All generated layers are released after the check.
+
+```
 # ===== ====== ===== ====== ===== ====== ===== ====== =====
 #  SG FOR ESD DEVICE
 #
@@ -69,6 +93,14 @@ PD_CONT.forget  # release memory
 NS_CONT.forget  # release memory
 ND_CONT.forget  # release memory
 #
+```
+###  Floating SG (anntena check)
+
+Floating **SG** detection was made by searching for electrically isolated **SG** by not tying it down to any Source/Drain or Anode/Cathode. 
+
+_**NOTE:** Because it is not easy to clean up any of the floating **SG** before building up the complete circuit structure, it is better to say WARNING rather than ERROR, IMHO._
+
+```
 # ===== ====== ===== ====== ===== ====== ===== ====== =====
 #  Floating SG detection (WARNING)
 #
@@ -87,4 +119,4 @@ SG_PE.forget  # release memory
 SG_NE.forget  # release memory
 SG_GP.forget  # release memory
 SG_GN.forget  # release memory
-
+```
