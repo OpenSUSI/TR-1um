@@ -32,3 +32,4 @@ _**NOTE:** Minimum W and L checks are described by the sep(projection) method, a
 (SG & AANE).drc( enclosed(SG, projection, without_touching_edges ) < 1.2).output("ERR07: Endcap(MNE) < 1.2") # NMOS(ESD)
 ```
 
+_**NOTE:** Endcap surrounding Notch shape Active area, see [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf) Table 1-5-1 ER0901/2 are NOT implemented yet. Need another idea to check it._
