@@ -24,7 +24,7 @@ This method allows editing each file outside the Klayout, and each DRC run refle
 
 ### Process Steps
 
-**IMHO** knowledge of the process steps is a fundamental requirement for DRC/LVS development beyond the check commands and grammars. Regarding TR-1um, TOKAI RIKA has not revealed it in the [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf), but there is enough information to imagine it. Thus, I would draw each of them below, focusing on GDSII layers. One of TR-1um technology's unique features is that drawing layers in the Klayout tool is closely tied to mask layers in the process. It is suitable for learning the relationship between MASKs and process integration; however, it may be redundant given the number of drawing layers and NOT designers who are oriented to minimize them.
+_**NOTE:** knowledge of the process steps is a fundamental requirement for DRC/LVS development beyond the check commands and grammars. Regarding TR-1um, **TOKAI RIKA** has not revealed it in the [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf), but there is enough information to imagine it. Thus, I would draw each of them below, focusing on GDSII layers. One of TR-1um technology's unique features is that drawing layers in the Klayout tool is closely tied to mask layers in the process. It is suitable for learning the relationship between MASKs and process integration; however, it may be redundant given the number of drawing layers and NOT designers who are oriented to minimize them, **IMHO**._
 
 #### Step 1 (PSUB)
 

@@ -36,8 +36,6 @@ PSUB.edges.inside_part(L).output("ERR04: L crossed PSUB")
 
 ### L(AA) to L(AA)
 
-
-
 ```
 # ----- ------ ----- 
 #  Each device's AA to other AA
