@@ -8,6 +8,16 @@ In here, **SG** related rules are described.
 
 _**NOTE:** Minimum W and L checks are described by the sep(projection) method, and Endcap measurement also utilizes the enclosed(projection) method. I am not confident that this projection method is appropriate to use. I would appreciate it if somebody let me know their opinions._
 
+_**projection method for Wmin/Lmin:**_
+
+1. L1.sep(L2, 0.1, projection) generate L1 and L2 butting edge < 0.1.
+2. L2.sep(L2, 0.1, projection, projecting < X ) filtering if butting edge length < X.
+   
+_**projection method for Endcap:**_
+
+1. L1.drc( enclosed(L2, projection) < X ) generate L1 to L2 edge enclosed < X.
+2. L2.drc( enclosed(L2, projection, without_touching_edges ) < X) filtering not_touching_edge which enclosed < X.
+
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #  W min check
