@@ -5,6 +5,7 @@
 # ----- ------ ----- 
 # source($input, "TOP")
 report("TR-1um DRC",  $output)
+WANING = new_report("TR-1um DRC(warning)", "warning.lyrdb")
 #----
 # %include 00_Layers.drc
 # %include 01_Basics.drc

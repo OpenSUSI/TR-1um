@@ -79,7 +79,7 @@ SG_NE = antenna_check(SDNE, SG, 0.0)
 SG_GP = antenna_check(AAGP, SG, 0.0)
 SG_GN = antenna_check(AAGN, SG, 0.0)
 #
-(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_GP + SG_GN )).output("WAR06: Floating SG Detected")
+(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_GP + SG_GN )).output("WAR06: Floating SG Detected", warning_rep)
 #
 SG_MP.forget  # release memory
 SG_MN.forget  # release memory

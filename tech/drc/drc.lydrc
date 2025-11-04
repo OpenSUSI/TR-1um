@@ -22,6 +22,7 @@
 #          http://www.apache.org/licenses/
 # ----- ------ ----- 
 report("TR-1um DRC")
+warning_rep = new_report("TR-1um DRC(warning)", "warning.lyrdb")
 #----
 # %include 00_Layers.drc
 # %include 01_Basics.drc
