@@ -60,25 +60,27 @@ _**NOTE:** IMHO: Even **TC** to **M1/M2** enclosures are same, the it's number 1
 
 ### Large M1 slit insertion
 
-Over 10um wide **M1** should have a slit space. **M1W** defined here and checked with space(projection) method.
+Over 10um wide **M1** should have relaxed space. **M1W** defined here and checked with sep(projection) method.
 
-_**NOTE:** There is no M2 slit insertion rule in the [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf), but it must be ruled._
+_**NOTE:** There is no Wide M2 space rule in the [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf), but it must be ruled._
 
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #
 #  Wide(>10.0) M1 space in case projecting >= 10.0um
 #
-M1W = M1.drc( width(projection) >= 10.0 ).polygons
-M1W.drc( space(projection, projecting >= 10.0 ) <  2.0 ).output( "ERR08: M1(Wide) space < 2.0" )
+M1W = M1.drc( width(projection) > 10.0 ).extents(1)
+M1W.drc( sep(M1,projection, projecting >= 10.0 ) <  2.0 ).output( "ERR08: M1(Wide) space < 2.0" )
 M1W.forget  # release memory
+#
+# M1W.forget  # release memory
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #
 #  Wide(>10.0) M2 space in case projecting >= 10.0um
 #
-M2W = M2.drc( width(projection) >= 10.0 ).polygons
-M2W.drc( space(projection, projecting >= 10.0 ) <  2.0 ).output( "ERR08: M2(Wide) space < 2.0" )
+M2W = M2.drc( width(projection) >= 10.0 ).extents(1)
+M2W.drc( sep(M2,projection, projecting >= 10.0 ) <  2.0 ).output( "ERR08: M2(Wide) space < 2.0" )
 M2W.forget  # release memory
 #
 ```

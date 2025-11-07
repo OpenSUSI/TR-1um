@@ -4,8 +4,8 @@
 #          http://www.apache.org/licenses/
 # ----- ------ ----- 
 # source($input, "TOP")
-report("TR-1um DRC",  $output)
-WANING = new_report("TR-1um DRC(warning)", "warning.lyrdb")
+warning_rep = new_report("TR-1um DRC(warning)", "warning.lyrdb")
+report("TR-1um DRC")
 #----
 # %include 00_Layers.drc
 # %include 01_Basics.drc
