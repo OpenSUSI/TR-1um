@@ -37,7 +37,7 @@
 #  Wide(>10.0) M1 space in case projecting >= 10.0um
 #
 M1W = M1.drc( width(projection) > 10.0 ).extents(1)
-M1W.drc( sep(M1,projection, projecting >= 10.0 ) < 1.9 ).output( "ERR08: M1(Wide) space < 2.0" )
+M1W.drc( sep(M1,projection, projecting >= 10.0 ) < 1.99 ).output( "ERR08: M1(Wide) space < 2.0" )
 M1W.forget  # release memory
 #
 # M1W.forget  # release memory
@@ -47,6 +47,6 @@ M1W.forget  # release memory
 #  Wide(>10.0) M2 space in case projecting >= 10.0um
 #
 M2W = M2.drc( width(projection) >= 10.0 ).extents(1)
-M2W.drc( sep(M2,projection, projecting >= 10.0 ) <  1.9 ).output( "ERR08: M2(Wide) space < 2.0" )
+M2W.drc( sep(M2,projection, projecting >= 10.0 ) <  1.99 ).output( "ERR08: M2(Wide) space < 2.0" )
 M2W.forget  # release memory
 #

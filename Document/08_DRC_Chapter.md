@@ -64,7 +64,7 @@ Over 10um wide **M1** should have relaxed space. **M1W** defined here and checke
 
 _**NOTE:** There is no Wide M2 space rule in the [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf), but it must be ruled._
 
-_**NOTE:** Edges.extents seems does NOT work, needs numbers like Edges.extents(1). So the space criteria reduced to 2.0 > 1.9._
+_**NOTE:** On this method, "sep < X" seems does NOT work, so the space criteria reduced to 2.0 > 1.99._
 
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
@@ -72,7 +72,7 @@ _**NOTE:** Edges.extents seems does NOT work, needs numbers like Edges.extents(1
 #  Wide(>10.0) M1 space in case projecting >= 10.0um
 #
 M1W = M1.drc( width(projection) > 10.0 ).extents(1)
-M1W.drc( sep(M1,projection, projecting >= 10.0 ) < 1.9 ).output( "ERR08: M1(Wide) space < 2.0" )
+M1W.drc( sep(M1,projection, projecting >= 10.0 ) < 1.99 ).output( "ERR08: M1(Wide) space < 2.0" )
 M1W.forget  # release memory
 #
 # M1W.forget  # release memory
@@ -82,7 +82,7 @@ M1W.forget  # release memory
 #  Wide(>10.0) M2 space in case projecting >= 10.0um
 #
 M2W = M2.drc( width(projection) >= 10.0 ).extents(1)
-M2W.drc( sep(M2,projection, projecting >= 10.0 ) < 1.9 ).output( "ERR08: M2(Wide) space < 2.0" )
+M2W.drc( sep(M2,projection, projecting >= 10.0 ) < 1.99 ).output( "ERR08: M2(Wide) space < 2.0" )
 M2W.forget  # release memory
 #
 ```
