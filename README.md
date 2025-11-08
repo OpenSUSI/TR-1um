@@ -21,7 +21,11 @@ Final GDSII data for 2025/09/24-25 OSS hands-on seminar on Kyushu university.
 Final schematic data for 2025/09/24-25 OSS hands-on seminar on Kyushu university.
 
 ## tech
-Working directry for Open Source Silicon community to exchange new idea and currently **drc** directory is active for KLayout DRC runset development. **lvs** is preserved. We are welcome to contribute **Open PDK** development.
+Working directry for Open Source Silicon community to exchange new idea and currently **drc** and **lvs** directories are active for KLayout DRC/LVS runset development. **TR-1um.lyp** is KLayout layer file for both **DRC** and **LVS**.
+
+- **drc** directory contain DRC runset files.
+- **lvs** directory contain LVS runset files.
+- **ngspice** directory is a symbolic link to the originals.
 
 ## Tools
 Preserved.
