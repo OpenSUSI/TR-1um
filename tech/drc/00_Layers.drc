@@ -35,6 +35,6 @@ M2    = input(20,  0).not(MASK)    # Metal-2
 PRO   = input(14,  0).not(MASK)    # PAD
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
-#  Bounding box
+#  Bounding box means BULK
 #
-BBOX  = extent
+BULK  = extent

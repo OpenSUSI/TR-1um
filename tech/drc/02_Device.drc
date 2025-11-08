@@ -9,7 +9,7 @@
 NWCS = (PSUB & NW).interacting(CL) 	    # Nwell for CSIO 
 NWMP = (PSUB & NW).not_interacting(CL)	# Nwell for PMOS 
 NWRR = (PSUB & HVNW)	                # HVNW  for RR
-PWMN = (BBOX - PSUB)                    # PWEL  for NMOS
+PWMN = (BULK - PSUB)                    # PWEL  for NMOS
 # ----- ------ ----- 
 #  Implant Layer Combination Table (Y:DATA N:Blank)
 # ----------+------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+

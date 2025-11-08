@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>TR-1um LVS</description>
+ <version/>
+ <category>lvs</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>lvs_scripts</group-name>
+ <menu-path>tools_menu.lvs.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>lvs-dsl-xml</dsl-interpreter-name>
+ <text>
+# TR-1um LVS v0.001 
+# Original version was made by jun1okamura from TokaiRika's document
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- 
+# %include run.lvs
+#----
+ </text>
+</klayout-macro>

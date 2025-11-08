@@ -1,0 +1,23 @@
+# TR-1um LVS v0.001 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- 
+deep
+#
+report_lvs     # LVS report window
+#----
+# %include ../drc/00_Layers.drc
+# %include ../drc/02_Device.drc
+# %include 00_Extract.lvs
+# %include 01_Extract.lvs
+### %include test.lvs
+#----
+target_netlist("output.cir", write_spice, "Created by KLayout")
+
+## schematic("inv2.cir")
+
+align
+netlist.simplify
+
+compare
