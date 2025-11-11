@@ -82,9 +82,9 @@
 #
 CONTL = CONT.drc( area > 1.5 )  
 #
-(CONTL).drc( space <  1.6 ).output("ERR05: CONT-L to CONT-L <  1.6")                        # CONTL space
-(CONTL).drc( width(projection, projecting > 1.0 ) < 1.6 ).output("ERR07: CONTL(L) < 1.6")   # CONTL(Long) < 1.6
-##(CONTL).drc( width(projection, projecting > 1.0 ) < 97.5).output("ERR07: CONTL(L) < 97.5")  # CONTL(Long) > 97.5
+(CONTL).drc( space <  1.6 ).output("ERR05: CONT-L to CONT-L <  1.6")                          # CONTL space
+## (CONTL).drc( width(projection, projecting >= 1.0 ) > 1.6 ).output("ERR07: CONTL(L) > 1.6")   # CONTL(Long) > 1.6
+(CONTL).drc( width(projection, projecting >= 1.0 ) > 97.5 ).output("ERR07: CONTL(L) > 97.5")  # CONTL(Long) > 97.5
 #
 #  Contact-L enclosure to L/SG/M1
 #

@@ -23,7 +23,7 @@ PWMN = (BULK - PSUB)                    # PWEL  for NMOS
 # BG-NW     | NWMP |  Y  |  Y  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
 # BG-PSUB   | PWMN |  N  |  N  |  N  |  N  |  Y  |  Y  |  N  |  Y  |  N  |  N  |
 # RR        | NWRR |  Y  |  N  |  N  |  N  |  Y  |  Y  |     |     |  Y  |  N  |
-# BG-HVNW   | NWGR |  Y  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
+# BG-HVNW   | NWRR |  Y  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
 # CSIO      | NWCS |  Y  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  Y  |  N  |  Y  |
 # BG-CSIO   | NWCS |  Y  |  N  |  N  |  N  |  Y  |  Y  |  Y  |  N  |  N  |  N  |
 # PESD      | NWMP |  Y  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  Y  |  N  |  N  |

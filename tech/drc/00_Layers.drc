@@ -6,8 +6,9 @@
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Input layers
 #
-MASK  = input(63,63)               # DRC check waiver area
+RS    = input(63,61)               # RS area recognition
 ESD   = input(63,62)               # IO/ESD area recognition
+MASK  = input(63,63)               # DRC check waiver area
 #
 PSUB  = input(140, 0).not(MASK)    # Nwell/Pwell
 NW    = input(36,  0).not(MASK)    # N-well mask
@@ -34,6 +35,11 @@ TC    = input(19,  0).not(MASK)    # Via1
 M2    = input(20,  0).not(MASK)    # Metal-2
 PRO   = input(14,  0).not(MASK)    # PAD
 #
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+#  Label Layer
+#
+M1_LBL = labels(48,  0).not(MASK)  # M1 Label
+M2_LBL = labels(49,  0).not(MASK)  # M2 Label
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #  Bounding box means BULK
 #

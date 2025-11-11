@@ -20,7 +20,7 @@ connect(AAGN, CONT)         # BG-NMOS
 connect(AADP, CONT)         # DP
 connect(AADN, CONT)         # DN
 #
-connect(SG,   CONT)         # SG-CONT
+connect(SG,  CONT)          # SGG-CONT
 connect(CONT, M1)           # CONT-M1
 connect(M1,   TC)           # M1-TC
 connect(TC,   M2)           # TC-M2

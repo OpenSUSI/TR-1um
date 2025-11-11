@@ -7,42 +7,42 @@
 # MOS extraction 5V CMOS
 #
 extract_devices(mos4("PMOS_mst" ), 
-                            { "SD" => (AAMP - SG),      # S/D region
-                              "G"  => (AAMP & SG),      # Channel region
+                            { "SD" => (AAMP - SGG),     # S/D region
+                              "G"  => (AAMP & SGG),     # Channel region
                               "W"  => (NWMP),           # Backgate region
                               "tS" => (SDMP),           # Terminal: Source
                               "tD" => (SDMP),           # Terminal: Drain
-                              "tG" => (SG),             # Terminal: Gate
+                              "tG" => (SGG),            # Terminal: Gate
                               "tB" => (NWMP) })         # Terminal: Backgate
 #
 extract_devices(mos4("NMOS_mst" ), 
-                            { "SD" => (AAMN - SG),      # S/D region
-                              "G"  => (AAMN & SG),      # Channel region
+                            { "SD" => (AAMN - SGG),     # S/D region
+                              "G"  => (AAMN & SGG),     # Channel region
                               "W"  => (BULK),           # Backgate region
                               "tS" => (SDMN),           # Terminal: Source
                               "tD" => (SDMN),           # Terminal: Drain
-                              "tG" => (SG),             # Terminal: Gate
+                              "tG" => (SGG),            # Terminal: Gate
                               "tB" => (BULK) })         # Terminal: Backgate
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # MOS(ESD) extraction
 #
 extract_devices(mos4("MPE_mst"),
-                            { "SD" => (AAPE - SG),      # S/D region
-                              "G"  => (AAPE & SG),      # Channel region 
+                            { "SD" => (AAPE - SGG),     # S/D region
+                              "G"  => (AAPE & SGG),     # Channel region 
                               "W"  => (NWMP),           # Backgate region
                               "tS" => (SDPE),           # Terminal: Source
                               "tD" => (SDPE),           # Terminal: Drain
-                              "tG" => (SG),             # Terminal: Gate
+                              "tG" => (SGG),            # Terminal: Gate
                               "tB" => (NWMP) })         # Terminal: Backgate
 #
 extract_devices(mos4("MNE_mst_mst"), 
-                            { "SD" => (AANE - SG),      # S/D region
-                              "G"  => (AANE & SG),      # Channel region
+                            { "SD" => (AANE - SGG),     # S/D region
+                              "G"  => (AANE & SGG),     # Channel region
                               "W"  => (BULK),           # Backgate region
                               "tS" => (SDNE),           # Terminal: Source
                               "tD" => (SDNE),           # Terminal: Drain
-                              "tG" => (SG),             # Terminal: Gate
+                              "tG" => (SGG),            # Terminal: Gate
                               "tB" => (BULK) })         # Terminal: Backgate
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 

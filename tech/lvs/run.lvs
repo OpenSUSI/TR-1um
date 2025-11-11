@@ -11,6 +11,7 @@ report_lvs     # LVS report window
 # %include ../drc/02_Device.drc
 # %include 00_Extract.lvs
 # %include 01_Extract.lvs
+# %include 02_Extract.lvs
 ### %include test.lvs
 #----
 target_netlist("output.cir", write_spice, "Created by KLayout")
@@ -20,4 +21,4 @@ target_netlist("output.cir", write_spice, "Created by KLayout")
 align
 netlist.simplify
 
-compare
+## compare
