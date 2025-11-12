@@ -10,7 +10,8 @@ SDMP = (AAMP - SG)          # MP S/D
 SDMN = (AAMN - SG)          # MN S/D
 SDPE = (AAPE - SG)          # MPE S/D
 SDNE = (AANE - SG)          # MNE S/D
-#
+# ---
+# MOS / Diode
 connect(SDMP, CONT)         # MP S/D
 connect(SDMN, CONT)         # MN S/D
 connect(SDPE, CONT)         # MPE S/D
@@ -19,7 +20,14 @@ connect(AAGP, CONT)         # BG-PMOS
 connect(AAGN, CONT)         # BG-NMOS
 connect(AADP, CONT)         # DP
 connect(AADN, CONT)         # DN
-#
+# ---
+# resistor / capacitor
+connect(AARR, CONT)         # RR
+connect(AAGR, CONT)         # BG-RR
+connect(AACC, CONT)         # CIS
+connect(AAGC, CONT)         # BG-CIS
+# ---
+# BEOL
 connect(SG,  CONT)          # SGG-CONT
 connect(CONT, M1)           # CONT-M1
 connect(M1,   TC)           # M1-TC
@@ -79,7 +87,7 @@ SG_NE = antenna_check(SDNE, SG, 0.0)
 SG_GP = antenna_check(AAGP, SG, 0.0)
 SG_GN = antenna_check(AAGN, SG, 0.0)
 #
-(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_GP + SG_GN )).output("WAR06: Floating SG Detected", warning_rep)
+(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_GP + SG_GN )).output("WAR06: Floating SG Detected")
 #
 SG_MP.forget  # release memory
 SG_MN.forget  # release memory
@@ -87,4 +95,9 @@ SG_PE.forget  # release memory
 SG_NE.forget  # release memory
 SG_GP.forget  # release memory
 SG_GN.forget  # release memory
-
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  Floating SG detection (RR field transistor)
+#
+antenna_check(AAGR, SG.interacting(R), 0.0).output("ERR06: SG(RR) not tied to HVNW(RR)")
+#

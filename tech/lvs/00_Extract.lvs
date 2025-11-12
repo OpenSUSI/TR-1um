@@ -4,9 +4,18 @@
 # LICENSE: Apache License Version 2.0, January 2004,
 #          http://www.apache.org/licenses/
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# RR Resistance
+#
+AARC = AARR & NSD - PSD          # RR Contact
+AARB = AARR & NSD & PSD          # RR Body
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Saliside Gate Resistance
 #
 SGR = SG.interacting(RS)         # SG for RS
+SGC = SGR - RS                   # RS Contact
+SGB = SGR & RS                   # RS Body
+#
 SGG = SG.not_interacting(RS)     # SG for except RS
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
@@ -25,27 +34,37 @@ connect_global(BULK, "VSS")
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Connections
 #
+# ---
+# Well 
 connect(NWMP, AAGP)      # NWELL
 connect(BULK, AAGN)      # BULK
-#
+# ---
+# Active
 connect(NWCS, AACC)      # CIS
 connect(NWCS, AAGC)      # CIS
-#
-connect(NWRR, AAGR)      # CIS
-#
+connect(NWRR, AAGR)      # BG-RR
+# ---
+# mos
 connect(SDMP, CONT)      # MP S/D
 connect(SDMN, CONT)      # MN S/D
 connect(SDPE, CONT)      # MPE S/D
 connect(SDNE, CONT)      # MNE S/D
 connect(AAGP, CONT)      # BG-PMOS
 connect(AAGN, CONT)      # BG-NMOS
+# ---
+# diode
 connect(AADP, CONT)      # DP
 connect(AADN, CONT)      # DN
+# ---
+# capacitance
 connect(AAGC, CONT)      # BG-CIS
-connect(AARR, CONT)      # RR
+# ---
+# resistance
+connect(AARC, CONT)      # RR Terminal
 connect(AAGR, CONT)      # BG-RR
-#
-connect(SGR,  CONT)      # RS-CONT
+connect(SGC,  CONT)      # RS-CONT
+# ---
+# BEOL
 connect(SGG,  CONT)      # SGG-CONT
 connect(CONT, M1)        # CONT-M1
 connect(M1,   TC)        # M1-TC

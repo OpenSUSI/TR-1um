@@ -24,21 +24,16 @@ extract_devices(capacitor("m_CSIO", 0.6e-15 ),
 # Resistor extraction
 #
 extract_devices(resistor("F_RS", 1),
-                    { "R"  => (SGR),             # Resistance Layer`
-                      "C"  => (SGR & CONT),      # Contact Layer
-                      "tA" => (SGR & CONT),      # Terminal: A
-                      "tB" => (SGR & CONT) })    # Terminal: B
+                    { "R"  => (SGB),             # Resistance Layer`
+                      "C"  => (SGC),             # Contact Layer
+                      "tA" => (SGC),             # Terminal: A
+                      "tB" => (SGC) })           # Terminal: B
 #
 extract_devices(resistor_with_bulk("F_RR", 1),
-                    { "R"  => (AARR),           # Resistance Layer`
-                      "C"  => (AARR & CONT),    # Contact Layer
-                      "W"  => (NWRR),           # Bulk plate
-                      "tA" => (AARR & CONT),    # Terminal: A
-                      "tB" => (AARR & CONT),    # Terminal: B
-                      "tW" => (NWRR) })         # Terminal: BULK
-
-
-
-
-
-
+                    { "R"  => (AARB),            # Resistance Layer`
+                      "C"  => (AARC),            # Contact Layer
+                      "W"  => (NWRR),            # Bulk plate
+                      "tA" => (AARC),            # Terminal: A
+                      "tB" => (AARC),            # Terminal: B
+                      "tW" => (NWRR) })          # Terminal: BULK
+#
