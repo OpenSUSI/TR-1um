@@ -28,7 +28,7 @@ connect(AACC, CONT)         # CIS
 connect(AAGC, CONT)         # BG-CIS
 # ---
 # BEOL
-connect(SG,  CONT)          # SGG-CONT
+connect(SG,  CONT)          # SG-CONT
 connect(CONT, M1)           # CONT-M1
 connect(M1,   TC)           # M1-TC
 connect(TC,   M2)           # TC-M2
@@ -84,20 +84,27 @@ SG_MP = antenna_check(SDMP, SG, 0.0)
 SG_MN = antenna_check(SDMN, SG, 0.0)
 SG_PE = antenna_check(SDPE, SG, 0.0)
 SG_NE = antenna_check(SDNE, SG, 0.0)
+SG_DP = antenna_check(AADP, SG, 0.0)
+SG_DN = antenna_check(AADN, SG, 0.0)
 SG_GP = antenna_check(AAGP, SG, 0.0)
 SG_GN = antenna_check(AAGN, SG, 0.0)
 #
-(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_GP + SG_GN )).output("WAR06: Floating SG Detected")
+(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_DP + SG_DN + SG_GP + SG_GN )).output("WAR06: Floating SG Detected")
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#  Floating SG detection (RR field transistor)
+#
+(SG.interacting(R) - antenna_check(AAGR, SG, 0.0)).output("ERR06: SG(RR) not tied to HVNW(RR)")
+#
+# ===== ====== ===== ====== ===== ====== ===== ====== =====
+#
 #
 SG_MP.forget  # release memory
 SG_MN.forget  # release memory
 SG_PE.forget  # release memory
 SG_NE.forget  # release memory
+SG_DP.forget  # release memory
+SG_DN.forget  # release memory
 SG_GP.forget  # release memory
 SG_GN.forget  # release memory
-#
-# ===== ====== ===== ====== ===== ====== ===== ====== =====
-#  Floating SG detection (RR field transistor)
-#
-antenna_check(AAGR, SG.interacting(R), 0.0).output("ERR06: SG(RR) not tied to HVNW(RR)")
 #
