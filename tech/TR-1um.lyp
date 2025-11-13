@@ -99,7 +99,7 @@
   <dither-pattern>I1</dither-pattern>
   <line-style>I0</line-style>
   <valid>true</valid>
-  <visible>true</visible>
+  <visible>false</visible>
   <transparent>false</transparent>
   <width>1</width>
   <marked>false</marked>
@@ -506,6 +506,24 @@
  </properties>
  <properties>
   <expanded>false</expanded>
+  <frame-color>#ddff00</frame-color>
+  <fill-color>#ddff00</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I5</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>1</width>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>RS</name>
+  <source>RS 63/61@1</source>
+ </properties>
+ <properties>
+  <expanded>false</expanded>
   <frame-color>#8000ff</frame-color>
   <fill-color>#8000ff</fill-color>
   <frame-brightness>0</frame-brightness>
@@ -593,6 +611,24 @@
   <animation>0</animation>
   <name>TXM2</name>
   <source>49/0@1</source>
+ </properties>
+ <properties>
+  <expanded>false</expanded>
+  <frame-color>#ff0080</frame-color>
+  <fill-color>#ff0080</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I5</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>1</width>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name/>
+  <source>ERR02@1</source>
  </properties>
  <name>GDS</name>
  <custom-dither-pattern>

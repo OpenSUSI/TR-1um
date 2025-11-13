@@ -95,6 +95,7 @@ SG_GN = antenna_check(AAGN, SG, 0.0)
 #  Floating SG detection (RR field transistor)
 #
 (SG.interacting(R) - antenna_check(AAGR, SG, 0.0)).output("ERR06: SG(RR) not tied to HVNW(RR)")
+(SG.interacting(R)).drc( width(projection) < 2.0 ).output("ERR06: SG(RR) width < 2.0 ")
 #
 # ===== ====== ===== ====== ===== ====== ===== ====== =====
 #
