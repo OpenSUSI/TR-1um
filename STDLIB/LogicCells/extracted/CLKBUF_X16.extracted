@@ -1,0 +1,15 @@
+* Created by KLayout
+
+* cell CLKBUF_X16
+* pin VSS
+.SUBCKT CLKBUF_X16 5
+* net 5 VSS
+* device instance $1 r0 *1 6.1,44.8 PMOS_mst
+M$1 3 2 4 4 PMOS_mst L=1U W=122.4U AS=196.86P AD=183.6P PS=171.2U PD=158.4U
+* device instance $13 r0 *1 54.1,44.8 PMOS_mst
+M$13 1 3 4 4 PMOS_mst L=1U W=816U AS=1224P AD=1237.26P PS=1056U PD=1068.8U
+* device instance $93 r0 *1 6.1,6.8 NMOS_mst
+M$93 3 2 5 5 NMOS_mst L=1U W=40.8U AS=65.62P AD=61.2P PS=82.8U PD=76.8U
+* device instance $105 r0 *1 54.1,6.8 NMOS_mst
+M$105 1 3 5 5 NMOS_mst L=1U W=272U AS=408P AD=412.42P PS=512U PD=518U
+.ENDS CLKBUF_X16

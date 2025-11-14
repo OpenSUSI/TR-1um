@@ -29,8 +29,9 @@ target_netlist(Lay_file, write_spice, "Created by KLayout")
 #
 schematic(Sch_file)
 #
-align
 netlist.simplify
+#
+align
 #
 compare
 #

@@ -1,0 +1,31 @@
+* Created by KLayout
+
+* cell DEL2
+* pin VSS
+.SUBCKT DEL2 9
+* net 9 VSS
+* device instance $1 r0 *1 6.1,44.8 PMOS_mst
+M$1 8 7 1 8 PMOS_mst L=1U W=10.2U AS=28.56P AD=15.3P PS=26U PD=13.2U
+* device instance $2 r0 *1 11.6,44.8 PMOS_mst
+M$2 2 1 8 8 PMOS_mst L=4U W=10.2U AS=15.3P AD=28.56P PS=13.2U PD=26U
+* device instance $3 r0 *1 24.6,44.8 PMOS_mst
+M$3 8 2 3 8 PMOS_mst L=8U W=10.2U AS=28.56P AD=15.3P PS=26U PD=13.2U
+* device instance $4 r0 *1 34.6,44.8 PMOS_mst
+M$4 4 3 8 8 PMOS_mst L=6U W=10.2U AS=15.3P AD=28.56P PS=13.2U PD=26U
+* device instance $5 r0 *1 46.6,44.8 PMOS_mst
+M$5 8 4 5 8 PMOS_mst L=4U W=10.2U AS=28.56P AD=15.3P PS=26U PD=13.2U
+* device instance $6 r0 *1 52.1,44.8 PMOS_mst
+M$6 6 5 8 8 PMOS_mst L=1U W=10.2U AS=15.3P AD=28.56P PS=13.2U PD=26U
+* device instance $7 r0 *1 6.1,6.8 NMOS_mst
+M$7 9 7 1 9 NMOS_mst L=1U W=3.4U AS=9.52P AD=5.1P PS=12.4U PD=6.4U
+* device instance $8 r0 *1 11.6,6.8 NMOS_mst
+M$8 2 1 9 9 NMOS_mst L=4U W=3.4U AS=5.1P AD=9.52P PS=6.4U PD=12.4U
+* device instance $9 r0 *1 24.6,6.8 NMOS_mst
+M$9 9 2 3 9 NMOS_mst L=8U W=3.4U AS=9.52P AD=5.1P PS=12.4U PD=6.4U
+* device instance $10 r0 *1 34.6,6.8 NMOS_mst
+M$10 4 3 9 9 NMOS_mst L=6U W=3.4U AS=5.1P AD=9.52P PS=6.4U PD=12.4U
+* device instance $11 r0 *1 46.6,6.8 NMOS_mst
+M$11 9 4 5 9 NMOS_mst L=4U W=3.4U AS=9.52P AD=5.1P PS=12.4U PD=6.4U
+* device instance $12 r0 *1 52.1,6.8 NMOS_mst
+M$12 6 5 9 9 NMOS_mst L=1U W=3.4U AS=5.1P AD=9.52P PS=6.4U PD=12.4U
+.ENDS DEL2

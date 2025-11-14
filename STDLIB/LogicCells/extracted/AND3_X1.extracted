@@ -1,0 +1,23 @@
+* Created by KLayout
+
+* cell AND3_X1
+* pin VSS
+.SUBCKT AND3_X1 9
+* net 9 VSS
+* device instance $1 r0 *1 6.1,44.8 PMOS_mst
+M$1 8 1 7 8 PMOS_mst L=1U W=10.2U AS=28.56P AD=15.3P PS=26U PD=13.2U
+* device instance $2 r0 *1 10.1,44.8 PMOS_mst
+M$2 7 2 8 8 PMOS_mst L=1U W=10.2U AS=15.3P AD=15.3P PS=13.2U PD=13.2U
+* device instance $3 r0 *1 14.1,44.8 PMOS_mst
+M$3 8 5 7 8 PMOS_mst L=1U W=10.2U AS=15.3P AD=15.3P PS=13.2U PD=13.2U
+* device instance $4 r0 *1 18.1,44.8 PMOS_mst
+M$4 6 7 8 8 PMOS_mst L=1U W=10.2U AS=15.3P AD=28.56P PS=13.2U PD=26U
+* device instance $5 r0 *1 6.1,6.8 NMOS_mst
+M$5 3 1 7 9 NMOS_mst L=1U W=3.4U AS=9.52P AD=5.1P PS=12.4U PD=6.4U
+* device instance $6 r0 *1 10.1,6.8 NMOS_mst
+M$6 4 2 3 9 NMOS_mst L=1U W=3.4U AS=5.1P AD=5.1P PS=6.4U PD=6.4U
+* device instance $7 r0 *1 14.1,6.8 NMOS_mst
+M$7 9 5 4 9 NMOS_mst L=1U W=3.4U AS=5.1P AD=5.1P PS=6.4U PD=6.4U
+* device instance $8 r0 *1 18.1,6.8 NMOS_mst
+M$8 6 7 9 9 NMOS_mst L=1U W=3.4U AS=5.1P AD=9.52P PS=6.4U PD=12.4U
+.ENDS AND3_X1

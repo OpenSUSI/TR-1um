@@ -1,0 +1,19 @@
+* Created by KLayout
+
+* cell NOR3
+* pin VSS
+.SUBCKT NOR3 8
+* net 8 VSS
+* device instance $1 r0 *1 6.1,44.8 PMOS_mst
+M$1 2 5 1 1 PMOS_mst L=1U W=10.2U AS=28.56P AD=15.3P PS=26U PD=13.2U
+* device instance $2 r0 *1 10.1,44.8 PMOS_mst
+M$2 3 6 2 1 PMOS_mst L=1U W=10.2U AS=15.3P AD=15.3P PS=13.2U PD=13.2U
+* device instance $3 r0 *1 14.1,44.8 PMOS_mst
+M$3 4 7 3 1 PMOS_mst L=1U W=10.2U AS=15.3P AD=28.56P PS=13.2U PD=26U
+* device instance $4 r0 *1 6.1,6.8 NMOS_mst
+M$4 4 5 8 8 NMOS_mst L=1U W=3.4U AS=9.52P AD=5.1P PS=12.4U PD=6.4U
+* device instance $5 r0 *1 10.1,6.8 NMOS_mst
+M$5 8 6 4 8 NMOS_mst L=1U W=3.4U AS=5.1P AD=5.1P PS=6.4U PD=6.4U
+* device instance $6 r0 *1 14.1,6.8 NMOS_mst
+M$6 4 7 8 8 NMOS_mst L=1U W=3.4U AS=5.1P AD=9.52P PS=6.4U PD=12.4U
+.ENDS NOR3

@@ -1,0 +1,15 @@
+* Created by KLayout
+
+* cell BUF_X12
+* pin VSS
+.SUBCKT BUF_X12 5
+* net 5 VSS
+* device instance $1 r0 *1 6.1,44.8 PMOS_mst
+M$1 2 1 4 4 PMOS_mst L=1U W=20.4U AS=43.86P AD=30.6P PS=39.2U PD=26.4U
+* device instance $3 r0 *1 14.1,44.8 PMOS_mst
+M$3 3 2 4 4 PMOS_mst L=1U W=122.4U AS=183.6P AD=196.86P PS=158.4U PD=171.2U
+* device instance $15 r0 *1 6.1,6.8 NMOS_mst
+M$15 2 1 5 5 NMOS_mst L=1U W=6.8U AS=14.62P AD=10.2P PS=18.8U PD=12.8U
+* device instance $17 r0 *1 14.1,6.8 NMOS_mst
+M$17 3 2 5 5 NMOS_mst L=1U W=40.8U AS=61.2P AD=65.62P PS=76.8U PD=82.8U
+.ENDS BUF_X12

@@ -1,0 +1,11 @@
+* Created by KLayout
+
+* cell INV_X12
+* pin VSS
+.SUBCKT INV_X12 4
+* net 4 VSS
+* device instance $1 r0 *1 6.1,44.8 PMOS_mst
+M$1 2 1 3 3 PMOS_mst L=1U W=122.4U AS=196.86P AD=196.86P PS=171.2U PD=171.2U
+* device instance $13 r0 *1 6.1,6.8 NMOS_mst
+M$13 2 1 4 4 NMOS_mst L=1U W=40.8U AS=65.62P AD=65.62P PS=82.8U PD=82.8U
+.ENDS INV_X12
