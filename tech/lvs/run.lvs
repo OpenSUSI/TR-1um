@@ -3,7 +3,7 @@
 # LICENSE: Apache License Version 2.0, January 2004,
 #          http://www.apache.org/licenses/
 # ----- ------ ----- 
-deep
+# deep          # Hierarchical extraction
 #
 report_lvs     # LVS report window
 #----
@@ -13,12 +13,24 @@ report_lvs     # LVS report window
 # %include 01_Extract.lvs
 # %include 02_Extract.lvs
 ### %include test.lvs
-#----
-target_netlist("output.cir", write_spice, "Created by KLayout")
-
-## schematic("inv2.cir")
-
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# LVS preparation
+# 
+# cell_name + ".extracted" is extracted circuit file 
+# cell_name + ".cir"       is circuit file to compare
+#
+Lay_file = source.cell_name + ".extracted"
+Sch_file = source.cell_name + ".cir"
+#
+target_netlist(Lay_file, write_spice, "Created by KLayout")
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# LVS exection  
+#
+schematic(Sch_file)
+#
 align
 netlist.simplify
-
-## compare
+#
+compare
+#
