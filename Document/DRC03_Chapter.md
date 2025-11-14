@@ -85,6 +85,8 @@ As well as above, all ion-implantation layers, such as **PF/NF**, **PBE/NBE**, *
 (PSD & R - L).drc( width < 2.0 ).output("ERR03: L(RR) enclosed PSD < 2.0")
 (NSD & R - L).drc( width < 2.0 ).output("ERR03: L(RR) enclosed NSD < 2.0")
 #
+(R - L      ).drc( width < 2.0 ).output("ERR03: L(RR) enclosed R < 2.0")
+#
 ```
 See [document](../openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf) section 6.7.
 

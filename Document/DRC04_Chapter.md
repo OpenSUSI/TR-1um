@@ -81,5 +81,9 @@ AARR.drc( primary.edges.count != 8 ).output("ERR04: L(RR) shape NOT Octagon")   
 #
 (AARR.extents - AARR).drc( area < 0.5 ).output("ERR04: L(RR) trimed corner size < 0.5")     # trimed area < 1.0^2/2.0
 #
+(SG.holes).not_covering(AARR).output("ERR03: L(RR) not surrounded by SG")                   # AARR must surrounded by SG 
+#
+(AARR.extents).drc( enclosed(SG.holes,projection) != 1.0).output("ERR03: L(RR) enclosed SG != 1.0")   # AARR to SG enclose
+#
 ```
 

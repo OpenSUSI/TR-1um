@@ -2,10 +2,10 @@
 # Original version was made by jun1okamura from TokaiRika's document 
 # LICENSE: Apache License Version 2.0, January 2004,
 #          http://www.apache.org/licenses/
-# ----- ------ ----- 
-# deep          # Hierarchical extraction
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+deep          # Hierarchical extraction
 #
-report_lvs     # LVS report window
+report_lvs    # LVS report window
 #----
 # %include ../drc/00_Layers.drc
 # %include ../drc/02_Device.drc
@@ -25,11 +25,14 @@ Sch_file = source.cell_name + ".cir"
 target_netlist(Lay_file, write_spice, "Created by KLayout")
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
-# LVS exection  
-#
-schematic(Sch_file)
+# netlist extraction
 #
 netlist.simplify
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Comparison exection (in case LPE, all comment out)
+#
+schematic(Sch_file)
 #
 align
 #

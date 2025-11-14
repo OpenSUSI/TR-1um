@@ -1,8 +1,22 @@
-# Preface: run.drc
+# Preface: drc.lydrc
+
+## [drc.lydrc](../tech/drc/drc.lydrc)
+
+It seems **drc.lydrc** file is cached in the KLayout once it is launched, so it has to be edited in the tools for debugging. So my **drc.lydrc** only includes **# %include run.drc** commands, as shown below.
+
+```
+# TR-1um DRC v0.001 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- 
+# %include run.drc
+#----
+```
 
 ## [run.drc](../tech/drc/run.drc)
 
-It seems **run.drc** file is cached in the KLayout once it is launched, so it has to be edited in the tools for debugging. It is not a convenient way, and it should be much easier to split it into each of check categories, like layer-based, to edit. So my **run.drc** only includes **report** for output and a couple of **# %include** commands, as shown below.
+DRC runset should be splited it into each of check categories, like layer-based, to edit. So my **run.drc** only includes **report** for output and a couple of **# %include** commands, as shown below.
 
 ```
 report("TR-1um DRC",  $output)
@@ -21,6 +35,8 @@ report("TR-1um DRC",  $output)
 ```
 
 This method allows editing each file outside the Klayout, and each DRC run reflects the changes made beforehand. Each file includes a DRC check step by step, and tries to be independent between steps and/or files, except **00_Layers.drc** and **01_Basics.drc**, which is common for loading GDSII layers and some foundational DRC checks.
+
+**run.drc** also useful for DRC batch mode, like "klayout -b -r run.drc -rd input=file.gds"
 
 ### Process Steps
 
