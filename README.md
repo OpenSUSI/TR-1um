@@ -4,6 +4,7 @@ TR-1um -- openIP62 -- AnagixLoader
        |           +- IP62
        +- GDSII
        +- schematic
+       +- STDLIB
        +- tech
        +- Tools
        +- Document
@@ -19,6 +20,9 @@ Final GDSII data for 2025/09/24-25 OSS hands-on seminar on Kyushu university.
 
 ## schematic
 Final schematic data for 2025/09/24-25 OSS hands-on seminar on Kyushu university.
+
+## STDLIB
+Extracted spice files from **openIP62/IP62/Basic/libraries/xxx.gds** by LVS operation which are including AD/AS/PD/PS information.
 
 ## tech
 Working directry for Open Source Silicon community to exchange new idea and currently **drc** and **lvs** directories are active for KLayout DRC/LVS runset development. **TR-1um.lyp** is KLayout layer file for both **DRC** and **LVS**.
