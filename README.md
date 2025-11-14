@@ -38,4 +38,5 @@ Preserved.
 
 [Tutorial: How to make DRC runset for KLayout](Document/Tutorial_DRC.md)
 
+[Tutorial: How to make LVS runset for KLayout](Document/Tutorial_LVS.md) 
 
