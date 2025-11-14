@@ -32,6 +32,5 @@ report_lvs    # LVS report window
 #----
 ```
 
-First two **%include** lines are shared with DRC runset which are GDSII layers input and device recognition steps.
-
+First two **# %include** lines are shared with DRC runset which are GDSII layers input and device recognition steps.
 

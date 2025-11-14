@@ -1,0 +1,39 @@
+# Device extraction
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Original version was made by jun1okamura from TokaiRika's document 
+# LICENSE: Apache License Version 2.0, January 2004,
+#          http://www.apache.org/licenses/
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Capacitance extraction ( F_CSIO: 3 terminal capacitor device is optional, either one to use )
+#
+extract_devices(capacitor("m_CSIO", 0.6e-15 ), 
+                    { "P1" => (SGG),            # Top plate
+                      "P2" => (AACC),           # Bottom plate
+                      "tA" => (SGG),            # Terminal: A
+                      "tB" => (NWCS) })         # Terminal: B
+#
+# extract_devices(capacitor_with_bulk("F_CSIO", 0.6e-15 ), 
+#                    { "P1" => (SGG),            # Top plate
+#                      "P2" => (AACC),           # Bottom plate
+#                      "W"  => (NWCS),           # Bulk plate
+#                      "tA" => (SGG),            # Terminal: A
+#                      "tB" => (NWCS),           # Terminal: B
+#                      "tW" => (BULK) })         # Terminal: BULK
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Resistor extraction
+#
+extract_devices(resistor("F_RS", 1),
+                    { "R"  => (SGB),             # Resistance Layer`
+                      "C"  => (SGC),             # Contact Layer
+                      "tA" => (SGC),             # Terminal: A
+                      "tB" => (SGC) })           # Terminal: B
+#
+extract_devices(resistor_with_bulk("F_RR", 1),
+                    { "R"  => (AARB),            # Resistance Layer`
+                      "C"  => (AARC),            # Contact Layer
+                      "W"  => (NWRR),            # Bulk plate
+                      "tA" => (AARC),            # Terminal: A
+                      "tB" => (AARC),            # Terminal: B
+                      "tW" => (NWRR) })          # Terminal: BULK
+#

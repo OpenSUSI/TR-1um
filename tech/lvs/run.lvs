@@ -9,9 +9,9 @@ report_lvs    # LVS report window
 #----
 # %include ../drc/00_Layers.drc
 # %include ../drc/02_Device.drc
-# %include 00_Extract.lvs
 # %include 01_Extract.lvs
 # %include 02_Extract.lvs
+# %include 03_Extract.lvs
 ### %include test.lvs
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # LVS preparation

@@ -4,36 +4,59 @@
 # LICENSE: Apache License Version 2.0, January 2004,
 #          http://www.apache.org/licenses/
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
-# Capacitance extraction ( F_CSIO: 3 terminal capacitor device is optional, either one to use )
+# MOS extraction 5V CMOS
 #
-extract_devices(capacitor("m_CSIO", 0.6e-15 ), 
-                    { "P1" => (SGG),            # Top plate
-                      "P2" => (AACC),           # Bottom plate
-                      "tA" => (SGG),            # Terminal: A
-                      "tB" => (NWCS) })         # Terminal: B
+extract_devices(mos4("PMOS_mst" ), 
+                            { "SD" => (AAMP - SGG),     # S/D region
+                              "G"  => (AAMP & SGG),     # Channel region
+                              "W"  => (NWMP),           # Backgate region
+                              "tS" => (SDMP),           # Terminal: Source
+                              "tD" => (SDMP),           # Terminal: Drain
+                              "tG" => (SGG),            # Terminal: Gate
+                              "tB" => (NWMP) })         # Terminal: Backgate
 #
-# extract_devices(capacitor_with_bulk("F_CSIO", 0.6e-15 ), 
-#                    { "P1" => (SGG),            # Top plate
-#                      "P2" => (AACC),           # Bottom plate
-#                      "W"  => (NWCS),           # Bulk plate
-#                      "tA" => (SGG),            # Terminal: A
-#                      "tB" => (NWCS),           # Terminal: B
-#                      "tW" => (BULK) })         # Terminal: BULK
+extract_devices(mos4("NMOS_mst" ), 
+                            { "SD" => (AAMN - SGG),     # S/D region
+                              "G"  => (AAMN & SGG),     # Channel region
+                              "W"  => (BULK),           # Backgate region
+                              "tS" => (SDMN),           # Terminal: Source
+                              "tD" => (SDMN),           # Terminal: Drain
+                              "tG" => (SGG),            # Terminal: Gate
+                              "tB" => (BULK) })         # Terminal: Backgate
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
-# Resistor extraction
+# MOS(ESD) extraction
 #
-extract_devices(resistor("F_RS", 1),
-                    { "R"  => (SGB),             # Resistance Layer`
-                      "C"  => (SGC),             # Contact Layer
-                      "tA" => (SGC),             # Terminal: A
-                      "tB" => (SGC) })           # Terminal: B
+extract_devices(mos4("MPE_mst"),
+                            { "SD" => (AAPE - SGG),     # S/D region
+                              "G"  => (AAPE & SGG),     # Channel region 
+                              "W"  => (NWMP),           # Backgate region
+                              "tS" => (SDPE),           # Terminal: Source
+                              "tD" => (SDPE),           # Terminal: Drain
+                              "tG" => (SGG),            # Terminal: Gate
+                              "tB" => (NWMP) })         # Terminal: Backgate
 #
-extract_devices(resistor_with_bulk("F_RR", 1),
-                    { "R"  => (AARB),            # Resistance Layer`
-                      "C"  => (AARC),            # Contact Layer
-                      "W"  => (NWRR),            # Bulk plate
-                      "tA" => (AARC),            # Terminal: A
-                      "tB" => (AARC),            # Terminal: B
-                      "tW" => (NWRR) })          # Terminal: BULK
+extract_devices(mos4("MNE_mst_mst"), 
+                            { "SD" => (AANE - SGG),     # S/D region
+                              "G"  => (AANE & SGG),     # Channel region
+                              "W"  => (BULK),           # Backgate region
+                              "tS" => (SDNE),           # Terminal: Source
+                              "tD" => (SDNE),           # Terminal: Drain
+                              "tG" => (SGG),            # Terminal: Gate
+                              "tB" => (BULK) })         # Terminal: Backgate
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# DIODE extraction
+#
+extract_devices(diode("DP"), 
+                            { "P"  => (AADP),           # P region
+                              "N"  => (NWMP),           # N region
+                              "tA" => (AADP),           # Terminal: Anode
+                              "tC" => (NWMP) })         # Terminal: Cathode
+#                              
+extract_devices(diode("DN"),                            # Floating Protection
+                            { "P"  => (BULK),           # P region
+                              "N"  => (AADN),           # N region
+                              "tA" => (BULK),           # Terminal: Anode
+                              "tC" => (AADN) })         # Terminal: Cathode
 #
