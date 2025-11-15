@@ -15,6 +15,9 @@ extract_devices(mos4("PMOS_mst" ),
                               "tG" => (SGG),            # Terminal: Gate
                               "tB" => (NWMP) })         # Terminal: Backgate
 #
+tolerance("PMOS_mst", "W", :relative => 0.01)           # 1% tolerance 
+tolerance("PMOS_mst", "L", :relative => 0.0)            # 0% tolerance 
+#
 extract_devices(mos4("NMOS_mst" ), 
                             { "SD" => (AAMN - SGG),     # S/D region
                               "G"  => (AAMN & SGG),     # Channel region
@@ -23,6 +26,9 @@ extract_devices(mos4("NMOS_mst" ),
                               "tD" => (SDMN),           # Terminal: Drain
                               "tG" => (SGG),            # Terminal: Gate
                               "tB" => (BULK) })         # Terminal: Backgate
+#
+tolerance("NMOS_mst", "W", :relative => 0.01)           # 1% tolerance 
+tolerance("NMOS_mst", "L", :relative => 0.0)            # 0% tolerance 
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # MOS(ESD) extraction
@@ -36,7 +42,10 @@ extract_devices(mos4("MPE_mst"),
                               "tG" => (SGG),            # Terminal: Gate
                               "tB" => (NWMP) })         # Terminal: Backgate
 #
-extract_devices(mos4("MNE_mst_mst"), 
+tolerance("MPE_mst", "W", :relative => 0.01)            # 1% tolerance 
+tolerance("MPE_mst", "L", :relative => 0.0)             # 0% tolerance 
+#
+extract_devices(mos4("MNE_mst"), 
                             { "SD" => (AANE - SGG),     # S/D region
                               "G"  => (AANE & SGG),     # Channel region
                               "W"  => (BULK),           # Backgate region
@@ -44,6 +53,9 @@ extract_devices(mos4("MNE_mst_mst"),
                               "tD" => (SDNE),           # Terminal: Drain
                               "tG" => (SGG),            # Terminal: Gate
                               "tB" => (BULK) })         # Terminal: Backgate
+#
+tolerance("MNE_mst", "W", :relative => 0.01)            # 1% tolerance 
+tolerance("MNE_mst", "L", :relative => 0.0)             # 0% tolerance 
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # DIODE extraction
@@ -54,9 +66,13 @@ extract_devices(diode("DP"),
                               "tA" => (AADP),           # Terminal: Anode
                               "tC" => (NWMP) })         # Terminal: Cathode
 #                              
+tolerance("DP", "A", :relative => 0.0)                  # 0% tolerance 
+#
 extract_devices(diode("DN"),                            # Floating Protection
                             { "P"  => (BULK),           # P region
                               "N"  => (AADN),           # N region
                               "tA" => (BULK),           # Terminal: Anode
                               "tC" => (AADN) })         # Terminal: Cathode
+#
+tolerance("DN", "A", :relative => 0.0)                  # 0% tolerance 
 #
