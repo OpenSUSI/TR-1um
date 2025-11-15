@@ -36,7 +36,7 @@ X1 plus minus sub F_CSIO_mst c=c m=m  x=x*1e+6  y=y*1e+6
 .ends F_CSIO
 ```
 
-**IMHO:** Knowoing tnhe influence of parasitic capacitance impact between Nwell and CL difission, should use F_CSIO model for pricese circuit simulation, I agree. In case of LVS two terminal device is enough and to veryfy are of capacitor is more important than precise circuit simulation.
+**IMHO:** Given the influence of parasitic capacitance between the N-well and P-substrate junction, it is advisable to use the F_CSIO model for accurate circuit-level simulation. This model captures the junction capacitance effects more precisely, which is critical for analog or mixed-signal performance analysis. However, for LVS purposes, a simplified two-terminal device representation is sufficient. In this context, verifying the physical area of the gate capacitor is more fundamental than achieving simulation accuracy, since LVS focuses on structural and topological consistency rather than analog behavior.
 
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
