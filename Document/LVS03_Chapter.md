@@ -6,7 +6,7 @@
 
 The command [**"extract_devices(capacitor/capacitor_with_bulk)"**](https://www.klayout.de/doc-qt5/manual/lvs_device_extractors.html#h2-72) to extract both two or three terminal capacitor device, as follow.
 
-**Notice:** The root level model is m_CSIO in ngspice model file yet it is pure two terminal capacitor as C1, and there is two .subckt model which are  F_CSIO_mst and F_CSIO as three terminal model incuding C1 and botom capacitos bteween Nwell and CL diffusion as C2. There is no voltage dependency for C1 yet has prinominal equation for C2.
+_**NOTE:** The root level model is m_CSIO in ngspice model file yet it is pure two terminal capacitor as C1, and there is two .subckt model which are  F_CSIO_mst and F_CSIO as three terminal model incuding C1 and botom capacitos bteween Nwell and CL diffusion as C2. There is no voltage dependency for C1 yet has prinominal equation for C2._
 
 ```
 * //macro F_CSIO/////////////////////////////////
@@ -66,8 +66,37 @@ C$6 2 5 4.8735e-13 m_CSIO
 
 ### Resistor (RR/RS)
 
+**RR** spice model is quatitized by w and only 4.0/6.0/12.0/20.0/2.8um are supported, yet DRC does not check those.
 
+```
+*//// RR  ////////////////////////////////////////////////////////////////////////
 
+.subckt F_RR PLUS MINUS SUB
+.param w=1u r=1 l=1u tc1=0 tc2=0 tnom=27
+.if (w == 4u)
+
+r0 PLUS MINUS
++ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
++     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(4-1.09)+(13.3*(9.2/	
++       (4-1.09)+3.38/(4-1.8))+2.79))+(-21*3.95+615.2)))*				
++     (1+(0.000949*log(4)-0.00559)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+			
++     (-3.2478*10**(-6)*log(4)+5.28*10**(-5))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+	
++     (-7.97*10**(-7)*log(4)+3.05*10**(-6))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+	
++     (-3*10**(-9)*log(4)+1.2394*10**(-8))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/	
++     (1+(-0.09)*abs(v(PLUS,MINUS))/(l*10**6)+0.19*(abs(v(PLUS,MINUS))/		
++     (l*10**6))**2+(-0.02)*(abs(v(PLUS,MINUS))/(l*10**6))**3)))'
+
+c_d0 PLUS SUB  c='(7.06*(10**-4)*l*(10**6)+6.89*(10**-3))*10**(-12)'
+c_d1 MINUS SUB c=0
+
+.elseif (w == 6u)
+....
+
+.ends F_RR
+```
+_**NOTE:** The root level model F_RR is tree terminal .subckt model and it include polynominal equation to precisely reflect voltage dependency and prasitic capacitance of PLUS/MINUS terminals. In case of LVS, L and W matching are needed._
+
+The [**"extract_devices(resistor/resistor_with_bulk)"**](https://www.klayout.de/doc-qt5/manual/lvs_device_extractors.html#h2-19) command in KLayout LVS allows extraction of both two-terminal and three-terminal resistor devices. However, this command does not support checking for L/W (length/width) matching or constraints during extraction, making it unsuitable for use cases where dimensional accuracy of the resistor is critical for verification.
 
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
@@ -88,6 +117,3 @@ extract_devices(resistor_with_bulk("F_RR", 1),
                       "tW" => (NWRR) })          # Terminal: BULK
 #
 ```
-
-
-
