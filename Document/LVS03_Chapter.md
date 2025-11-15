@@ -8,6 +8,34 @@ The command [**"extract_devices(capacitor/capacitor_with_bulk)"**](https://www.k
 
 **Notice:** The root level model is m_CSIO in ngspice model file yet it is pure two terminal capacitor as C1, and there is two .subckt model which are  F_CSIO_mst and F_CSIO as three terminal model incuding C1 and botom capacitos bteween Nwell and CL diffusion as C2. There is no voltage dependency for C1 yet has prinominal equation for C2.
 
+```
+* //macro F_CSIO/////////////////////////////////
+.model m_CSIO C tnom=27
+
+* ----- ----- ----- ----- ----- ----- ----- ----- ----- 
+.subckt F_CSIO_mst plus minus sub
+.param c=0 y=0 x=0 m=1 magCSIO=1
+
+C1 plus minus m_CSIO c=c*magCSIO  m=m
+C2 minus sub  							
++ c = '0.56*(((x+18.8+((2.03e-8*(0.61+v(minus,sub)))**0.5)*1e+4)*			
++     (y+18.8+((2.03e-8*(0.61+v(minus,sub)))**0.5)*1e+4))*(1.053e-20)/		
++     (2.03e-8*(0.61+v(minus,sub)))**0.5+(2.0*(x+18.8+((1.03e-8*(0.71+		
++     v(minus,sub)))**0.5)*1e+4)*(10+0.5*((1.03e-8*(0.71+v(minus,sub)))**0.5)*	
++     1e+4)+2.0*(y+18.8+((1.03e-8*(0.71+v(minus,sub)))**0.5)*1e+4)*		
++     (10+0.5*((1.03e-8*(0.71+v(minus,sub)))**0.5)*1e+4))*(1.053e-20)/		
++     (1.03e-8*(0.71+v(minus,sub)))**0.5)'    m=m
+
+.ends F_CSIO_mst
+
+* ----- ----- ----- ----- ----- ----- ----- ----- ----- 
+.subckt F_CSIO plus minus sub
+.param c=0 y=0 x=0 m=1
+                           
+X1 plus minus sub F_CSIO_mst c=c m=m  x=x*1e+6  y=y*1e+6  
+.ends F_CSIO
+```
+
 **IMHO:** Knowoing tnhe influence of parasitic capacitance impact between Nwell and CL difission, should use F_CSIO model for pricese circuit simulation, I agree. In case of LVS two terminal device is enough and to veryfy are of capacitor is more important than precise circuit simulation.
 
 ```
@@ -37,6 +65,9 @@ C$6 2 5 4.8735e-13 m_CSIO
 ```
 
 ### Resistor (RR/RS)
+
+
+
 
 ```
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 

@@ -41,6 +41,14 @@ M$3 1 2 5 5 NMOS_mst L=1U W=3.4U AS=9.52P AD=9.52P PS=12.4U PD=12.4U
 
 **IMHO:** The ngspice model provides .subckt definitions for both PMOS and NMOS; however, there are no additional devices beyond the MOSFETs themselves. The root-level models are PMOS_mst and NMOS_mst, and the LVS runset extracts them as intrinsic MOS devices rather than .subckt instances. This approach simplifies device recognition in LVS.
 
+```
+* // model PMOS ////////////////////////////////////////
+.subckt PMOS d g s b
+.param w=0 l=0 as=0 ad=0 ps=0 pd=0 nrd=0 nrs=0 m=1
+M1 d g s b PMOS_mst w=w l=l as=as ad=ad ps=ps pd=pd nrd=nrd nrs=nrs m=m
+.ends PMOS
+```
+
 ## MOS (ESD)
 
 ESD device are separetly extracted since those has differnt spice models, as follow.
