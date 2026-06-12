@@ -58,8 +58,12 @@ L = {
     "GC(R)": "GC & WR",
     "CO": "CO",
     "CO(L)": "CL",
-    "CO(S)": "CO - CL",
-    "CO(C)": "CO & AC",
+    "CO(S)": "CS",
+    "CO(C)": "CO & WC",
+    "CO(CC)": "CO & AC",
+    "CO(M)": "CO & AM",
+    "CO(B)": "CO & BG",
+    "CO(G)": "CO & GM",
     "CO(R)": "CO & WR",
     "CO(RR)": "CO & AR",
     "CL(RR)": "CL & AR",
@@ -129,6 +133,7 @@ def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
 
     print(rule)
 
+Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GC.AP", "GC.AN", "APE.CO", "ANE.CO", "PO.M1", "PO.M2", "V1.CL"] 
 
 def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
     if L1 == L2:
@@ -138,14 +143,12 @@ def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
             file=f,
         )
         return
-    elif L1 == "M1W":
-        print("# ----- M1(Wide) -----", file=f)
+    elif L3.startswith(L4): # Derived layers spacing to original layers
         print(
-            "(%-7s).drc(  sep(%2s, projection, projecting >= 10.0 ) < %4.1f).output('%-5s:%2s %s < %4.1f')"
-            % (L1, L2, min - 0.1, rule, L3, func, min),
+            "(%-7s).drc(sep(%-7s, transparent) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
+            % (L1, L2, min, rule, L3, L4, func, min),
             file=f,
         )
-        print("# ", file=f)
         return
     else:
         print(
@@ -153,6 +156,12 @@ def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
             % (L1, L2, min, rule, L3, L4, func, min),
             file=f,
         )
+        if not (rule in Sn_OVERLAP_OK):
+            print(
+                "((%-7s) &  (%-7s)                 ).output('%-5s:%2s overlap %s')"
+                % (L1, L2, rule, L3, L4),
+                file=f,
+            )
 
 
 def print_MX(f, rule, func, L1, L2, L3, L4, min, max):
@@ -253,8 +262,18 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
             return
         case "Wfix":
             print(
-                "(%-7s).drc(            width != %4.1f ).output('%-5s:%2s %s < %4.1f')"
+                "(%-7s).drc(             width < %4.1f ).output('%-5s:%2s %s < %4.1f')"
                 % (L1, min, rule, L3, func, min),
+                file=f,
+            )
+            print(
+                "(%-7s).drc(          bbox_min < %4.1f ).output('%-5s:%2s bbox_min < %4.1f')"
+                % (L1, min, rule, L3, min),
+                file=f,
+            )
+            print(
+                "(%-7s).drc(          bbox_max > %4.1f ).output('%-5s:%2s bbox_max > %4.1f')"
+                % (L1, min, rule, L3, min),
                 file=f,
             )
             return
@@ -264,9 +283,23 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
         case "Smin":
             print_Sn(f, rule, func, L1, L2, L3, L4, min, max)
             return
+        case "Sfix":
+            print(
+                "(%-7s).drc(     sep(%-7s) != %4.1f ).output('%-5s:%2s-%s %s != %4.1f')"
+                % (L1, L2, min, rule, L3, L4, func, min),
+                file=f,
+            )
+            return
         case "Emin":
             print(
                 "(%-7s).drc( enclosed(%-7s) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
+                % (L1, L2, min, rule, L3, L4, func, min),
+                file=f,
+            )
+            return
+        case "Efix":
+            print(
+                "(%-7s).drc(enclosed(%-7s) != %4.1f ).output('%-5s:%2s-%s %s != %4.1f')"
                 % (L1, L2, min, rule, L3, L4, func, min),
                 file=f,
             )
