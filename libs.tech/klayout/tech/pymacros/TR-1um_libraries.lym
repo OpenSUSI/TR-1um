@@ -48,9 +48,21 @@ libraries = [{ "name":         "TR-1um_stdcell",
                "description":  "TR-1um standard cells",
                "gds":          "TR-1um_STDCELL.gds"
              },
-             { "name":         "TR-1um_ESD",     
+             { "name":         "TR-1um_frame",     
                "description":  "TR-1um pad frame",
                "gds":          "TR-1um_frame_25x25.gds"
+             },
+             { "name":         "TR-1um_ESD",     
+               "description":  "TR-1um ESD devices",
+               "gds":          "TR-1um_ESD.gds"
+             },
+             { "name":         "TR-1um_Characters1",     
+               "description":  "TR-1um Metal1 0-1,A-Z",
+               "gds":          "TR-1um_Characters1.gds"
+             },
+             { "name":         "TR-1um_Characters2",     
+               "description":  "TR-1um Metal2 0-1,A-Z",
+               "gds":          "TR-1um_Characters2.gds"
              },
             ]
 
