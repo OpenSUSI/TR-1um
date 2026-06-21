@@ -617,9 +617,9 @@ set LIB "$env(PDK_ROOT)/$env(PDK)/libs.tech/spice/models"
 append XSCHEM_LIBRARY_PATH ":${XSCHEM_SHAREDIR}/xschem_library"
 append XSCHEM_LIBRARY_PATH ":${XSCHEM_SHAREDIR}/xschem_library/devices"
 append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem"
-append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/IP62LIB"
-append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/IP62_2_ESD"
-append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/IP62_5_stdcell"
+append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/TR-1umLIB"
+append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/TR-1um_ESD"
+append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/TR-1um_stdcell"
 append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/systemlib"
 #puts stdout $XSCHEM_LIBRARY_PATH
 
