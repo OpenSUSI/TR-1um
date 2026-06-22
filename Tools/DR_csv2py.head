@@ -11,7 +11,7 @@ class DRule():
         self.min  = min
         self.max  = max      
         self.L1   = L1
-        self.L1   = L2
+        self.L2   = L2
         self.func = func
 
     def min(self) :
