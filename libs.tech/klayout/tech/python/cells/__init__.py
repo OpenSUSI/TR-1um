@@ -16,8 +16,9 @@ from .via       import *
 # It's a Python class that inherits from the pya.Library class
 class tr_1um(pya.Library):
 
-    def __init__(self):
+    def __init__(self, technology):
         # Set the description
+        self.add_technology(technology)
         self.description = "TR-1um PCell library"
 
     # Create the PCell declarations
