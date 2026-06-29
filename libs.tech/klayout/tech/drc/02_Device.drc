@@ -15,7 +15,6 @@ AA  = (AN + AP + AC + AR)                                   # ALL ACTIVE
 MP  = (AP.interacting(GC) & WN - ESD)                       # PMOS
 MN  = (AN.interacting(GC) & WP - ESD)                       # NMOS
 AM  = (MP + MN)                                             # ALL MOS
-GM  = (GC - AC)                                             # mosfet poly for CO check (exclude CSIO)
 #
 MPE = (AP.interacting(GC) & WN & ESD)                       # PMOS (ESD)
 MNE = (AN.interacting(GC) & WP & ESD)                       # NMOS (ESD)
@@ -28,7 +27,7 @@ DP  = (AP.not_interacting(GC) & WN)                         # DIODE(P)
 DN  = (AN.not_interacting(GC) & WP)                         # DIODE(N)
 AD  = (DP + DN)                                             # ALL DIODE 
 #
-CL  = CO.drc( area > 1.0 )                                  # LARGE CONTACT
+CL  = CO.drc( area >= 1.5 )                                 # LARGE CONTACT
 COE = CO & (MPE + MNE)                                      # S/D CONTACT on ESD MOSFET
 CS  = CO - (AR + WC + AD + MPE + MNE)                       # Small CO
 #
@@ -41,11 +40,56 @@ V1P = V1.interacting(PO)                                    # M1 for PAD
 #
 M2P = M2.interacting(PO)                                    # M2 for PAD
 #
-RS  = (GR - (CO & GR).sized(2.0)).and(GR).sized(2.0).and(GR)    # ACTUAL RS
-RR  = (AR - (CO & AR).sized(2.0)).and(AR).sized(2.0).and(AR)    # ACTUAL RR
+CRS = (CO & GR).sized(0.5).sized(-0.5)                      # RS CO merged with 1.0um spacing
+RSW = (GR - (CO & GR).sized(2.0)).sized(2.0)                # RS WIDE SIDE to measure RS Length
+ARW = (AR - (CO & AR).sized(2.0)).sized(2.0)                # AR WIDE SIDE to measure RR Length
+
+RS_raw  = RSW & GR                                          # ACTUAL RS
+RR_raw  = ARW & AR                                          # ACTUAL RR
+
+RST = GR - RS_raw                                           # RS terminals
+RRT = AR - RR_raw                                           # RR terminals
+
+RST_multi_CO = RST.interacting(CRS, 2 .. nil)
+(CRS & RST_multi_CO).output("[EXT] merged CO error. Only one merged CO per RS terminal allowed. Use minimum CO space.")
+RS_raw.non_rectangles.output("[EXT] Invalid RS. Check CO spacing and enclosure.")
+RS = RS_raw.rectangles.not_interacting(RST_multi_CO)        # Valid RS
+
+RRT_multi_CO = RRT.interacting(CO, 2 .. nil)
+(CO & RRT_multi_CO).output("[EXT] Only one CO per RR terminal allowed.")
+RR_raw.non_rectangles.output("[EXT] Invalid RR. Check CO enclosure.")
+RR = RR_raw.rectangles.not_interacting(RRT_multi_CO)        # Valid RR
+
+# AR enclosure of CO must be < 2.0 on 3 sides or else the device won't be extracted properly
+# This is not a DRM rule, but a consequence of the extraction method
+(CO & AR).drc( 2.0 < enclosed(AR.interacting(RR)) < 13.0 ).output('[EXT] can not extract RR if AR enclosure of CO > 2.0')
+# GR enclosure of CO must be < 2.0 on 3 sides or else the device won't be extracted properly
+# This is not a DRM rule, but a consequence of the extraction method
+(CRS - RST_multi_CO).drc( 2.0 < enclosed(GR.interacting(RS)) < 13.0 ).output('[EXT] can not extract RS if GR enclosure of merged CO > 2.0')
 #
-RSW = (GR - (CO & GR).sized(2.0)).and(GR).sized(2.0)        # RS WIDE SIDE to measure RS Length
-ARW = (AR - (CO & AR).sized(2.0)).and(AR).sized(2.0)        # AR WIDE SIDE to measure RR Length
+
+
+RR28 = RR.interacting(RR.edges.inside_part(AR).with_length(2.8), 2 )   # 2.8um width RR
+RR40 = RR.interacting(RR.edges.inside_part(AR).with_length(4.0), 2 )   # 4.0um width RR
+RR60 = RR.interacting(RR.edges.inside_part(AR).with_length(6.0), 2 )   # 6.0um width RR
+RR120 = RR.interacting(RR.edges.inside_part(AR).with_length(12.0), 2 ) # 12.0um width RR
+RR200 = RR.interacting(RR.edges.inside_part(AR).with_length(20.0), 2 ) # 20.0um width RR
+
+RRN = RR28                                 # narrow RR: 2.8um
+RRW = RR40 + RR60 + RR120 + RR200          # wide RR: 4um, 6um, 12um, 20um
+RROK = RRN + RRW
+
+ARNS = AR.edges.interacting(RRN.edges)
+ARWS = AR.edges.interacting(RRW.edges)
+ART = AR.edges.not_interacting(RR_raw.edges).with_angle(ortho)
+
+RS40 = RS.interacting(RS.edges.inside_part(GR).with_length(4.0), 2 )    # 4.0um width RS
+RS60 = RS.interacting(RS.edges.inside_part(GR).with_length(6.0), 2 )    # 6.0um width RS
+RS120 = RS.interacting(RS.edges.inside_part(GR).with_length(12.0), 2 )  # 12.0um width RS
+RS200 = RS.interacting(RS.edges.inside_part(GR).with_length(20.0), 2 )  # 20.0um width RS
+RSOK = RS40 + RS60 + RS120 + RS200                                  # Valid RS resistor widths
+
+GRS = GR.edges.interacting(RS.edges)
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # RR Resistance
