@@ -24,18 +24,13 @@ HFILE = "./DR_csv2drc.head"
 # ------------------------------------------------------------
 
 L = {
-    "WN": "WN",
     "WN(R)": "WR",
     "WN(C)": "WC",
     "WN(M)": "WN - WC",
-    "AP": "AP",
-    "AN": "AN",
     "AN(C)": "AN & WC",
     "AN(R)": "AN & WR",
-    "AR": "AR",
-    "AR(T)": "AR, projection, two_sides_allowed",
+    "AR(T)": "ART",
     "AR(S)": "AR",
-    "AC": "AC",
     "AP+AR": "AP + AR",
     "AP+AC": "AP + AC",
     "AP+AN": "AP + AN",
@@ -45,44 +40,42 @@ L = {
     "AN-GC": "AN - GC",
     "AP(M)": "AP - DP",
     "AN(M)": "AN - DN",
+    "ARN(S)": "ARNS",
+    "ARW(S)": "ARWS",
     "PMOS": "AP & GC",
     "NMOS": "AN & GC",
-    "DP": "DP",
-    "DN": "DN",
     "GC+GR": "GC + GR",
-    "GC": "GC",
     "GC-AP": "GC - AP",
     "GC-AN": "GC - AN",
-    "GR": "GR",
     "GC(G)": "GC & AM",
     "GC(R)": "GC & WR",
-    "CO": "CO",
+    "GR(S)": "GRS",
     "CO(L)": "CL",
     "CO(S)": "CS",
     "CO(C)": "CO & WC",
     "CO(CC)": "CO & AC",
     "CO(M)": "CO & AM",
     "CO(B)": "CO & BG",
-    "CO(G)": "CO & GM",
     "CO(R)": "CO & WR",
     "CO(RR)": "CO & AR",
+    "CO(RRN)": "CO & AR.covering(RRN)",
+    "CO(RRW)": "CO & AR.covering(RRW)",
+    "CO(RS)": "CR & GR",
+    "CO(RSM)": "CRS",
     "CL(RR)": "CL & AR",
+    "CO(RS)": "CO & GR",
     "CO(D)": "CO & AD",
-    "M1": "M1",
     "M1(C)": "M1C",
     "M1(W)": "M1W",
     "V1": "V1 - V1P",
     "V1(P)": "V1P",
-    "M2": "M2",
     "Endcap": "Endcap",
     "Bevel": "Bevel",
     "TieDown": "TieDown",
-    "RR": "RR",
-    "RS": "RS",
-    "RR(L)": "AR  - RR",
-    "RS(L)": "GR  - RS",
-    "RR(W)": "ARW - RR",
-    "RS(W)": "RSW - RS",
+    "RR(W)": "AR  - RR",
+    "RS(W)": "GR  - RS",
+    "RR(L)": "ARW - RR",
+    "RS(L)": "RSW - RS",
     "APE": "MPE",
     "ANE": "MNE",
     "PMOSE": "MPE & GC",
@@ -94,7 +87,6 @@ L = {
     "CO(E)": "COE",
     "CD(E)": "COD",
     "CS(E)": "COS",
-    "PO": "PO",
     "V1(P)": "V1P",
     "M1(P)": "M1P",
     "M2(P)": "M2P",
@@ -106,26 +98,24 @@ L = {
 # ------------------------------------------------------------
 
 def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
-    match L1:
-        case "WR" | "WC":
+    match func:
+        case "Prohibit":
             print(
-                "(%-7s).covering(%-5s).output('%-5s:%2s not in %2s')"
+                "((%-7s) & (%-7s)).output('%-5s:%2s over %2s')"
                 % (L1, L2, rule, L4, L3),
                 file=f,
             )
             return
-        case "CO" | "PO":
+        case "Require":
             print(
-                "(%2s - ( %-12s )).output('%-5s:%2s not on %s')"
+                "((%-7s) - (%-7s)).output('%-5s:%2s outside %s')"
                 % (L1, L2, rule, L3, L4),
                 file=f,
             )
             return
-
-    match L3:
-        case "V1":
+        case "Contain":
             print(
-                "((%-7s) - (%-6s)).output('%-5s:%2s not on %s')"
+                "((%-7s).not_covering(%-6s)).output('%-5s:%2s without %s')"
                 % (L1, L2, rule, L3, L4),
                 file=f,
             )
@@ -133,7 +123,7 @@ def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
 
     print(rule)
 
-Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GC.AP", "GC.AN", "APE.CO", "ANE.CO", "PO.M1", "PO.M2", "V1.CL"] 
+Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GC.AP", "GC.AN", "APE.CO", "ANE.CO", "V1.CL"] 
 
 def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
     if L1 == L2:
@@ -143,7 +133,14 @@ def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
             file=f,
         )
         return
-    elif L3.startswith(L4): # Derived layers spacing to original layers
+    elif rule == "M1.SW": # wide metal1 rule
+        print(
+            "(%-7s).space(%-4.1f).polygons.raw.interacting(%-7s).output('%-5s:%2s-%s %s < %4.1f')"
+            % (L2, min, L1, rule, L3, L4, func, min),
+            file=f,
+        )
+        return
+    elif L3.startswith(L4) or rule.startswith("PO.M"): # Derived layers spacing to original layers
         print(
             "(%-7s).drc(sep(%-7s, transparent) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
             % (L1, L2, min, rule, L3, L4, func, min),
@@ -158,15 +155,16 @@ def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
         )
         if not (rule in Sn_OVERLAP_OK):
             print(
-                "((%-7s) &  (%-7s)                 ).output('%-5s:%2s overlap %s')"
+                "((%-7s) & (%-7s)                  ).output('%-5s:%2s overlap %s')"
                 % (L1, L2, rule, L3, L4),
                 file=f,
             )
 
 
 def print_MX(f, rule, func, L1, L2, L3, L4, min, max):
+    rule_heading = ""
     match rule:
-        case "AC.W1" | "CR.W2":
+        case "AC.W1":
             print(
                 "(%-7s).drc(           width <  %5.1f ).output('%-5s:%2s Wmin < %5.1f')"
                 % (L1, min, rule, L3, min),
@@ -178,62 +176,49 @@ def print_MX(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             return
+        case "CR.W2":
+            print(
+                "(%-7s).drc(         bbox_max < %5.1f ).output('%-5s:%2s Lmin < %5.1f')"
+                % (L1, min, rule, L3, min),
+                file=f,
+            )
+            print(
+                "(%-7s).drc(         bbox_max > %5.1f ).output('%-5s:%2s Lmax > %5.1f')"
+                % (L1, max, rule, L3, max),
+                file=f,
+            )
+            return
         case "GR.W1" | "AR.W1":
-            print("# ----- RES(W) -----", file=f)
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting < %5.1f ).output('%-5s:%2s Wmin < %5.1f')"
-                % (L1, L2, min, rule, L3, min),
-                file=f,
-            )
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting > %5.1f ).output('%-5s:%2s Wmax > %5.1f')"
-                % (L1, L2, max, rule, L3, max),
-                file=f,
-            )
-            print("# ", file=f)
-            return
+            rule_heading = "RES(W)"
+            min_check = "Wmin"
+            max_check = "Wmax"
         case "GR.L1" | "AR.L1":
-            print("# ----- RES(L) -----", file=f)
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting < %5.1f ).output('%-5s:%2s Lmin < %5.1f')"
-                % (L1, L2, min, rule, L3, min),
-                file=f,
-            )
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting > %5.1f ).output('%-5s:%2s Lmax > %5.1f')"
-                % (L1, L2, max, rule, L3, max),
-                file=f,
-            )
-            print("# ", file=f)
-            return
+            rule_heading = "RES(L)"
+            min_check = "Lmin"
+            max_check = "Lmax"
         case "AP.WM" | "AN.WM" | "APE.WM" | "ANE.WM":
-            print("# ----- MOS(W) -----", file=f)
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting < %5.1f ).output('%-5s:%2s Wmin < %5.1f')"
-                % (L1, L2, min, rule, L3, min),
-                file=f,
-            )
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting > %5.1f ).output('%-5s:%2s Wmax > %5.1f')"
-                % (L1, L2, max, rule, L3, max),
-                file=f,
-            )
-            print("# ", file=f)
-            return
+            rule_heading = "MOS(W)"
+            min_check = "Wmin"
+            max_check = "Wmax"
         case "AP.LM" | "AN.LM" | "APE.LM" | "ANE.LM":
-            print("# ----- MOS(L) -----", file=f)
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting < %5.1f ).output('%-5s:%2s Lmin < %5.1f')"
-                % (L1, L2, min, rule, L3, min),
-                file=f,
-            )
-            print(
-                "(%-7s).sep((%-7s), 0.1, projection, projecting > %5.1f ).output('%-5s:%2s Lmax > %5.1f')"
-                % (L1, L2, max, rule, L3, max),
-                file=f,
-            )
-            print("# ", file=f)
-            return
+            rule_heading = "MOS(L)"
+            min_check = "Lmin"
+            max_check = "Lmax"
+
+    if rule_heading:
+        print("# ----- %s -----" % (rule_heading), file=f)
+        print(
+            "(%-7s).sep((%-7s), 0.1, projection, projecting < %5.1f ).output('%-5s:%2s %s < %5.1f')"
+            % (L1, L2, min, rule, L3, min_check, min),
+            file=f,
+        )
+        print(
+            "(%-7s).sep((%-7s), 0.1, projection, projecting > %5.1f ).output('%-5s:%2s %s > %5.1f')"
+            % (L1, L2, max, rule, L3, max_check, max),
+            file=f,
+        )
+        print("# ", file=f)
+        return
 
     print(rule, func)
 
@@ -243,7 +228,7 @@ def print_MX(f, rule, func, L1, L2, L3, L4, min, max):
 
 def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
     match func:
-        case "None":
+        case "Prohibit" | "Require" | "Contain":
             print_Zn(f, rule, func, L1, L2, L3, L4, min, max)
             return
         case "Exist":
@@ -290,20 +275,47 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             return
-        case "Emin":
+        case "Emin/max":
             print(
-                "(%-7s).drc( enclosed(%-7s) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
-                % (L1, L2, min, rule, L3, L4, func, min),
+                "(%-7s).drc( enclosed(%-7s) < %4.1f ).output('%-5s:%2s-%s Emin < %4.1f')"
+                % (L1, L2, min, rule, L3, L4, min),
                 file=f,
             )
+            print(
+                "(%-7s).drc( enclosed(%-7s) > %4.1f ).output('%-5s:%2s-%s Emax > %4.1f')"
+                % (L1, L2, max, rule, L3, L4, max),
+                file=f,
+            )
+            return
+        case "Emin":
+            if rule == "CR.AT":
+                print(
+                    "(%-7s).edges.enclosed((%-7s), %4.1f, projection).output('%-5s:%2s-%s %s < %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
+            else:
+                print(
+                    "(%-7s).drc( enclosed(%-7s) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
             return
         case "Efix":
-            print(
-                "(%-7s).drc(enclosed(%-7s) != %4.1f ).output('%-5s:%2s-%s %s != %4.1f')"
-                % (L1, L2, min, rule, L3, L4, func, min),
-                file=f,
-            )
-            return
+            if rule == "AC.GC":
+                print(
+                    "(%-7s).drc(enclosed(%-7s) != %4.1f ).output('%-5s:%2s-%s %s != %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
+                return
+            else:
+                print(
+                    "(%-7s).edges.not_interacting((%-7s).extended_in(%4.1f).edges).output('%-5s:%2s-%s %s != %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
+                return
         case "Fmin":
             print(
                 "(%-7s).drc(enclosing(%-7s) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
@@ -319,6 +331,21 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             print("# ", file=f)
+            return
+        case "Rect":
+            if max > 0:
+                print_MX(f, rule, "Wmin/max", L1, L2, L3, L4, min, max)
+            elif min > 0:
+                print(
+                    "(%-7s).drc(             width < %4.1f ).output('%-5s:%2s %s < %4.1f')"
+                    % (L1, min, rule, L3, "Wmin", min),
+                    file=f,
+                )
+            print(
+                "(%-7s).non_rectangles.output('%-5s:%2s must be a rectangle')"
+                % (L1, rule, L3),
+                file=f,
+            )
             return
         case "Donut":
             print("# ----- Surrounded -----", file=f)
@@ -355,7 +382,7 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             print(
-                "(%-2s.extents - %2s).drc(       area < %4.2f ).output('%-5s:%2s trimed corner size < %4.2f')"
+                "(%-2s.extents - %2s).drc(       area < %4.2f ).output('%-5s:%2s trimmed corner size < %4.2f')"
                 % (L1, L1, (min ** 2) / 2, rule, L3, (min ** 2) / 2),
                 file=f,
             )
@@ -385,17 +412,14 @@ def read_line(f, row):
 
     else:
         rule = row[0].replace(" ", "")
-        L1 = L[row[1].replace(" ", "")]
-        L2 = L[row[2].replace(" ", "")]
         L3 = row[1].replace(" ", "")
         L4 = row[2].replace(" ", "")
+        L1 = L[L3] if L3 in L else L3 # no longer need to define A = A
+        L2 = L[L4] if L4 in L else L4 # no longer need to define A = A
         func = row[3].replace(" ", "")
 
-        min = float(row[4])
-        if row[5] == "":
-            max = -1.0
-        else:
-            max = float(row[5])
+        min = float(row[4]) if row[4] != "" else -1.0
+        max = float(row[5]) if row[5] != "" else -1.0
 
         gen_drc(f, rule, func, L1, L2, L3, L4, min, max)
         return

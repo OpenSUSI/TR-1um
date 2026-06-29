@@ -407,7 +407,7 @@ def draw_res_p( cell, l, w ,
 #
 def draw_res_d( cell, l, w ,
                co_w : float = DR['CO.W1'].min, 
-               co_s : float = DR['CR.AS'].min, 
+               co_s : float = DR['CR.ASW'].min, 
                co_t : float = DR['CR.AT'].min, 
                r_xy : float = DR['AR.XY'].min,
                co_m : float = DR['M1.CL'].min, 

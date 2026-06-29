@@ -16,8 +16,8 @@ class res_p(pya.PCellDeclarationHelper):
         # Initialize super class.
         super(res_p, self).__init__()
         #
-        self.param("l", self.TypeDouble, "L", default=10.0, unit="um")
-        self.param("w", self.TypeDouble, "W", default=2.0,  unit="um")
+        self.param("l", self.TypeDouble, "L (20 - 100)", default=10.0, unit="um")
+        self.param("w", self.TypeDouble, "W (4, 6, 12, 20)", default=2.0,  unit="um")
 
     def display_text_impl(self):
         # Provide a descriptive text for the cell
@@ -45,8 +45,8 @@ class res_d(pya.PCellDeclarationHelper):
         # Initialize super class.
         super(res_d, self).__init__()
         #
-        self.param("l", self.TypeDouble, "L", default=10.0, unit="um")
-        self.param("w", self.TypeDouble, "W", default=2.0,  unit="um")
+        self.param("l", self.TypeDouble, "L (13 - 100)", default=10.0, unit="um")
+        self.param("w", self.TypeDouble, "W (2.8, 4, 6, 12, 20)", default=2.0,  unit="um")
 
     def display_text_impl(self):
         # Provide a descriptive text for the cell
