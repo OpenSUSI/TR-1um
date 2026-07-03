@@ -82,7 +82,10 @@ else
     else
         puts("Starting TR-1um LVS Comparison in strict port mode")
         puts("flag_missing_ports enabled: missing/mislabeled top-level ports are treated as errors")
-        success = compare && flag_missing_ports
+        # success = compare && flag_missing_ports
+        compare_result = compare
+        port_check_result = flag_missing_ports
+        success = compare_result && port_check_result
     end
     #================================================
     #------------- COMPARISON RESULTS ---------------
