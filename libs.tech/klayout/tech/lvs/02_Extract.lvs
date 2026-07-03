@@ -20,6 +20,7 @@ class LWCapacitorWithBulk < RBA::DeviceClassCapacitorWithBulk
     self.combiner = CAPDeviceCombiner.new
     self.supports_serial_combination = false
     self.supports_parallel_combination = true
+    clear_equivalent_terminal_ids
   end
 end
 #
