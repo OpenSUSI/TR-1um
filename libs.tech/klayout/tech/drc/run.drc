@@ -293,7 +293,7 @@ end
 (PO     ).drc(             space < 64.0 ).output('PO.S1:PO Smin < 64.0')
 (M2P    ).drc(enclosing(PO     ) <  5.0 ).output('M2.PO:M2(P)-PO Fmin <  5.0')
 (M1P    ).drc(enclosing(PO     ) <  5.0 ).output('M1.PO:M1(P)-PO Fmin <  5.0')
-(PO     ).drc( enclosed(V1P    ) < 10.0 ).output('PO.V1:PO-V1(P) Emin < 10.0')
+(PO     ).drc(enclosing(V1P    ) < 10.0 ).output('PO.V1:PO-V1(P) Emin < 10.0')
 (PO     ).drc(      sep(AP     ) < 14.0 ).output('PO.AP:PO-AP Smin < 14.0')
 ((PO     ) & (AP     )                  ).output('PO.AP:PO overlap AP')
 (PO     ).drc(      sep(AN     ) < 14.0 ).output('PO.AN:PO-AN Smin < 14.0')
