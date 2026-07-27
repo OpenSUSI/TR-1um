@@ -87,12 +87,12 @@ end
 (AP     ).drc(      sep(AN     ) <  2.8 ).output('AP.AN:AP-AN Smin <  2.8')
 ((AP     ) & (AN     )                  ).output('AP.AN:AP overlap AN')
 # ----- MOS(W) -----
-(AP & GC).sep((AP - GC), 0.1, projection, projecting <   3.4 ).output('AP.WM:PMOS Wmin <   3.4')
-(AP & GC).sep((AP - GC), 0.1, projection, projecting >  60.0 ).output('AP.WM:PMOS Wmax >  60.0')
+(AP & GC - ESD).sep((AP - GC), 0.1, projection, projecting <   3.4 ).output('AP.WM:PMOS Wmin <   3.4')
+(AP & GC - ESD).sep((AP - GC), 0.1, projection, projecting >  60.0 ).output('AP.WM:PMOS Wmax >  60.0')
 # 
 # ----- MOS(L) -----
-(AP & GC).sep((GC - AN), 0.1, projection, projecting <   1.0 ).output('AP.LM:PMOS Lmin <   1.0')
-(AP & GC).sep((GC - AN), 0.1, projection, projecting >  30.0 ).output('AP.LM:PMOS Lmax >  30.0')
+(AP & GC - ESD).sep((GC - AP), 0.1, projection, projecting <   1.0 ).output('AP.LM:PMOS Lmin <   1.0')
+(AP & GC - ESD).sep((GC - AP), 0.1, projection, projecting >  30.0 ).output('AP.LM:PMOS Lmax >  30.0')
 # 
 (AP     ).drc( enclosed(WN     ) <  7.0 ).output('AP.WN:AP-WN Emin <  7.0')
 (DP     ).drc(             width <  2.8 ).output('DP.W1:DP Wmin <  2.8')
@@ -105,12 +105,12 @@ end
 (AN     ).drc(      sep(AP     ) <  2.8 ).output('AN.AP:AN-AP Smin <  2.8')
 ((AN     ) & (AP     )                  ).output('AN.AP:AN overlap AP')
 # ----- MOS(W) -----
-(AN & GC).sep((AN - GC), 0.1, projection, projecting <   3.4 ).output('AN.WM:NMOS Wmin <   3.4')
-(AN & GC).sep((AN - GC), 0.1, projection, projecting >  60.0 ).output('AN.WM:NMOS Wmax >  60.0')
+(AN & GC - ESD).sep((AN - GC), 0.1, projection, projecting <   3.4 ).output('AN.WM:NMOS Wmin <   3.4')
+(AN & GC - ESD).sep((AN - GC), 0.1, projection, projecting >  60.0 ).output('AN.WM:NMOS Wmax >  60.0')
 # 
 # ----- MOS(L) -----
-(AN & GC).sep((GC - AN), 0.1, projection, projecting <   1.0 ).output('AN.LM:NMOS Lmin <   1.0')
-(AN & GC).sep((GC - AN), 0.1, projection, projecting >  30.0 ).output('AN.LM:NMOS Lmax >  30.0')
+(AN & GC - ESD).sep((GC - AN), 0.1, projection, projecting <   1.0 ).output('AN.LM:NMOS Lmin <   1.0')
+(AN & GC - ESD).sep((GC - AN), 0.1, projection, projecting >  30.0 ).output('AN.LM:NMOS Lmax >  30.0')
 # 
 (AN     ).drc( enclosed(WN - WC) <  5.0 ).output('AN.WN:AN-WN(M) Emin <  5.0')
 (DN     ).drc(             width <  2.8 ).output('DN.W1:DN Wmin <  2.8')
@@ -128,12 +128,8 @@ end
 (GC     ).drc(             space <  1.2 ).output('GC.S1:GC Smin <  1.2')
 (GC     ).drc(      sep(AP     ) <  0.4 ).output('GC.AP:GC-AP Smin <  0.4')
 (GC     ).drc(      sep(AN     ) <  0.4 ).output('GC.AN:GC-AN Smin <  0.4')
-# ----- MOS(EndCap) -----
-(AP & GC).drc( enclosed(GC, projection, without_touching_edges ) <  1.2).output('GC.EP:PMOS Endcap <  1.2')
-# 
-# ----- MOS(EndCap) -----
-(AN & GC).drc( enclosed(GC, projection, without_touching_edges ) <  1.2).output('GC.EN:NMOS Endcap <  1.2')
-# 
+(AP     ).drc( enclosed(GC     ) <  1.2 ).output('GC.EP:AP-GC Emin <  1.2')
+(AN     ).drc( enclosed(GC     ) <  1.2 ).output('GC.EN:AN-GC Emin <  1.2')
 (CO     ).drc(             width <  1.0 ).output('CO.W1:CO Wmin <  1.0')
 (CO     ).non_rectangles.output('CO.W1:CO must be a rectangle')
 (COM    ).drc(             width <  1.0 ).output('CO.WM:CO(M) Wfix <  1.0')
@@ -148,7 +144,6 @@ end
 (CO & AD).drc(             width <  1.2 ).output('CO.WD:CO(D) Wfix <  1.2')
 (CO & AD).drc(          bbox_min <  1.2 ).output('CO.WD:CO(D) bbox_min <  1.2')
 (CO & AD).drc(          bbox_max >  1.2 ).output('CO.WD:CO(D) bbox_max >  1.2')
-(CO & WC).drc(sep(CO     , transparent) <  1.2 ).output('CO.SC:CO(C)-CO Smin <  1.2')
 (CO & AD).drc(sep(CO     , transparent) <  1.2 ).output('CO.SD:CO(D)-CO Smin <  1.2')
 (CO & AD).drc( enclosed(AP + AN) <  1.2 ).output('CO.AD:CO(D)-AP+AN Emin <  1.2')
 (CO     ).drc( enclosed(AP     ) <  0.8 ).output('CO.AP:CO-AP Emin <  0.8')
@@ -210,6 +205,7 @@ end
 (CO & WC).drc(             width <  1.2 ).output('CC.W1:CO(C) Wfix <  1.2')
 (CO & WC).drc(          bbox_min <  1.2 ).output('CC.W1:CO(C) bbox_min <  1.2')
 (CO & WC).drc(          bbox_max >  1.2 ).output('CC.W1:CO(C) bbox_max >  1.2')
+(CO & WC).drc(sep(CO     , transparent) <  1.2 ).output('CO.SC:CO(C)-CO Smin <  1.2')
 (CO & WC).drc( enclosed(AC     ) <  2.9 ).output('CC.AC:CO(C)-AC Emin <  2.9')
 (CO & WC).drc( enclosed(AN     ) <  1.2 ).output('CC.AN:CO(C)-AN Emin <  1.2')
 (CO     ).drc( enclosed(GR     ) <  0.8 ).output('CO.GR:CO-GR Emin <  0.8')
@@ -253,8 +249,8 @@ end
 (MPE & GC).sep((MPE - GC), 0.1, projection, projecting >  60.0 ).output('APE.WM:PMOSE Wmax >  60.0')
 # 
 # ----- MOS(L) -----
-(MPE & GC).sep((GC - MNE), 0.1, projection, projecting <   2.0 ).output('APE.LM:PMOSE Lmin <   2.0')
-(MPE & GC).sep((GC - MNE), 0.1, projection, projecting >  30.0 ).output('APE.LM:PMOSE Lmax >  30.0')
+(MPE & GC).sep((GC - MPE), 0.1, projection, projecting <   2.0 ).output('APE.LM:PMOSE Lmin <   2.0')
+(MPE & GC).sep((GC - MPE), 0.1, projection, projecting >  30.0 ).output('APE.LM:PMOSE Lmax >  30.0')
 # 
 (MPE    ).drc(      sep(AN     ) < 10.0 ).output('APE.AN:APE-AN Smin < 10.0')
 ((MPE    ) & (AN     )                  ).output('APE.AN:APE overlap AN')

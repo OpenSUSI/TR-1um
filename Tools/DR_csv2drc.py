@@ -44,8 +44,8 @@ L = {
     "AN(M)": "AN - DN",
     "ARN(S)": "ARNS",
     "ARW(S)": "ARWS",
-    "PMOS": "AP & GC",
-    "NMOS": "AN & GC",
+    "PMOS": "AP & GC - ESD",
+    "NMOS": "AN & GC - ESD",
     "GC+GR": "GC + GR",
     "GC-AP": "GC - AP",
     "GC-AN": "GC - AN",
@@ -355,15 +355,15 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             return
-        case "ECmin":
-            print("# ----- MOS(EndCap) -----", file=f)
-            print(
-                "(%-7s).drc( enclosed(%2s, projection, without_touching_edges ) < %4.1f).output('%-5s:%2s Endcap < %4.1f')"
-                % (L1, L2, min, rule, L3, min),
-                file=f,
-            )
-            print("# ", file=f)
-            return
+#        case "ECmin":
+#            print("# ----- MOS(EndCap) -----", file=f)
+#            print(
+#                "(%-7s).drc( enclosed(%2s, projection, without_touching_edges ) < %4.1f).output('%-5s:%2s Endcap < %4.1f')"
+#                % (L1, L2, min, rule, L3, min),
+#                file=f,
+#            )
+#            print("# ", file=f)
+#            return
         case "Rect":
             if max > 0:
                 print_MX(f, rule, "Wmin/max", L1, L2, L3, L4, min, max)
