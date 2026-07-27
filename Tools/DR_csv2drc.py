@@ -29,6 +29,8 @@ L = {
     "WN(M)": "WN - WC",
     "AN(C)": "AN & WC",
     "AN(R)": "AN & WR",
+    "AN(T)": "ANT",
+    "AP(T)": "APT",
     "AR(T)": "ART",
     "AR(S)": "AR",
     "AP+AR": "AP + AR",
@@ -42,8 +44,8 @@ L = {
     "AN(M)": "AN - DN",
     "ARN(S)": "ARNS",
     "ARW(S)": "ARWS",
-    "PMOS": "AP & GC",
-    "NMOS": "AN & GC",
+    "PMOS": "AP & GC - ESD",
+    "NMOS": "AN & GC - ESD",
     "GC+GR": "GC + GR",
     "GC-AP": "GC - AP",
     "GC-AN": "GC - AN",
@@ -54,8 +56,8 @@ L = {
     "CO(S)": "CS",
     "CO(C)": "CO & WC",
     "CO(CC)": "CO & AC",
-    "CO(M)": "CO & AM",
-    "CO(B)": "CO & BG",
+    "CO(M)": "COM",
+    "CO(B)": "CO & BGM",
     "CO(R)": "CO & WR",
     "CO(RR)": "CO & AR",
     "CO(RRN)": "CO & AR.covering(RRN)",
@@ -124,6 +126,7 @@ def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
     print(rule)
 
 Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GC.AP", "GC.AN", "APE.CO", "ANE.CO", "V1.CL"] 
+Sn_CROSS_NG = ["WN.AP", "WN.AN", "APE.CO", "ANE.CO", "V1.CL"] 
 
 def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
     if L1 == L2:
@@ -157,6 +160,12 @@ def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
             print(
                 "((%-7s) & (%-7s)                  ).output('%-5s:%2s overlap %s')"
                 % (L1, L2, rule, L3, L4),
+                file=f,
+            )
+        elif rule in Sn_CROSS_NG:
+            print(
+                "((%-7s).overlapping(%-7s).not_inside(%-7s)).output('%-5s:%2s overlap %s')"
+                % (L2, L1, L1, rule, L3, L4),
                 file=f,
             )
 
@@ -269,11 +278,34 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
             print_Sn(f, rule, func, L1, L2, L3, L4, min, max)
             return
         case "Sfix":
-            print(
-                "(%-7s).drc(     sep(%-7s) != %4.1f ).output('%-5s:%2s-%s %s != %4.1f')"
-                % (L1, L2, min, rule, L3, L4, func, min),
-                file=f,
-            )
+            if rule in ["CO.SM", "COE.SE"]:
+                print(
+                    "(%-7s).drc(     sep(%-7s) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
+                print(
+                    "(%-7s).not_interacting((%s_e + %s_s).raw, 2).output('%-5s:%2s-%s %s != %4.1f or off-center/missing %s')"
+                    % (L2, L1, L1, rule, L3, L4, func, max, L3),
+                    file=f,
+                )
+            elif rule in ["CO.GG", "CDE.GC", "CSE.GC"]:
+                print(
+                    "(%-7s).drc(     sep(%-7s) < %4.1f ).output('%-5s:%2s-%s %s < %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
+                print(
+                    "(%s_ext%d - (%s_e + %s_s + %s).edges).output('%-5s:%2s-%s %s != %4.1f or off-center/missing %s')"
+                    % (L2, int(min), L1, L1, L1, rule, L3, L4, func, min, L3),
+                    file=f,
+                )
+            else:
+                print(
+                    "(%-7s).drc(     sep(%-7s) != %4.1f ).output('%-5s:%2s-%s %s != %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
             return
         case "Emin/max":
             print(
@@ -288,7 +320,7 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
             )
             return
         case "Emin":
-            if rule == "CR.AT":
+            if rule in ["CR.AT", "COE.APT", "COE.ANT"]:
                 print(
                     "(%-7s).edges.enclosed((%-7s), %4.1f, projection).output('%-5s:%2s-%s %s < %4.1f')"
                     % (L1, L2, min, rule, L3, L4, func, min),
@@ -323,15 +355,15 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             return
-        case "ECmin":
-            print("# ----- MOS(EndCap) -----", file=f)
-            print(
-                "(%-7s).drc( enclosed(%2s, projection, without_touching_edges ) < %4.1f).output('%-5s:%2s Endcap < %4.1f')"
-                % (L1, L2, min, rule, L3, min),
-                file=f,
-            )
-            print("# ", file=f)
-            return
+#        case "ECmin":
+#            print("# ----- MOS(EndCap) -----", file=f)
+#            print(
+#                "(%-7s).drc( enclosed(%2s, projection, without_touching_edges ) < %4.1f).output('%-5s:%2s Endcap < %4.1f')"
+#                % (L1, L2, min, rule, L3, min),
+#                file=f,
+#            )
+#            print("# ", file=f)
+#            return
         case "Rect":
             if max > 0:
                 print_MX(f, rule, "Wmin/max", L1, L2, L3, L4, min, max)

@@ -11,24 +11,37 @@ WC  = WN.covering(AC)                                       # Nwell for CSIO
 WM  = WN.covering(AP)                                       # Nwell for PMOS
 #
 AA  = (AN + AP + AC + AR)                                   # ALL ACTIVE
+GA  = (GC + GR)                                             # ALL POLY
 #
-MP  = (AP.interacting(GC) & WN - ESD)                       # PMOS
-MN  = (AN.interacting(GC) & WP - ESD)                       # NMOS
+MP  = (AP.interacting(GC) & WN - ESD)                       # PMOS diffusion
+MN  = (AN.interacting(GC) & WP - ESD)                       # NMOS diffusion
 AM  = (MP + MN)                                             # ALL MOS
+AM_h = AM.edges.interacting(GC)                             # MOS diffusion edges crossing poly
 #
 MPE = (AP.interacting(GC) & WN & ESD)                       # PMOS (ESD)
 MNE = (AN.interacting(GC) & WP & ESD)                       # NMOS (ESD)
+AME = (MPE + MNE)                                           # ALL MOS (ESD)
+AME_h = AME.edges.interacting(GC)                           # MOS (ESD) diffusion edges crossing poly
 #
 GP  = (AN & WN)                                             # BG-contact (PMOS) (poly interaction not relevant)
 GN  = (AP & WP)                                             # BG-contact (NMOS) (poly interaction not relevant)
-BG  = ((GP + GN) - WC)                                      # BG-contact except for CSIO
+BG  = (GP + GN)                                             # BG-contact
+BGM = (BG - WC)                                             # BG-contact except for CSIO
 #
 DP  = (AP.not_interacting(GC) & WN)                         # DIODE(P)
 DN  = (AN.not_interacting(GC) & WP)                         # DIODE(N)
 AD  = (DP + DN)                                             # ALL DIODE 
 #
 CL  = CO.drc( area >= 1.5 )                                 # LARGE CONTACT
+COM = CO & (MP + MN)                                        # S/D CONTACT on MOSFET
+COM_s = COM.drc((space(projection) <= 1.0).polygons) # Requires width and space from DRM
+# end of row diffusion contacts. enclosure is half max enclosure allowed without adding another CO
+COM_e = COM.edges.enclosed(AM_h, 0.8+1.0+1.dbu, projection).polygons
 COE = CO & (MPE + MNE)                                      # S/D CONTACT on ESD MOSFET
+COE_s = COE.drc((space(projection) <= 1.6).polygons) # Requires width and space from DRM
+# end of row diffusion contacts. enclosure is half max enclosure allowed without adding another CO
+# DRM calculates to 4.8um, but actual layout is 5.1um, so add 0.3um fudge factor
+COE_e = COE.edges.enclosed(AME_h, 2.5+(1.6+3.0)/2+0.3+1.dbu, projection).polygons
 CS  = CO - (AR + WC + AD + MPE + MNE)                       # Small CO
 #
 M1W = M1.sized(-5.0).merged.sized(5.0).merged               # WIDE M1
@@ -108,6 +121,13 @@ SDP  = (MP  - GC)               # MP S/D
 SDN  = (MN  - GC)               # MN S/D
 SDPE = (MPE - GC)               # MPE S/D
 SDNE = (MNE - GC)               # MNE S/D
+SDC  = (AM - GC).interacting(CO)  # Normal mos source/drain with CO
+SDEC = (AME - GC).interacting(CO) # ESD mos source/drain with CO
+#
+GC_ext1 = GA.edges.inside_part(AM).extended_out(1.0).edges.inside_part(SDC)
+# ESD diffusion long side
+APT = MPE.edges.not_interacting(GC).with_angle(ortho)
+ANT = MNE.edges.not_interacting(GC).with_angle(ortho)
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Global node

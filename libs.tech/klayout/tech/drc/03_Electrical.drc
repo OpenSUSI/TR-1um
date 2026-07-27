@@ -6,8 +6,24 @@
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Drain connected to Backgate
 #
-COS = ( SDPE & antenna_check(GP, CO, 0.0)) + ( SDNE & antenna_check(GN, CO, 0.0))
-COD = (((SDPE & CO) + (SDNE & CO)) - COS)
+COSP = (SDPE & antenna_check(GP, CO, 0.0))
+COSN = (SDNE & antenna_check(GN, CO, 0.0))
+COS  = (COSP + COSN)
+CODP = (SDPE & CO - COS)
+CODN = (SDNE & CO - COS)
+COD  = (CODP + CODN)
+COD_s = COD.drc((space(projection) <= 1.6).polygons) # Requires width and space from DRM
+COS_s = COS.drc((space(projection) <= 1.6).polygons) # Requires width and space from DRM
+# end of row diffusion contacts. enclosure is half max enclosure allowed without adding another CO
+# DRM calculates to 4.8um, but actual layout is 5.1um, so add 0.3um fudge factor
+COD_e = COD.edges.enclosed(AME_h, 2.5+(1.6+3.0)/2+0.3+1.dbu, projection).polygons
+COS_e = COS.edges.enclosed(AME_h, 2.5+(1.6+3.0)/2+0.3+1.dbu, projection).polygons
+
+SE = (SDPE + SDNE).select_covering(COS)
+DE = (SDPE + SDNE).select_covering(COD)
+
+GC_ext3 = GA.edges.inside_part(AME).extended_out(3.0).edges.inside_part(SE)
+GC_ext7 = GA.edges.inside_part(AME).extended_out(7.0).edges.inside_part(DE)
 # COS.output("SOURCE")      # DEBUG
 # COD.output("DRAIN")       # DEBUG
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
