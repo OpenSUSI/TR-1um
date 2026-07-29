@@ -125,7 +125,7 @@ def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
 
     print(rule)
 
-Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GC.AP", "GC.AN", "APE.CO", "ANE.CO", "V1.CL"] 
+Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GA.AP", "GA.AN", "APE.CO", "ANE.CO", "V1.CL"] 
 Sn_CROSS_NG = ["WN.AP", "WN.AN", "APE.CO", "ANE.CO", "V1.CL"] 
 
 def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
@@ -173,7 +173,7 @@ def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
 def print_MX(f, rule, func, L1, L2, L3, L4, min, max):
     rule_heading = ""
     match rule:
-        case "AC.W1":
+        case "AC.W1" | "CO.W1":
             print(
                 "(%-7s).drc(           width <  %5.1f ).output('%-5s:%2s Wmin < %5.1f')"
                 % (L1, min, rule, L3, min),
@@ -393,6 +393,15 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
             print(
                 "((%-7s) - antenna_check((%-2s), GC, 0.0)).output('%-5s:%2s must tie down to %s')"
                 % (L1, L2, rule, L3, L4),
+                file=f,
+            )
+            print("# ", file=f)
+            return
+        case "Ext":
+            print("# ----- Extended Pad Output Rule -----", file=f)
+            print(
+                "((%-7s).sized(%.1f, size_inside(%s), steps(%d)) - (%s).sized(-%.1f+1.dbu).sized(%.1f-1.dbu)).output('%-5s:%2s lead out must be %.1fum wide for %.1fum')"
+                % (L1, min, L2, int(min), L2, max / 2.0, max / 2.0, rule, L3, max, min),
                 file=f,
             )
             print("# ", file=f)

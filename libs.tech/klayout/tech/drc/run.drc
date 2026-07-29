@@ -50,7 +50,7 @@ end
 # Cat-2:  WN-AC/AR related
 #
 (WN     ).drc(             width <  8.0 ).output('WN.W1:WN Wmin <  8.0')
-(WN     ).drc(             space < 12.0 ).output('WN.S1:WN Smin < 12.0')
+(WN     ).drc(             space <  7.0 ).output('WN.S1:WN Smin <  7.0')
 (WR     ).drc(sep(WN     , transparent) <  9.5 ).output('WN.S2:WN(R)-WN Smin <  9.5')
 (WC     ).drc(sep(WN     , transparent) < 12.0 ).output('WN.S3:WN(C)-WN Smin < 12.0')
 (WR     ).drc(      sep(WC     ) <  9.5 ).output('WN.S4:WN(R)-WN(C) Smin <  9.5')
@@ -95,7 +95,7 @@ end
 (AP & GC - ESD).sep((GC - AP), 0.1, projection, projecting >  30.0 ).output('AP.LM:PMOS Lmax >  30.0')
 # 
 (AP     ).drc( enclosed(WN     ) <  7.0 ).output('AP.WN:AP-WN Emin <  7.0')
-(DP     ).drc(             width <  2.8 ).output('DP.W1:DP Wmin <  2.8')
+(DP     ).drc(             width <  3.6 ).output('DP.W1:DP Wmin <  3.6')
 (DP     ).drc(             space <  1.4 ).output('DP.S1:DP Smin <  1.4')
 (DP     ).drc(      sep(AP - DP) <  2.8 ).output('DP.AP:DP-AP(M) Smin <  2.8')
 (DP     ).drc(      sep(AN     ) <  2.8 ).output('DP.AN:DP-AN Smin <  2.8')
@@ -113,7 +113,7 @@ end
 (AN & GC - ESD).sep((GC - AN), 0.1, projection, projecting >  30.0 ).output('AN.LM:NMOS Lmax >  30.0')
 # 
 (AN     ).drc( enclosed(WN - WC) <  5.0 ).output('AN.WN:AN-WN(M) Emin <  5.0')
-(DN     ).drc(             width <  2.8 ).output('DN.W1:DN Wmin <  2.8')
+(DN     ).drc(             width <  3.6 ).output('DN.W1:DN Wmin <  3.6')
 (DN     ).drc(             space <  1.4 ).output('DN.S1:DN Smin <  1.4')
 (DN     ).drc(      sep(AP     ) <  2.8 ).output('DN.AP:DN-AP Smin <  2.8')
 ((DN     ) & (AP     )                  ).output('DN.AP:DN overlap AP')
@@ -126,11 +126,16 @@ end
 #
 (GC     ).drc(             width <  1.0 ).output('GC.W1:GC Wmin <  1.0')
 (GC     ).drc(             space <  1.2 ).output('GC.S1:GC Smin <  1.2')
-(GC     ).drc(      sep(AP     ) <  0.4 ).output('GC.AP:GC-AP Smin <  0.4')
-(GC     ).drc(      sep(AN     ) <  0.4 ).output('GC.AN:GC-AN Smin <  0.4')
+(GC     ).drc(      sep(GR     ) <  1.2 ).output('GC.GR:GC-GR Smin <  1.2')
+((GC     ) & (GR     )                  ).output('GC.GR:GC overlap GR')
+(GA     ).drc(      sep(AP     ) <  0.4 ).output('GA.AP:GA-AP Smin <  0.4')
+(GA     ).drc(      sep(AN     ) <  0.4 ).output('GA.AN:GA-AN Smin <  0.4')
 (AP     ).drc( enclosed(GC     ) <  1.2 ).output('GC.EP:AP-GC Emin <  1.2')
 (AN     ).drc( enclosed(GC     ) <  1.2 ).output('GC.EN:AN-GC Emin <  1.2')
-(CO     ).drc(             width <  1.0 ).output('CO.W1:CO Wmin <  1.0')
+((GA     ) & (BG     )).output('GA.BG:BG over GA')
+((GA     ).not_covering(CO    )).output('GA.CO:GA without CO')
+(CO     ).drc(           width <    1.0 ).output('CO.W1:CO Wmin <   1.0')
+(CO     ).drc(           width >   97.0 ).output('CO.W1:CO Wmax >  97.0')
 (CO     ).non_rectangles.output('CO.W1:CO must be a rectangle')
 (COM    ).drc(             width <  1.0 ).output('CO.WM:CO(M) Wfix <  1.0')
 (COM    ).drc(          bbox_min <  1.0 ).output('CO.WM:CO(M) bbox_min <  1.0')
@@ -139,6 +144,7 @@ end
 (CO & BGM).drc(          bbox_min <  1.0 ).output('CO.WB:CO(B) bbox_min <  1.0')
 (CO & BGM).drc(          bbox_max >  1.0 ).output('CO.WB:CO(B) bbox_max >  1.0')
 (CO     ).drc(             space <  1.0 ).output('CO.S1:CO Smin <  1.0')
+(CL     ).drc(sep(CO     , transparent) <  1.6 ).output('CO.CL:CO(L)-CO Smin <  1.6')
 (COM    ).drc(     sep(COM    ) <  1.0 ).output('CO.SM:CO(M)-CO(M) Sfix <  1.0')
 (COM    ).not_interacting((COM_e + COM_s).raw, 2).output('CO.SM:CO(M)-CO(M) Sfix !=  1.0 or off-center/missing CO(M)')
 (CO & AD).drc(             width <  1.2 ).output('CO.WD:CO(D) Wfix <  1.2')
@@ -218,7 +224,6 @@ end
 # Cat-6: BEOL related
 #
 (M1     ).drc(             width <  1.8 ).output('M1.W1:M1 Wmin <  1.8')
-(M1W    ).drc(             width < 10.0 ).output('M1.W2:M1(W) Wmin < 10.0')
 (M1     ).drc(             space <  1.4 ).output('M1.S1:M1 Smin <  1.4')
 (M1     ).drc(enclosing(CO     ) <  0.8 ).output('M1.CO:M1-CO Fmin <  0.8')
 (M1     ).drc(enclosing(CO & AC) <  1.3 ).output('M1.CC:M1-CO(CC) Fmin <  1.3')
@@ -229,8 +234,8 @@ end
 (V1 - V1P).drc(          bbox_max >  1.4 ).output('V1.W1:V1 bbox_max >  1.4')
 (V1 - V1P).drc(             space <  1.5 ).output('V1.S1:V1 Smin <  1.5')
 (V1 - V1P).drc( enclosed(M1     ) <  1.0 ).output('V1.M1:V1-M1 Emin <  1.0')
-(V1 - V1P).drc(      sep(GC     ) <  1.2 ).output('V1.GC:V1-GC Smin <  1.2')
-((V1 - V1P) & (GC     )                  ).output('V1.GC:V1 overlap GC')
+(V1 - V1P).drc(      sep(GA     ) <  1.2 ).output('V1.GA:V1-GA Smin <  1.2')
+((V1 - V1P) & (GA     )                  ).output('V1.GA:V1 overlap GA')
 (V1 - V1P).drc(      sep(CO     ) <  1.0 ).output('V1.CO:V1-CO Smin <  1.0')
 ((V1 - V1P) & (CO     )                  ).output('V1.CO:V1 overlap CO')
 (V1 - V1P).drc(      sep(CL     ) <  1.4 ).output('V1.CL:V1-CO(L) Smin <  1.4')
@@ -296,19 +301,31 @@ end
 # ----- ----- ----- ----- ----- ----- ----- ----- 
 # Cat-8: PAD related
 #
-(PO     ).drc(             width < 70.0 ).output('PO.W1:PO Wmin < 70.0')
-(PO     ).drc(             space < 64.0 ).output('PO.S1:PO Smin < 64.0')
-(M2P    ).drc(enclosing(PO     ) <  5.0 ).output('M2.PO:M2(P)-PO Fmin <  5.0')
-(M1P    ).drc(enclosing(PO     ) <  5.0 ).output('M1.PO:M1(P)-PO Fmin <  5.0')
-(PO     ).drc( enclosed(V1P    ) < 10.0 ).output('PO.V1:PO-V1(P) Emin < 10.0')
-(PO     ).drc(      sep(AP     ) < 14.0 ).output('PO.AP:PO-AP Smin < 14.0')
-((PO     ) & (AP     )                  ).output('PO.AP:PO overlap AP')
-(PO     ).drc(      sep(AN     ) < 14.0 ).output('PO.AN:PO-AN Smin < 14.0')
-((PO     ) & (AN     )                  ).output('PO.AN:PO overlap AN')
-(PO     ).drc(      sep(GC     ) < 14.0 ).output('PO.GC:PO-GC Smin < 14.0')
-((PO     ) & (GC     )                  ).output('PO.GC:PO overlap GC')
-(PO     ).drc(sep(M1     , transparent) < 14.0 ).output('PO.M1:PO-M1 Smin < 14.0')
-(PO     ).drc(sep(M2     , transparent) < 14.0 ).output('PO.M2:PO-M2 Smin < 14.0')
+(PO     ).drc(             width < 10.0 ).output('PO.W1:PO Wmin < 10.0')
+(PO     ).non_rectangles.output('PO.W1:PO must be a rectangle')
+(PO     ).drc(             space < 20.0 ).output('PO.S1:PO Smin < 20.0')
+(PP     ).drc(             width < 70.0 ).output('PP.W1:PP Wmin < 70.0')
+(PP     ).drc(             space < 64.0 ).output('PP.S1:PP Smin < 64.0')
+(M1     ).drc(enclosing(PO     ) <  5.0 ).output('M1.PO:M1-PO Fmin <  5.0')
+(M2     ).drc(enclosing(PO     ) <  5.0 ).output('M2.PO:M2-PO Fmin <  5.0')
+(M1     ).drc(enclosing(V1P    ) < 10.0 ).output('M1.V1P:M1-V1(P) Fmin < 10.0')
+(M2     ).drc(enclosing(V1P    ) < 10.0 ).output('M2.V1P:M2-V1(P) Fmin < 10.0')
+(M1P    ).drc(      sep(AA     ) < 14.0 ).output('M1P.AA:M1(P)-AA Smin < 14.0')
+((M1P    ) & (AA     )                  ).output('M1P.AA:M1(P) overlap AA')
+(M2P    ).drc(      sep(AA     ) < 14.0 ).output('M2P.AA:M2(P)-AA Smin < 14.0')
+((M2P    ) & (AA     )                  ).output('M2P.AA:M2(P) overlap AA')
+(M1P    ).drc(      sep(GA     ) < 14.0 ).output('M1P.GA:M1(P)-GA Smin < 14.0')
+((M1P    ) & (GA     )                  ).output('M1P.GA:M1(P) overlap GA')
+(M2P    ).drc(      sep(GA     ) < 14.0 ).output('M1P.GA:M2(P)-GA Smin < 14.0')
+((M2P    ) & (GA     )                  ).output('M1P.GA:M2(P) overlap GA')
+(M1P    ).drc(sep(M1     , transparent) < 14.0 ).output('M1P.M1:M1(P)-M1 Smin < 14.0')
+(M2P    ).drc(sep(M2     , transparent) < 14.0 ).output('M2P.M2:M2(P)-M2 Smin < 14.0')
+# ----- Extended Pad Output Rule -----
+((M1P    ).sized(14.0, size_inside(M1), steps(14)) - (M1).sized(-20.0+1.dbu).sized(20.0-1.dbu)).output('M1P.PE:M1(P) lead out must be 40.0um wide for 14.0um')
+# 
+# ----- Extended Pad Output Rule -----
+((M2P    ).sized(14.0, size_inside(M2), steps(14)) - (M2).sized(-20.0+1.dbu).sized(20.0-1.dbu)).output('M2P.PE:M2(P) lead out must be 40.0um wide for 14.0um')
+# 
 # ----- ----- ----- ----- ----- ----- ----- ----- 
 # NOTICE: THIS IS AUTO-GENERATED by DRC_csv2drc.py
 # NOTICE: DO NOT EDIT DIRECTLY
