@@ -127,7 +127,7 @@ def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
 
     print(rule)
 
-Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GA.AP", "GA.AN", "APE.CO", "ANE.CO", "V1.CL"] 
+Sn_OVERLAP_OK = ["WN.S2", "WN.S3", "WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GA.AP", "GA.AN", "APE.CO", "ANE.CO", "V1.CL"] 
 Sn_CROSS_NG = ["WN.AP", "WN.AN", "APE.CO", "ANE.CO"]
 
 def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
