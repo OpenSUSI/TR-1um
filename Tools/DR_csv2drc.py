@@ -26,7 +26,7 @@ HFILE = "./DR_csv2drc.head"
 L = {
     "WN(R)": "WR",
     "WN(C)": "WC",
-    "WN(M)": "WN - WC",
+    "WN(M)": "WN - WC - WR",
     "AN(C)": "AN & WC",
     "AN(R)": "AN & WR",
     "AN(T)": "ANT",
@@ -91,7 +91,9 @@ L = {
     "CS(E)": "COS",
     "V1(P)": "V1P",
     "M1(P)": "M1P",
+    "M1(I)": "M1 - M1P - AC",
     "M2(P)": "M2P",
+    "M2(I)": "M2 - M2P",
     "": "XXX",
 }
 
@@ -117,7 +119,7 @@ def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
             return
         case "Contain":
             print(
-                "((%-7s).not_covering(%-6s)).output('%-5s:%2s without %s')"
+                "((%-7s).outside(%-6s)).output('%-5s:%2s without %s')"
                 % (L1, L2, rule, L3, L4),
                 file=f,
             )
@@ -126,7 +128,7 @@ def print_Zn(f, rule, func, L1, L2, L3, L4, min, max):
     print(rule)
 
 Sn_OVERLAP_OK = ["WN.S4", "WN.AP", "WN.AN", "DP.AP", "DN.AN", "GA.AP", "GA.AN", "APE.CO", "ANE.CO", "V1.CL"] 
-Sn_CROSS_NG = ["WN.AP", "WN.AN", "APE.CO", "ANE.CO", "V1.CL"] 
+Sn_CROSS_NG = ["WN.AP", "WN.AN", "APE.CO", "ANE.CO"]
 
 def print_Sn(f, rule, func, L1, L2, L3, L4, min, max):
     if L1 == L2:
@@ -247,10 +249,24 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             return
+        case "Nmin":
+            print(
+                "(%-7s).drc(             notch < %4.1f ).output('%-5s:%2s %s < %4.1f')"
+                % (L1, min, rule, L3, func, min),
+                file=f,
+            )
+            return
         case "Wmin":
             print(
                 "(%-7s).drc(             width < %4.1f ).output('%-5s:%2s %s < %4.1f')"
                 % (L1, min, rule, L3, func, min),
+                file=f,
+            )
+            return
+        case "Wmax":
+            print(
+                "(%-7s).sized(%.2f).sized(%.2f).output('%-5s:%2s %s > %4.1f')"
+                % (L1, - max / 2.0, max / 2.0, rule, L3, func, max),
                 file=f,
             )
             return
