@@ -38,5 +38,5 @@ GC_DN = antenna_check(DN,   GC, 0.0)
 GC_GP = antenna_check(GP,   GC, 0.0)
 GC_GN = antenna_check(GN,   GC, 0.0)
 #
-GC_FL = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC+GN))  # Floating Gate
+GC_FL = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN))  # Floating Gate
 #

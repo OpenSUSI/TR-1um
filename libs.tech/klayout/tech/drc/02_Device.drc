@@ -46,12 +46,14 @@ CS  = CO - (AR + WC + AD + MPE + MNE)                       # Small CO
 #
 M1W = M1.sized(-5.0).merged.sized(5.0).merged               # WIDE M1
 M1C = ((M1 & WC).not_interacting(AC)) & AN                  # M1 for GUARD-RING (CSIO)
-M1P = M1.interacting(PO)                                    # M1 for PAD
+M1P = M1.interacting(PO).sized(-35.0).sized(35.0)           # M1 for PAD
 # M1W.output("M1W")                                         # DEBUG
 #
 V1P = V1.interacting(PO)                                    # M1 for PAD
 #
-M2P = M2.interacting(PO)                                    # M2 for PAD
+M2P = M2.interacting(PO).sized(-35.0).sized(35.0)           # M2 for PAD
+#
+PP = PO.with_bbox_max(70.0 ..)                              # Bonding pads have at least one dimension as 70um
 #
 CRS = (CO & GR).sized(0.5).sized(-0.5)                      # RS CO merged with 1.0um spacing
 RSW = (GR - (CO & GR).sized(2.0)).sized(2.0)                # RS WIDE SIDE to measure RS Length
