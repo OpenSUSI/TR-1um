@@ -53,7 +53,7 @@ V1P = V1.interacting(PO)                                    # M1 for PAD
 #
 M2P = M2.interacting(PO).sized(-35.0).sized(35.0)           # M2 for PAD
 #
-PP = PO.with_bbox_max(70.0)                                 # Bonding pads have at least one dimension as 70um
+PP = PO.with_bbox_max(70.0 ..)                              # Bonding pads have at least one dimension as 70um
 #
 CRS = (CO & GR).sized(0.5).sized(-0.5)                      # RS CO merged with 1.0um spacing
 RSW = (GR - (CO & GR).sized(2.0)).sized(2.0)                # RS WIDE SIDE to measure RS Length
