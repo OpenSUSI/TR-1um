@@ -23,8 +23,10 @@ GC    = input(8,   1).not(MASK + SCRB)    # Salisaide for Gate
 GR    = input(8,   2).not(MASK + SCRB)    # Salisaide for Resistor
 CO    = input(11,  0).not(MASK + SCRB)    # Contact
 M1    = input(13,  0).not(MASK + SCRB)    # Metal-1
+M1S   = input(13,  0).not(MASK).and(SCRB) # Metal-1 scribe
 V1    = input(19,  0).not(MASK + SCRB)    # Via1
 M2    = input(20,  0).not(MASK + SCRB)    # Metal-2
+M2S   = input(20,  0).not(MASK).and(SCRB) # Metal-2 scribe
 PO    = input(14,  0).not(MASK + SCRB)    # PAD
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
