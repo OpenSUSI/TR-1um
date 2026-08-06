@@ -40,3 +40,28 @@ GC_GN = antenna_check(GN,   GC, 0.0)
 #
 GC_FL = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN))  # Floating Gate
 #
+# Select Top
+#
+TOPCELL = layout.cell_name
+if SCRB.is_empty?
+    source_topcell  = source.select("-*", "+#{TOPCELL}")
+else
+    source_topcell = source.select("-*")
+end
+#
+# Select Top Metal Labels
+#
+M1LBL_TOP = source_topcell.labels(48, 0).texts(as_boxes)  # Top M1 Label
+M2LBL_TOP = source_topcell.labels(49, 0).texts(as_boxes)  # Top M2 Label
+#
+# Top Pins and labels connection
+#
+connect(M1,   M1LBL_TOP)  # Attaches M1 top labels
+connect(M2,   M2LBL_TOP)  # Attaches M2 top labels
+#
+# Gate electrically connected to Substrate
+#
+GC_M1LBL_TOP = antenna_check(M1LBL_TOP, GC, 0.0)
+GC_M2LBL_TOP = antenna_check(M2LBL_TOP, GC, 0.0)
+#
+GC_FL_LBL_TOP = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN + GC_M1LBL_TOP + GC_M2LBL_TOP))  # Floating Gate

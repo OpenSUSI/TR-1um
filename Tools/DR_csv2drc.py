@@ -462,7 +462,7 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
         case "ANTE":
             print("# ----- Floating Gate -----", file=f)
             print(
-                "( GC_FL ).output('%-5s:%2s must electrically connect to Substrate')"
+                "( GC_FL_LBL_TOP ).output('%-5s:%2s must electrically connect to Substrate (or text if not chip level)')"
                 % (rule, L3),
                 file=f,
             )
