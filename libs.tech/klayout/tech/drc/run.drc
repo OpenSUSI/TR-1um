@@ -345,5 +345,5 @@ GC_EP_check.interacting((GC_EP_check.edges & GC_EP_side.edges), 2 ..).output('GC
 # Cat-9: Electrical / Optional
 #
 # ----- Floating Gate -----
-( GC_FL ).output('GC.ANT:GC must electrically connect to Substrate')
+( GC_FL_LBL_TOP ).output('GC.ANT:GC must electrically connect to Substrate (or text if not chip level)')
 # 
