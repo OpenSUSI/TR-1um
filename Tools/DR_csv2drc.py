@@ -92,8 +92,10 @@ L = {
     "V1(P)": "V1P",
     "M1(P)": "M1P",
     "M1(I)": "M1 - M1P - AC",
+    "M1(S)": "M1S",
     "M2(P)": "M2P",
     "M2(I)": "M2 - M2P",
+    "M2(S)": "M2S",
     "": "XXX",
 }
 
@@ -293,6 +295,19 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
         case "Smin":
             print_Sn(f, rule, func, L1, L2, L3, L4, min, max)
             return
+        case "Smin/Smax":
+            if rule in ["M1.SC"]:
+                print(
+                    "(%s).drc(bbox_max < %4.1f ).output('%-5s:%2s over %s %s < %4.1f')"
+                    % (L1, min, rule, L4, L3, "Sfix", min),
+                    file=f,
+                )
+                print(
+                    "(%s).drc(bbox_max > %4.1f ).output('%-5s:%2s over %s %s > %4.1f')"
+                    % (L1, max, rule, L4, L3, "Sfix", max),
+                    file=f,
+                )
+                return
         case "Sfix":
             if rule in ["CO.SM", "COE.SE"]:
                 print(
@@ -303,6 +318,17 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 print(
                     "(%-7s).not_interacting((%s_e + %s_s).raw, 2).output('%-5s:%2s-%s %s != %4.1f or off-center/missing %s')"
                     % (L2, L1, L1, rule, L3, L4, func, max, L3),
+                    file=f,
+                )
+            elif rule in ["AR.GC"]:
+                print(
+                    "(%s.extents).drc(     sep(%-7s, projection) != %4.1f ).output('%-5s:%2s-%s %s != %4.1f')"
+                    % (L1, L2, min, rule, L3, L4, func, min),
+                    file=f,
+                )
+                print(
+                    "((%-7s) & (%-7s)                  ).output('%-5s:%2s overlap %s')"
+                    % (L1, L2, rule, L3, L4),
                     file=f,
                 )
             elif rule in ["CO.GG", "CDE.GC", "CSE.GC"]:
@@ -371,15 +397,26 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
                 file=f,
             )
             return
-#        case "ECmin":
-#            print("# ----- MOS(EndCap) -----", file=f)
-#            print(
-#                "(%-7s).drc( enclosed(%2s, projection, without_touching_edges ) < %4.1f).output('%-5s:%2s Endcap < %4.1f')"
-#                % (L1, L2, min, rule, L3, min),
-#                file=f,
-#            )
-#            print("# ", file=f)
-#            return
+        case "ECmin":
+            if rule in ["GC.E2"]:
+                print("# ----- MOS(EndCap) -----", file=f)
+                print(
+                    "GC_EP_check = (%s & %s).drc( enclosed(%s, projection) < %4.1f).polygons"
+                    % (L1, L2, L2, min),
+                    file=f,
+                )
+                print(
+                    "GC_EP_side = GC_EP_check.sep((%s - %s), 1.2+1.dbu, projection, only_opposite)"
+                    % (L1, L2),
+                    file=f,
+                )
+                print(
+                    "GC_EP_check.interacting((GC_EP_check.edges & GC_EP_side.edges), 2 ..).output('%-5s:%2s Concave <= 1.2 Endcap < %4.1f')"
+                    % (rule, L4, min),
+                    file=f,
+                )
+                print("# ", file=f)
+                return
         case "Rect":
             if max > 0:
                 print_MX(f, rule, "Wmin/max", L1, L2, L3, L4, min, max)
@@ -425,7 +462,7 @@ def gen_drc(f, rule, func, L1, L2, L3, L4, min, max):
         case "ANTE":
             print("# ----- Floating Gate -----", file=f)
             print(
-                "( GC_FL ).output('%-5s:%2s must electrically connect to Substrate')"
+                "( GC_FL_LBL_TOP ).output('%-5s:%2s must electrically connect to Substrate (or text if not chip level)')"
                 % (rule, L3),
                 file=f,
             )

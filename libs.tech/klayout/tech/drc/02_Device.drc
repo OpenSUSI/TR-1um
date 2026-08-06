@@ -45,7 +45,8 @@ COE_e = COE.edges.enclosed(AME_h, 2.5+(1.6+3.0)/2+0.3+1.dbu, projection).polygon
 CS  = CO - (AR + WC + AD + MPE + MNE)                       # Small CO
 #
 M1W = M1.sized(-5.0).merged.sized(5.0).merged               # WIDE M1
-M1C = ((M1 & WC).not_interacting(AC)) & AN                  # M1 for GUARD-RING (CSIO)
+M1C = (M1 & WC & AN).interacting(CO)                        # M1 for GUARD-RING (CSIO)
+ANC = (AN.interacting(M1C) - M1C).sized(-1.8+1.dbu).sized(1.8-1.dbu) # AN for GUARD-RING (CSIO) without M1C
 M1P = M1.interacting(PO).sized(-35.0).sized(35.0)           # M1 for PAD
 # M1W.output("M1W")                                         # DEBUG
 #
@@ -176,3 +177,22 @@ connect(V1,   M2)       # V1-M2
 connect(M1,   M1_LBL)   # Attaches labels
 connect(M2,   M2_LBL)   # Attaches labels
 #
+# Reliability rules.
+#
+# Check contact density on AC. Flag locations where another CO could be added
+AC_check_region = AC.sized(-3.5)  # AC - CO enclosure 2.9um + 1/2 CO width 1.2um = 3.5um
+AC_CO_coverage = (CO & AC).sized(1.8-1.dbu)  # CO space 1.2um + 1/2 CO width 1.2um
+(AC_check_region - AC_CO_coverage).sized(0.6).output("Warning: missing CSIO CO")
+
+# Check contact density on CSIO guard ring. Flag locations where another CO could be added
+M1C_check_region = M1C.sized(-1.8+1.dbu)  # M1C - CO enclosure 1.2um + 1/2 CO width 1.2um = 1.8um
+M1C_CO_coverage = (CO & M1C).sized(1.8-1.dbu)  # CO space 1.2um + 1/2 CO width 1.2um
+(M1C_check_region - M1C_CO_coverage).sized(0.6).output("Warning: missing CSIO guardring CO")
+
+# Check contact density on normal guard ring. Flag locations where another CO could be added
+BG_check_region = (M1 & BGM).interacting(CO).sized(-1.3+1.dbu)  # BGM - CO enclosure 0.8um + 1/2 CO width 1.0um = 1.3um
+BG_CO_coverage = CO.sized(4.5, size_inside(M1 & BGM), steps(10))  # CO space 1.0um x 2.5 + CO width 1.0um x 2 (missing 4 contacts)
+(BG_check_region - BG_CO_coverage).sized(0.5).output("Warning: missing guardring CO")
+
+
+
