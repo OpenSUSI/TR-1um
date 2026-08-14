@@ -7,6 +7,7 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>C0</dither-pattern>
+  <line-style/>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
@@ -325,11 +326,11 @@
  </properties>
  <properties>
   <expanded>false</expanded>
-  <frame-color>#800000</frame-color>
-  <fill-color>#800000</fill-color>
+  <frame-color>#0080ff</frame-color>
+  <fill-color>#0080ff</fill-color>
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
-  <dither-pattern>I9</dither-pattern>
+  <dither-pattern>I13</dither-pattern>
   <line-style/>
   <valid>true</valid>
   <visible>true</visible>
@@ -338,8 +339,26 @@
   <marked>false</marked>
   <xfill>false</xfill>
   <animation>0</animation>
-  <name>pin</name>
+  <name>M1PIN</name>
   <source>48/1@1</source>
+ </properties>
+ <properties>
+  <expanded>false</expanded>
+  <frame-color>#c0c0c0</frame-color>
+  <fill-color>#c0c0c0</fill-color>
+  <frame-brightness>0</frame-brightness>
+  <fill-brightness>0</fill-brightness>
+  <dither-pattern>I13</dither-pattern>
+  <line-style/>
+  <valid>true</valid>
+  <visible>true</visible>
+  <transparent>false</transparent>
+  <width>1</width>
+  <marked>false</marked>
+  <xfill>false</xfill>
+  <animation>0</animation>
+  <name>M2PIN</name>
+  <source>49/1@1</source>
  </properties>
  <properties>
   <expanded>false</expanded>
@@ -402,7 +421,7 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I1</dither-pattern>
-  <line-style>C9</line-style>
+  <line-style>C0</line-style>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
@@ -564,7 +583,7 @@
   <frame-brightness>0</frame-brightness>
   <fill-brightness>0</fill-brightness>
   <dither-pattern>I1</dither-pattern>
-  <line-style>C9</line-style>
+  <line-style>C0</line-style>
   <valid>true</valid>
   <visible>true</visible>
   <transparent>false</transparent>
