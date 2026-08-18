@@ -26,7 +26,7 @@ WN.AP,WN,AP,Smin,5.0,,ERWLMN01
 WN.AN,WN,AN,Smin,10.0,,ERWLMN03
 AR.S1,AR ,AR,Smin,4.0,,ERWLRR03
 AR.WR,AR,WN(R),Emin,10.0,,ERWLRR02
-AN.WR,AN,WN(R),Emin,5.0,,ERWLRR01
+AN.WR,AN,WN(R),Emin,10.0,,ERWLRR01
 AR.AN,AR,AN,Smin,4.0,,ERWLRR04
 AC.W1,AC,,Rect,28.5,120.0,Table I-2-1
 AC.S1,AC,AC,Smin,6.4,,
@@ -100,6 +100,8 @@ GR.L1,RS,RS(L),Lmin/max,20.0,100.0,Table I-2-1
 RS.SZ,RS,RSOK,Require,,,Valid width
 RS.RT,RS,,Rect,,,
 GR.S1,RS,RS,Smin,2.0,,ERRS04
+GR.AP,GR,AP,Smin,2.8,,Avoid MDP implant Errors
+GR.AN,GR,AN,Smin,2.8,,Avoid MDP implant Errors
 CR.W1,CO(RR),,Wmin,1.0,,ERRR10
 CR.W2,CO(RRW),,Lmin/max,1.6,17.6,CO(L)
 CR.W3,CO(RRN),,Wfix,1.0,1.0,ERRR11
