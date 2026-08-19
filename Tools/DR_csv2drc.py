@@ -69,7 +69,7 @@ L = {
     "CO(D)": "CO & AD",
     "M1(C)": "M1C",
     "M1(W)": "M1W",
-    "V1": "V1 - V1P",
+    "V1(S)": "V1 - V1P",
     "V1(P)": "V1P",
     "Endcap": "Endcap",
     "Bevel": "Bevel",
