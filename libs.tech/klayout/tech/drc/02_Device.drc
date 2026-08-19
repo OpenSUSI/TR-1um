@@ -8,9 +8,17 @@
 #
 WR  = WN.covering(AR)                                       # Nwell for RR
 WC  = WN.covering(AC)                                       # Nwell for CSIO
-WM  = WN.covering(AP)                                       # Nwell for PMOS
+WM  = WN.covering(AP & GC)                                  # Nwell for PMOS
+WB  = WN - (WR + WC + WM)                                   # Nwell for bipolar
 #
 AA  = (AN + AP + AC + AR)                                   # ALL ACTIVE
+
+AA_OK = AA.drc(sep(AA, transparent, projection, projecting >= 1.4) < 5.4).edges
+AA_projecting = AA.drc(sep(AA, transparent, projection, projecting < 1.4) < 5.4).polygons.raw.not_interacting(AA_OK).merged
+AA_projecting.output('ERROR: AA space projecting < 1.4 Smin < 5.4: can cause MDP implant errors')
+AA_diagonal = AA.drc(sep(AA, transparent, projecting < 1.4) < 5.4).polygons.raw.not_interacting(AA_OK).merged
+AA_diagonal.not_interacting(AA_projecting).output('ERROR: AA diagonal space Smin < 5.4: can cause MDP implant errors')
+
 GA  = (GC + GR)                                             # ALL POLY
 #
 MP  = (AP.interacting(GC) & WN - ESD)                       # PMOS diffusion
@@ -47,12 +55,16 @@ CS  = CO - (AR + WC + AD + MPE + MNE)                       # Small CO
 M1W = M1.sized(-5.0).merged.sized(5.0).merged               # WIDE M1
 M1C = (M1 & WC & AN).interacting(CO)                        # M1 for GUARD-RING (CSIO)
 ANC = (AN.interacting(M1C) - M1C).sized(-1.8+1.dbu).sized(1.8-1.dbu) # AN for GUARD-RING (CSIO) without M1C
-M1P = M1.interacting(PO).sized(-35.0).sized(35.0)           # M1 for PAD
+M1P = M1.sized(-35.0).sized(35.0).interacting(PO)           # M1 for PAD
+M1P.non_rectangles.output("M1 pad not rectangular")
+M1P.drc( area > 16000.0).output("M1 pad too big")
 # M1W.output("M1W")                                         # DEBUG
 #
 V1P = V1.interacting(PO)                                    # M1 for PAD
 #
-M2P = M2.interacting(PO).sized(-35.0).sized(35.0)           # M2 for PAD
+M2P = M2.sized(-35.0).sized(35.0).interacting(PO)           # M2 for PAD
+M2P.non_rectangles.output("M2 pad not rectangular")
+M2P.drc( area > 16000.0).output("M2 pad too big")
 #
 PP = PO.with_bbox_max(70.0 ..)                              # Bonding pads have at least one dimension as 70um
 #
@@ -124,6 +136,13 @@ SDP  = (MP  - GC)               # MP S/D
 SDN  = (MN  - GC)               # MN S/D
 SDPE = (MPE - GC)               # MPE S/D
 SDNE = (MNE - GC)               # MNE S/D
+
+# CO is sized by 5.2um in the following rules becuase that is the current ESD device AA-CO enclosure.
+SPE  = SDPE.inside(CO.sized(5.2)) # ESD source has contacts < 5.2um from gate
+SNE  = SDNE.inside(CO.sized(5.2)) # ESD source has contacts < 5.2um from gate
+DPE  = SDPE - SPE
+DNE  = SDNE - SNE
+
 SDC  = (AM - GC).interacting(CO)  # Normal mos source/drain with CO
 SDEC = (AME - GC).interacting(CO) # ESD mos source/drain with CO
 #
@@ -152,7 +171,6 @@ connect(WC,   AC)       # CIS
 connect(WC,   GP)       # BG-CIS
 connect(WR,   RR)       # BG-RR
 connect(WR,   GP)       # BG-RR
-# ---
 # mos
 connect(SDP,  CO)       # MP S/D
 connect(SDN,  CO)       # MN S/D
@@ -191,7 +209,7 @@ M1C_CO_coverage = (CO & M1C).sized(1.8-1.dbu)  # CO space 1.2um + 1/2 CO width 1
 
 # Check contact density on normal guard ring. Flag locations where another CO could be added
 BG_check_region = (M1 & BGM).interacting(CO).sized(-1.3+1.dbu)  # BGM - CO enclosure 0.8um + 1/2 CO width 1.0um = 1.3um
-BG_CO_coverage = CO.sized(4.5, size_inside(M1 & BGM), steps(10))  # CO space 1.0um x 2.5 + CO width 1.0um x 2 (missing 4 contacts)
+BG_CO_coverage = CO.sized(5.5, size_inside(M1 & BGM), steps(12))  # CO space 1.0um x 3.0 + CO width 1.0um x 2.5 (missing 5 contacts)
 (BG_check_region - BG_CO_coverage).sized(0.5).output("Warning: missing guardring CO")
 
 
