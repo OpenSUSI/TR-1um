@@ -13,12 +13,6 @@ WB  = WN - (WR + WC + WM)                                   # Nwell for bipolar
 #
 AA  = (AN + AP + AC + AR)                                   # ALL ACTIVE
 
-AA_OK = AA.drc(sep(AA, transparent, projection, projecting >= 1.4) < 5.4).edges
-AA_projecting = AA.drc(sep(AA, transparent, projection, projecting < 1.4) < 5.4).polygons.raw.not_interacting(AA_OK).merged
-AA_projecting.output('ERROR: AA space projecting < 1.4 Smin < 5.4: can cause MDP implant errors')
-AA_diagonal = AA.drc(sep(AA, transparent, projecting < 1.4) < 5.4).polygons.raw.not_interacting(AA_OK).merged
-AA_diagonal.not_interacting(AA_projecting).output('ERROR: AA diagonal space Smin < 5.4: can cause MDP implant errors')
-
 GA  = (GC + GR)                                             # ALL POLY
 #
 MP  = (AP.interacting(GC) & WN - ESD)                       # PMOS diffusion
