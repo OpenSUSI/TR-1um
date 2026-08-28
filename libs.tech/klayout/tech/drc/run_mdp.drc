@@ -18,6 +18,11 @@ end
 
 target($output) if $output
 
+TOPCELL = layout.cell_name
+source_topcell  = source.select("-*", "+#{TOPCELL}")
+TXM1_TOP = source_topcell.labels(48, 0).texts  # Top M1 Label
+TXM2_TOP = source_topcell.labels(49, 0).texts  # Top M2 Label
+
 flat
 
 # --------------------------------------------------------
@@ -45,8 +50,9 @@ PRO  = input(14, 0)    # Pad
 TC23 = input(121, 0)   # Via2
 M3   = input(122, 0)   # Metal-3
 TXM1 = input(48, 0)    # Text M1
-TXM2 = input(48, 1)    # Text M2
-PIN  = input(49, 0)    # Pin text
+TXM2 = input(49, 0)    # Text M2
+M1PIN = input(48, 1)   # M1 Pin
+M2PIN = input(49, 1)   # M1 Pin
 
 SCRB = input(80, 0)    # Seal ring / scribe
 
@@ -112,9 +118,13 @@ GCS = (AN & NWCS).not_interacting(GC).hulls  # CSIO back gate
 # AR resistor related layers
 # --------------------------------------------------------
 CL   = AC.sized(1.4, square_limit).merged.snap(0.05, 0.05)
-R    = AR.sized(2.0, square_limit).extents.merged.snap(0.05, 0.05)
+RR   = AR.sized(2.0, square_limit).raw.extents.merged.snap(0.05, 0.05)
+R    = RR.sized(1.3-1.dbu).sized(-1.3+1.dbu)
 RS   = GR.sized(1.4, square_limit).merged.snap(0.05, 0.05)
-RPSD = (R - (CO & R).sized(4.2))
+
+# Non-RPSD block region should be limited to half the surrounding poly.
+# Anything larger can conflict with neighboring resistors of different sizes.
+RPSD = RR - (CO & RR).sized(4.2-1.0, size_inside(SG.holes), steps(7)).sized(1.0)
 
 # --------------------------------------------------------
 # Main generated process layers
@@ -135,74 +145,74 @@ implant_grow_limit = BULK - base_implant
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 PBE_base = MP + MPEs
 PBE_minimum = PBE_base.sized(1.4)
-# If there are holes, remove from the extents
-PBE_holes = (PBE_minimum.drc(area < 4000000.0).holes - PBE_minimum).sized(-4.2)
-# Merge minimum space errors and get the extents. Remove all the implants and add only the ones we need
-# Don't process extents that cover the whole chip
-PBE_maximum = (PBE_minimum.sized(1.3).extents.drc(area < 4000000.0) - PBE_holes).sized(-1.3) - base_implant + PBE_minimum
+PBE_spacing = PBE_minimum.sized(2.6+1.4)
+PBE_maximum = PBE_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + PBE_minimum
 # Undersize by just less than half width to remove minimum width errors
 # Final sizing needs to be minimum enclosure to get diagonal spacing correct
-PBE = PBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu).sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+PBE_W_OK = (PBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PBE_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+PBE_WS_OK = PBE_W_OK - (PBE_W_OK & PBE_spacing).not_interacting(PBE_minimum)
+PBE = PBE_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 NBE_base = MN + MNEs
 NBE_minimum = NBE_base.sized(1.4)
-# If there are holes, remove from the extents
-NBE_holes = (NBE_minimum.drc(area < 4000000.0).holes - NBE_minimum).sized(-4.2)
-# Merge minimum space errors and get the extents. Remove all the implants and add only the ones we need
-# Don't process extents that cover the whole chip
-NBE_maximum = (NBE_minimum.sized(1.3).extents.drc(area < 4000000.0) - NBE_holes).sized(-1.3) - base_implant + NBE_minimum
+NBE_spacing = NBE_minimum.sized(2.6+1.4)
+NBE_maximum = NBE_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + NBE_minimum
 # Undersize by just less than half width to remove minimum width errors
 # Final sizing needs to be minimum enclosure to get diagonal spacing correct
-NBE = NBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu).sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+NBE_W_OK = (NBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NBE_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+NBE_WS_OK = NBE_W_OK - (NBE_W_OK & NBE_spacing).not_interacting(NBE_minimum)
+NBE = NBE_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 PM_base = (ARs.sized(0.6) + GR + MN + DP + GP + DN + GN + MNEs + GCS)
 PM_minimum = PM_base.sized(1.4)
-# If there are holes, remove from the extents
-PM_holes = (PM_minimum.drc(area < 4000000.0).holes - PM_minimum).sized(-4.2)
-# Merge minimum space errors and get the extents. Remove all the implants and add only the ones we need
-# Don't process extents that cover the whole chip
-PM_maximum = (PM_minimum.sized(1.3).extents.drc(area < 4000000.0) - PM_holes).sized(-1.3) - base_implant + PM_minimum
+PM_spacing = PM_minimum.sized(2.6+1.4)
+PM_maximum = PM_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + PM_minimum
 # Undersize by just less than half width to remove minimum width errors
 # Final sizing needs to be minimum enclosure to get diagonal spacing correct
-PM = PM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu).sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+PM_W_OK = (PM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PM_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+PM_WS_OK = PM_W_OK - (PM_W_OK & PM_spacing).not_interacting(PM_minimum)
+PM = PM_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 NM_base = (ARs.sized(0.6) + GR + MP + DP + GP + DN + GN + MPEs + MNEs + GCS)
 NM_minimum = NM_base.sized(1.4)
-# If there are holes, remove from the extents
-NM_holes = (NM_minimum.drc(area < 4000000.0).holes - NM_minimum).sized(-4.2)
-# Merge minimum space errors and get the extents. Remove all the implants and add only the ones we need
-# Don't process extents that cover the whole chip
-NM_maximum = (NM_minimum.sized(1.3).extents.drc(area < 4000000.0) - NM_holes).sized(-1.3) - base_implant + NM_minimum
+NM_spacing = NM_minimum.sized(2.6+1.4)
+NM_maximum = NM_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + NM_minimum
 # Undersize by just less than half width to remove minimum width errors
 # Final sizing needs to be minimum enclosure to get diagonal spacing correct
-NM = NM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu).sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+NM_W_OK = (NM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NM_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+NM_WS_OK = NM_W_OK - (NM_W_OK & NM_spacing).not_interacting(NM_minimum)
+NM = NM_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 PSD_base = AN + GCS + GR
 PSD_minimum = PSD_base.sized(1.4) + RPSD
-# If there are holes, remove from the extents
-PSD_holes = (PSD_minimum.drc(area < 4000000.0).holes - PSD_minimum).sized(-4.2)
-# Merge minimum space errors and get the extents. Remove all the implants and add only the ones we need
-# Don't process extents that cover the whole chip
-PSD_maximum = (PSD_minimum.sized(1.3).extents.drc(area < 4000000.0) - PSD_holes).sized(-1.3) - base_implant + PSD_minimum
+PSD_spacing = PSD_minimum.sized(2.6+1.4)
+PSD_maximum = PSD_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + PSD_minimum
 # Undersize by just less than half width to remove minimum width errors
 # Final sizing needs to be minimum enclosure to get diagonal spacing correct
-PSD = PSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu).sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+PSD_W_OK = (PSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PSD_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+PSD_WS_OK = PSD_W_OK - (PSD_W_OK & PSD_spacing).not_interacting(PSD_minimum)
+PSD = (PSD_WS_OK.sized(1.4, octagon_limit) + RPSD).merged.snap(0.05, 0.05)
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 NSD_base = AP + AC + ARs.sized(0.6)
 NSD_minimum = NSD_base.sized(1.4)
-# If there are holes, remove from the extents
-NSD_holes = (NSD_minimum.drc(area < 4000000.0).holes - NSD_minimum).sized(-4.2)
-# Merge minimum space errors and get the extents. Remove all the implants and add only the ones we need
-# Don't process extents that cover the whole chip
-NSD_maximum = (NSD_minimum.sized(1.3).extents.drc(area < 4000000.0) - NSD_holes).sized(-1.3) - base_implant + NSD_minimum
+NSD_spacing = NSD_minimum.sized(2.6+1.4)
+NSD_maximum = NSD_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + NSD_minimum
 # Undersize by just less than half width to remove minimum width errors
 # Final sizing needs to be minimum enclosure to get diagonal spacing correct
-NSD = NSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu).sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+NSD_W_OK = (NSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NSD_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+NSD_WS_OK = NSD_W_OK - (NSD_W_OK & NSD_spacing).not_interacting(NSD_minimum)
+NSD = NSD_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
 
 HPM = BULK
 
@@ -257,9 +267,10 @@ DLBGRR = HVNW & PSD - DLRR
 (TC23      ).output(121, 0)   # Via2
 (M3        ).output(122, 0)   # Metal-3
 (SCRB      ).output(80,  0)   # SCRB
-(TXM1      ).output(48,  0)   # TEXT M1
-(TXM2      ).output(48,  1)   # TEXT M2
-(PIN       ).output(49,  0)   # PIN
+(TXM1_TOP  ).output(48,  0)   # TEXT M1
+(TXM2_TOP  ).output(49,  0)   # TEXT M2
+(M1PIN     ).output(48,  1)   # M1 PIN
+(M2PIN     ).output(49,  1)   # M2 PIN
 
 (MASK      ).output(63,  0)   # DRC waiver
 (PTECT     ).output(63,  1)   # Protection recognition

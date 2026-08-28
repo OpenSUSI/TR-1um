@@ -12,6 +12,7 @@
 import sys
 from   xml.dom.minidom import parseString
 import xml.etree.ElementTree as ET
+import pprint as pp
 #
 args  = sys.argv
 root  = ET.Element('report-database')
@@ -48,7 +49,7 @@ def xml_category( ) :
     #
     child = ET.SubElement(root, 'categories')
     #
-    for err_name in item_dic.keys() :
+    for cell, err_name in item_dic.keys() :
         category = ET.SubElement(child, 'category')
         ET.SubElement(category, 'name').text = '%s' % err_name
         ET.SubElement(category, 'description')
@@ -61,10 +62,14 @@ def xml_cell( ) :
     #
     child = ET.SubElement(root, 'cells')
     #
-    cell = ET.SubElement(child, 'cell')
-    ET.SubElement(cell, 'name').text = '%s' % CELL
-    ET.SubElement(cell, 'layout-name')
-    ET.SubElement(cell, 'references')
+    cell_list = set()
+    for cellname, err_name in item_dic.keys() :
+        if cellname not in cell_list:
+            cell_list.add(cellname)
+            cell = ET.SubElement(child, 'cell')
+            ET.SubElement(cell, 'name').text = '%s' % cellname
+            ET.SubElement(cell, 'layout-name')
+            ET.SubElement(cell, 'references')
 
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Items
@@ -79,12 +84,13 @@ def xml_items( ) :
     #
     items = ET.SubElement(root, 'items')
     #
-    for err_name, err_data in item_dic.items() :
+    for err_key, err_data in item_dic.items() :
+        cell, err_name = err_key
         for data in err_data :
             item  = ET.SubElement(items, 'item')
             ET.SubElement(item, 'tags')
             ET.SubElement(item, 'category').text = "'%s'" % err_name
-            ET.SubElement(item, 'cell').text = '%s' % CELL
+            ET.SubElement(item, 'cell').text = '%s' % cell
             ET.SubElement(item, 'visited').text = 'false'
             ET.SubElement(item, 'multiplicity').text = '1'
             ET.SubElement(item, 'comment')
@@ -124,25 +130,31 @@ def parse_line( line ) :
     w = line.split()
     if not w : 
         if err_list != [] :
-            item_dic[RULE] = err_list
+            try:
+                item_dic[(CELL, RULE)] = err_list
+            except:
+                print(f"err_list {err_list}")
             err_list = [] 
         return
     elif w[0][0] == '=' or w[0][0] == '-' :
         return
     elif w[0] == 'Rule' :
-        RULE = w[4].split(':')[0]
+        RULE = " ".join(w[4:])
         err_list = []
-        SKIP = 5
+        SKIP = 2
         return
     elif w[0] == 'Cell' :
         CELL = w[3]
-        SKIP = 8
+        SKIP = 10
         return
     elif w[0] == 'Shape' :
-        SKIP = 3
+        SKIP = 2
         return
-    elif w[0].isdigit() :
-        err_list.append( (float(w[2]),float(w[3]),float(w[4]),float(w[5])) )
+    elif line[0].isdigit() :  # check first byte of line rather than first byte of first word
+        try:
+            err_list.append( (float(w[2]),float(w[3]),float(w[4]),float(w[5])) )
+        except:
+            print(f"Unexpected format: {line}")
         return
 
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
@@ -175,5 +187,5 @@ while True :
 # OUTPUT
 print_xml( args[0] )
 
-print(item_dic.keys())
+pp.pprint(list(item_dic.keys()), indent=4)
 exit
