@@ -76,6 +76,21 @@ else
     schematic.combine_devices
     netlist.combine_devices
     #
+    equivalent_pins("AND2_X1", "A", "B")
+    equivalent_pins("AND3_X1", "A", "B", "C")
+    equivalent_pins("AND4_X1", "A", "B", "C", "D")
+    equivalent_pins("NAND2",   "A", "B")
+    equivalent_pins("NAND3",   "A", "B", "C")
+    equivalent_pins("NAND4",   "A", "B", "C", "D")
+    equivalent_pins("NOR2",    "A", "B")
+    equivalent_pins("NOR3",    "A", "B", "C")
+    equivalent_pins("NOR4",    "A", "B", "C", "D")
+    equivalent_pins("OR2",     "A", "B")
+    equivalent_pins("OR3",     "A", "B", "C")
+    equivalent_pins("OR4",     "A", "B", "C", "D")
+    equivalent_pins("XOR2",    "A", "B")
+    equivalent_pins("XNOR2",   "A", "B")
+    #
     if IGNORE_TOP_PORTS_MISMATCH
         puts("Starting TR-1um LVS Comparison")
         success = compare

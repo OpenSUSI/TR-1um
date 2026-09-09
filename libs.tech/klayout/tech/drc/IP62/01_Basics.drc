@@ -95,7 +95,7 @@
 (PM  ).drc( width <  4.2 ).output( "ERR01: Width for PM   <  4.2" )
 (NM  ).drc( width <  4.2 ).output( "ERR01: Width for NM   <  4.2" )
 (R   ).drc( width <  4.0 ).output( "ERR01: Width for R    <  4.0" )
-(PSD ).drc( width <  3.8 ).output( "ERR01: Width for PSD  <  3.8" )
+(PSD ).drc( width <  3.5 ).output( "ERR01: Width for PSD  <  3.5" )   #2026-08-20 3.8->3.5
 (NSD ).drc( width <  2.6 ).output( "ERR01: Width for NSD  <  2.6" )
 (CONT).drc( width <  1.0 ).output( "ERR01: Width for CONT <  1.0" )
 (M1  ).drc( width <  1.8 ).output( "ERR01: Width for M1   <  1.8" )

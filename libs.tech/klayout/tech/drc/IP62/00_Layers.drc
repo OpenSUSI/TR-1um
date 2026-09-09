@@ -10,6 +10,7 @@ MASK  = input(63, 0)                            # DRC check waiver area
 MEAS  = input(63, 1)                            # MEASUREMT area recognition
 ESD   = input(63, 2)                            # IO/ESD area recognition
 RS    = input(63,61)                            # RS area recognition
+DLRS  = input(165,0)                            # RS area recognition
 TEMP  = input(80, 0)               # SCRB
 BULK  = extent
 SCRB  = TEMP.drc(switch(TEMP.holes, (BULK - TEMP.holes + TEMP), (BULK - BULK) ))
