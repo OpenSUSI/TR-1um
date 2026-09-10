@@ -150,7 +150,7 @@ def parse_line( line ) :
     elif w[0] == 'Shape' :
         SKIP = 2
         return
-    elif line[0].isdigit() :  # check first byte of line rather than first byte of first word
+    elif w[0][0].isdigit() :
         try:
             err_list.append( (float(w[2]),float(w[3]),float(w[4]),float(w[5])) )
         except:
