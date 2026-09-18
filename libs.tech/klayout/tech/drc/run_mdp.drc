@@ -43,8 +43,10 @@ GR = input(8, 2)       # silicide resistor
 PSUB = input(140, 0)   # Nwell / Pwell marker
 CO   = input(11, 0)    # Contact
 M1   = input(13, 0)    # Metal-1
+M1.data = M1.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 TC   = input(19, 0)    # Via1
 M2   = input(20, 0)    # Metal-2
+M2.data = M2.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 PRO  = input(14, 0)    # Pad
 
 TC23 = input(121, 0)   # Via2
@@ -153,6 +155,7 @@ PBE_W_OK = (PBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PBE_minimum.sized(-
 # subtract spacing error implant that doesn't do anything
 PBE_WS_OK = PBE_W_OK - (PBE_W_OK & PBE_spacing).not_interacting(PBE_minimum)
 PBE = PBE_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+PBE.data = PBE.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 NBE_base = MN + MNEs
@@ -165,6 +168,7 @@ NBE_W_OK = (NBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NBE_minimum.sized(-
 # subtract spacing error implant that doesn't do anything
 NBE_WS_OK = NBE_W_OK - (NBE_W_OK & NBE_spacing).not_interacting(NBE_minimum)
 NBE = NBE_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+NBE.data = NBE.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 PM_base = (ARs.sized(0.6) + GR + MN + DP + GP + DN + GN + MNEs + GCS)
@@ -177,6 +181,7 @@ PM_W_OK = (PM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PM_minimum.sized(-1.4
 # subtract spacing error implant that doesn't do anything
 PM_WS_OK = PM_W_OK - (PM_W_OK & PM_spacing).not_interacting(PM_minimum)
 PM = (PM_WS_OK.sized(1.4, octagon_limit) + GR.sized(1.4)).merged.snap(0.05, 0.05)
+PM.data = PM.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 NM_base = (ARs.sized(0.6) + GR + MP + DP + GP + DN + GN + MPEs + MNEs + GCS)
@@ -189,6 +194,7 @@ NM_W_OK = (NM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NM_minimum.sized(-1.4
 # subtract spacing error implant that doesn't do anything
 NM_WS_OK = NM_W_OK - (NM_W_OK & NM_spacing).not_interacting(NM_minimum)
 NM = (NM_WS_OK.sized(1.4, octagon_limit) + GR.sized(1.4)).merged.snap(0.05, 0.05)
+NM.data = NM.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 PSD_base = AN + GCS + GR
@@ -201,6 +207,7 @@ PSD_W_OK = (PSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PSD_minimum.sized(-
 # subtract spacing error implant that doesn't do anything
 PSD_WS_OK = PSD_W_OK - (PSD_W_OK & PSD_spacing).not_interacting(PSD_minimum)
 PSD = (PSD_WS_OK.sized(1.4, octagon_limit) + RPSD + GR.sized(1.4)).merged.snap(0.05, 0.05)
+PSD.data = PSD.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
 # 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
 NSD_base = AP + AC + ARs.sized(0.6)
@@ -214,6 +221,7 @@ NSD_W_OK = (NSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NSD_minimum.sized(-
 NSD_WS_OK = NSD_W_OK - (NSD_W_OK & NSD_spacing).not_interacting(NSD_minimum)
 DLCSIO = NWCS.sized(1.5)
 NSD = (NSD_WS_OK.sized(1.4, octagon_limit) - DLCSIO + CL).merged.snap(0.05, 0.05)
+NSD.data = NSD.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
 HPM = BULK
 
@@ -234,7 +242,9 @@ DLDN   = DN.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05,
 DLMPE  = MPE.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
 DLMNE  = MNE.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
 DLBGMP = (GP - HVNW).sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
+DLBGMP.data = DLBGMP.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 DLBGMN = GN.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
+DLBGMN.data = DLBGMN.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 DLBGRR = HVNW & PSD - DLRR
 
 # --------------------------------------------------------
@@ -276,7 +286,6 @@ DLBGRR = HVNW & PSD - DLRR
 (MASK      ).output(63,  0)   # DRC waiver
 (PTECT     ).output(63,  1)   # Protection recognition
 (ESD       ).output(63,  2)   # IO/ESD recognition
-(SCRB      ).output(80,  0)   # Seal ring
 
 (DLWLMP    ).output(150, 0)
 (DLWLMN    ).output(151, 0)

@@ -19,6 +19,11 @@ if $report
 else
     report("TR-1um DRC(Drawing)")
 end
+
+skip_warnings = defined?($skip_warnings) &&
+                $skip_warnings.to_s.downcase == "true"
+puts "WARNING rules disabled (skip_warnings=true)" if skip_warnings
+
 #
 # warning_rep = new_report("TR-1um DRC(warning)", "warning.lyrdb")
 #
@@ -27,3 +32,4 @@ end
 # %include 01_Basics.drc
 # %include 02_Device.drc
 # %include 03_Electrical.drc
+# %include 04_TapeOut.drc
