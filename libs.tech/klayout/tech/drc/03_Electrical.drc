@@ -24,6 +24,9 @@ GC_ext7 = GA.edges.inside_part(AME).extended_out(7.0).edges.inside_part(DPE + DN
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Gate electrically connected to Substrate
 #
+connect(AR, CO) # short diffusion resistors for substrate connection checks
+connect(GR, CO) # short poly resistors for substrate connection checks
+#
 GC_MP = antenna_check(SDP,  GC, 0.0)
 GC_MN = antenna_check(SDN,  GC, 0.0)
 GC_PE = antenna_check(SDPE, GC, 0.0)
@@ -32,6 +35,7 @@ GC_DP = antenna_check(DP,   GC, 0.0)
 GC_DN = antenna_check(DN,   GC, 0.0)
 GC_GP = antenna_check(GP,   GC, 0.0)
 GC_GN = antenna_check(GN,   GC, 0.0)
+GC_PAD = antenna_check(M2P, GC, 0.0)
 #
 GC_FL = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN))  # Floating Gate
 #
@@ -59,4 +63,4 @@ connect(M2,   M2LBL_TOP)  # Attaches M2 top labels
 GC_M1LBL_TOP = antenna_check(M1LBL_TOP, GC, 0.0)
 GC_M2LBL_TOP = antenna_check(M2LBL_TOP, GC, 0.0)
 #
-GC_FL_LBL_TOP = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN + GC_M1LBL_TOP + GC_M2LBL_TOP))  # Floating Gate
+GC_FL_LBL_TOP = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN + GC_M1LBL_TOP + GC_M2LBL_TOP + GC_PAD))  # Floating Gate

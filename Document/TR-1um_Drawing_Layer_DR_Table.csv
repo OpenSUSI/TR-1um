@@ -35,6 +35,7 @@ AN.WC,AN,WN(C),Emin,3.0,,ERCSIO04
 AC.AN,AC,AN,Sfix,2.8,2.8,ERCSIO11
 AC.GC,AC,GC,Efix,1.4,1.4,ERCSIO13
 AC.R1,AC,AN(C),Donut,0.0,,
+GA.CX,GA(CX),WN(C),Smin,1.5,,
 #,Cat-3: AP/AN/DP/DN related,,,,,
 Rule,L1,L2,Func,MIN,MAX,IP62 Rule Name
 AP.W1,AP,,Wmin,1.4,,ER0004
@@ -94,7 +95,8 @@ AR.PW,GC(R),,Wmin,2.0,,ERRR06
 AR.XY,AR,Bevel,XYmin,1.0,,
 GC.AN,GC(R),AN,Smin,???,???,
 GC.R1,AR,GC(R),Donut,0.0,,
-GC.R2,GC(R),WN(R),TieDown,0.0,,
+GC.R2,GC(R),WN(R),TieDown,0.0,,ERRR37
+GC.R3,GC(RR),CO,Prohibit,,,ERRR36
 GR.W1,RS,RS(W),Wmin/max,4.0,20.0,Table I-2-1
 GR.L1,RS,RS(L),Lmin/max,20.0,100.0,Table I-2-1
 RS.SZ,RS,RSOK,Require,,,Valid width
@@ -169,8 +171,8 @@ PO.W1,PO,,Rect,10.0,,ER0024
 PO.S1,PO,PO,Smin,20.0,,ER0048
 PP.W1,PP,,Wmin,70.0,,ER1809
 PP.S1,PP,PP,Smin,64.0,,ER1810
-M1.PO,M1,PO,Fmin,10.0,,ER1703
-M2.PO,M2,PO,Fmin,10.0,,ER1704
+M1.PO,M1,PO,Fmin,5.0,,ER1703
+M2.PO,M2,PO,Fmin,5.0,,ER1704
 M1.V1P,M1,V1(P),Fmin,15.0,,ER1811
 M2.V1P,M2,V1(P),Fmin,15.0,,ER1812
 M1P.AA,M1(P),AA,Smin,14.0,,ER1808

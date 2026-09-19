@@ -49,16 +49,11 @@ CS  = CO - (AR + WC + AD + MPE + MNE)                       # Small CO
 M1W = M1.sized(-5.0).merged.sized(5.0).merged               # WIDE M1
 M1C = (M1 & WC & AN).interacting(CO)                        # M1 for GUARD-RING (CSIO)
 ANC = (AN.interacting(M1C) - M1C).sized(-1.8+1.dbu).sized(1.8-1.dbu) # AN for GUARD-RING (CSIO) without M1C
-M1P = M1.sized(-35.0).sized(35.0).interacting(PO)           # M1 for PAD
-M1P.non_rectangles.output("M1 pad not rectangular")
-M1P.drc( area > 16000.0).output("M1 pad too big")
-# M1W.output("M1W")                                         # DEBUG
+M1P = (M1 & PO).sized(5.0)                                  # Updated PAD definition
 #
 V1P = V1.interacting(PO)                                    # M1 for PAD
 #
-M2P = M2.sized(-35.0).sized(35.0).interacting(PO)           # M2 for PAD
-M2P.non_rectangles.output("M2 pad not rectangular")
-M2P.drc( area > 16000.0).output("M2 pad too big")
+M2P = (M2 & PO).sized(5.0)                                  # Updated PAD definition
 #
 PP = PO.with_bbox_max(70.0 ..)                              # Bonding pads have at least one dimension as 70um
 #
@@ -117,6 +112,7 @@ GRS = GR.edges.interacting(RS.edges)
 # RR Resistance
 #
 ARC = AR - RR                   # RR Contact
+DLRR = (WR & GC).holes.sized(2.0) # RR device recognition - No GC contacts
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Saliside Gate Resistance
@@ -188,6 +184,7 @@ connect(M1,   V1)       # M1-V1
 connect(V1,   M2)       # V1-M2
 connect(M1,   M1_LBL)   # Attaches labels
 connect(M2,   M2_LBL)   # Attaches labels
+connect(M2,   M2P)      # connects pads
 #
 # Reliability rules.
 #
@@ -198,13 +195,13 @@ AC_CO_coverage = (CO & AC).sized(1.8-1.dbu)  # CO space 1.2um + 1/2 CO width 1.2
 
 # Check contact density on CSIO guard ring. Flag locations where another CO could be added
 M1C_check_region = M1C.sized(-1.8+1.dbu)  # M1C - CO enclosure 1.2um + 1/2 CO width 1.2um = 1.8um
-M1C_CO_coverage = (CO & M1C).sized(1.8-1.dbu)  # CO space 1.2um + 1/2 CO width 1.2um
+M1C_CO_coverage = (CO & M1C).sized(3.6-1.dbu)  # (CO space 1.2um * 4 + CO width 1.2um * 2) / 2
 (M1C_check_region - M1C_CO_coverage).sized(0.6).output("Warning: missing CSIO guardring CO")
 
 # Check contact density on normal guard ring. Flag locations where another CO could be added
 BG_check_region = (M1 & BGM).interacting(CO).sized(-1.3+1.dbu)  # BGM - CO enclosure 0.8um + 1/2 CO width 1.0um = 1.3um
 BG_CO_coverage = CO.sized(5.5, size_inside(M1 & BGM), steps(12))  # CO space 1.0um x 3.0 + CO width 1.0um x 2.5 (missing 5 contacts)
-(BG_check_region - BG_CO_coverage).sized(0.5).output("Warning: missing guardring CO")
+(BG_check_region - BG_CO_coverage - V1.sized(1.75)).sized(0.5).output("Warning: missing guardring CO")
 
 
 
