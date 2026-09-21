@@ -36,18 +36,18 @@
 # --------- --------- --------- --------- --------- --------- ---------
 #  Twisted Polygon
 #
-WN.raw.odd_polygons.output("ERR02: NW twisted polygon")
-AP.raw.odd_polygons.output("ERR02: AP twisted polygon")
-AN.raw.odd_polygons.output("ERR02: AN twisted polygon")
-AR.raw.odd_polygons.output("ERR02: AR twisted polygon")
-AC.raw.odd_polygons.output("ERR02: AC twisted polygon")
-GC.raw.odd_polygons.output("ERR02: GC twisted polygon")
-GR.raw.odd_polygons.output("ERR02: GR twisted polygon")
-CO.raw.odd_polygons.output("ERR02: CO twisted polygon")
-M1.raw.odd_polygons.output("ERR02: M1 twisted polygon")
-V1.raw.odd_polygons.output("ERR02: V1 twisted polygon")
-M2.raw.odd_polygons.output("ERR02: M2 twisted polygon")
-PO.raw.odd_polygons.output("ERR02: PO twisted polygon")
+WN.dup.raw.odd_polygons.output("ERR02: NW twisted polygon")
+AP.dup.raw.odd_polygons.output("ERR02: AP twisted polygon")
+AN.dup.raw.odd_polygons.output("ERR02: AN twisted polygon")
+AR.dup.raw.odd_polygons.output("ERR02: AR twisted polygon")
+AC.dup.raw.odd_polygons.output("ERR02: AC twisted polygon")
+GC.dup.raw.odd_polygons.output("ERR02: GC twisted polygon")
+GR.dup.raw.odd_polygons.output("ERR02: GR twisted polygon")
+CO.dup.raw.odd_polygons.output("ERR02: CO twisted polygon")
+M1.dup.raw.odd_polygons.output("ERR02: M1 twisted polygon")
+V1.dup.raw.odd_polygons.output("ERR02: V1 twisted polygon")
+M2.dup.raw.odd_polygons.output("ERR02: M2 twisted polygon")
+PO.dup.raw.odd_polygons.output("ERR02: PO twisted polygon")
 # --------- --------- --------- --------- --------- --------- ---------
 #  Check Non-diagonal shape
 #
