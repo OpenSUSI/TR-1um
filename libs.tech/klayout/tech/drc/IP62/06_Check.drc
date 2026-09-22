@@ -33,6 +33,9 @@ connect(CONT, M1)           # CONT-M1
 connect(M1,   TC)           # M1-TC
 connect(TC,   M2)           # TC-M2
 #
+M2P = M2 & PRO
+connect(M2P, M2)            # connect_pad
+#
 # ===== ====== ===== ====== ===== ====== ===== ====== =====
 #  SG to L Separation
 # 
@@ -88,8 +91,11 @@ SG_DP = antenna_check(AADP, SG, 0.0)
 SG_DN = antenna_check(AADN, SG, 0.0)
 SG_GP = antenna_check(AAGP, SG, 0.0)
 SG_GN = antenna_check(AAGN, SG, 0.0)
+SG_PAD = antenna_check(M2P, SG, 0.0)
+SG_GR = antenna_check(AAGR, SG, 0.0)  # Added for RR resistor 2026-09-18
+
 #
-(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_DP + SG_DN + SG_GP + SG_GN )).output("WAR06: Floating SG Detected")
+(SG - ( SG_MP + SG_MN + SG_PE + SG_NE + SG_DP + SG_DN + SG_GP + SG_GN + SG_PAD + SG_GR)).output("WAR06: Floating SG Detected")
 #
 # ===== ====== ===== ====== ===== ====== ===== ====== =====
 #  Floating SG detection (RR field transistor)

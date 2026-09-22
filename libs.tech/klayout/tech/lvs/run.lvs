@@ -42,6 +42,9 @@ if $ignore_top_ports_mismatch
 else
     IGNORE_TOP_PORTS_MISMATCH = false
 end
+
+skip_warnings = true
+
 #----
 # %include ../drc/00_Layers.drc
 # %include ../drc/02_Device.drc
