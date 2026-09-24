@@ -112,7 +112,7 @@ sidemetal1 = ml1.overlapping(chipring)
 sidemetal2 = ml2.overlapping(chipring)
 sidemetal = sidemetal1 | sidemetal2
 
-er1903_1 = ml1 - sidemetal # - dlcsio
+er1903_1 = ml1 - sidemetal - dlcsio # Assura rules flag CSIO metal
 er1903_2 = er1903_1 - pro
 er1903_3 = er1903_2.sized(-22.5.um)
 er1903 = er1903_3.sized(22.5.um)
