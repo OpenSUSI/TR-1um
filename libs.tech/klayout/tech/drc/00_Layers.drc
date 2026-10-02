@@ -31,9 +31,10 @@ PO    = input(14,  0).not(MASK + SCRB)    # PAD
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #  Label Layer
+#  See https://github.com/KLayout/klayout/issues/1921#issuecomment-2477456498 for discussion of labels
 #
-M1_LBL = labels(48,  0).not(MASK + SCRB)  # M1 Label
-M2_LBL = labels(49,  0).not(MASK + SCRB)  # M2 Label
+M1_LBL = input(48,  0)  # M1 Label
+M2_LBL = input(49,  0)  # M2 Label
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 #  Bounding box means BULK
 #

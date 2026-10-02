@@ -58,7 +58,7 @@ target_netlist(Lay_file, writer, "Created by KLayout")
 #
 if NET_ONLY
     puts("Starting TR-1um LVS in Net Only Mode")
-    netlist.combine_devices
+    # netlist.combine_devices
     puts("Done")
 else
 #
