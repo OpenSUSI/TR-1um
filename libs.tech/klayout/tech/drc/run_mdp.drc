@@ -230,6 +230,7 @@ HPM = BULK
 # --------------------------------------------------------
 DLWLMP = NW.not_interacting(AC + AR)
 DLWLMN = PWMN
+DLWLMN.data = DLWLMN.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 DLWLRR = HVNW
 
 DLMP   = MP.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
