@@ -9,92 +9,74 @@
 
 .subckt F_RR PLUS MINUS SUB
 .param w=1u r=1 l=1u tc1=0 tc2=0 tnom=27
+.param eps=1e-9 xmax=20 emax=5 rmin=1e-3 rmax=1e12
+.param LUM='l*1e6'
+
+.func LIM(x,lo,hi) {min(max(x,lo),hi)}
+.func XSUB(x) {LIM(x,-xmax,xmax)}
+.func EFIELD(vd) {min(abs(vd)/LUM,emax)}
+.func VDEP(e,a,b,c) {max(1+a*e+b*e**2+c*e**3,eps)}
+.func SUBDEP(x,s1,s2,s3,s4) {max(1+s1*x+s2*x**2+s3*x**3+s4*x**4,eps)}
+.func RSAFE(x) {LIM(x,rmin,rmax)}
+
 .if (w == 4u)
-
-r0 PLUS MINUS
-+ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
-+     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(4-1.09)+(13.3*(9.2/	
-+       (4-1.09)+3.38/(4-1.8))+2.79))+(-21*3.95+615.2)))*				
-+     (1+(0.000949*log(4)-0.00559)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+			
-+     (-3.2478*10**(-6)*log(4)+5.28*10**(-5))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+	
-+     (-7.97*10**(-7)*log(4)+3.05*10**(-6))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+	
-+     (-3*10**(-9)*log(4)+1.2394*10**(-8))*((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/	
-+     (1+(-0.09)*abs(v(PLUS,MINUS))/(l*10**6)+0.19*(abs(v(PLUS,MINUS))/		
-+     (l*10**6))**2+(-0.02)*(abs(v(PLUS,MINUS))/(l*10**6))**3)))'
-
-c_d0 PLUS SUB  c='(7.06*(10**-4)*l*(10**6)+6.89*(10**-3))*10**(-12)'
+.param RTEMP_4='1+0.00105*(temper-tnom)+2.4e-6*(temper-tnom)**2'
+.param RBASE_4='((834.54*magRR)*(LUM-9.2)/(4-1.09)+(13.3*(9.2/(4-1.09)+3.38/(4-1.8))+2.79))+(-21*3.95+615.2)'
+.param S1_4='0.000949*log(4)-0.00559'
+.param S2_4='-3.2478e-6*log(4)+5.28e-5'
+.param S3_4='-7.97e-7*log(4)+3.05e-6'
+.param S4_4='-3e-9*log(4)+1.2394e-8'
+r0 PLUS MINUS r = 'RSAFE(RTEMP_4*RBASE_4*VDEP(EFIELD(v(PLUS,MINUS)),-0.09,0.19,-0.02)/SUBDEP(XSUB(v(SUB)-(v(MINUS)+v(PLUS))/2),S1_4,S2_4,S3_4,S4_4))'
+c_d0 PLUS SUB  c='(7.06e-4*LUM+6.89e-3)*1e-12'
 c_d1 MINUS SUB c=0
 
 
 .elseif (w == 6u)
-
-r0 PLUS MINUS
-+ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
-+     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(6-1.09)+			
-+       (13.3*(9.2/(6-1.09)+3.38/(6-1.8))+2.79))+(-21*4.0+366.4)))*			
-+     (1+(0.000639*log(6)-0.00559)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+			
-+     (-1.03248*10**(-6)*log(6)+5.28*10**(-5))*((v(SUB)-(v(MINUS)+		
-+     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-9.9798*10**(-7)*log(6)+4.05*10**(-6))*			
-+     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-3*10**(-9)*log(6)+1.9394*10**(-8))*	
-+     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.1)*abs(v(PLUS,MINUS))/(l*10**6)+	
-+     0.25*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.02)*(abs(v(PLUS,MINUS))/		
-+     (l*10**6))**3)))'
-
-c_d0 PLUS SUB  c='(8.99*(10**-4)*l*(10**6)+7.98*(10**-3))*10**(-12)' 
+.param RTEMP_6='1+0.00105*(temper-tnom)+2.4e-6*(temper-tnom)**2'
+.param RBASE_6='((834.54*magRR)*(LUM-9.2)/(6-1.09)+(13.3*(9.2/(6-1.09)+3.38/(6-1.8))+2.79))+(-21*4.0+366.4)'
+.param S1_6='0.000639*log(6)-0.00559'
+.param S2_6='-1.03248e-6*log(6)+5.28e-5'
+.param S3_6='-9.9798e-7*log(6)+4.05e-6'
+.param S4_6='-3e-9*log(6)+1.9394e-8'
+r0 PLUS MINUS r = 'RSAFE(RTEMP_6*RBASE_6*VDEP(EFIELD(v(PLUS,MINUS)),-0.1,0.25,-0.02)/SUBDEP(XSUB(v(SUB)-(v(MINUS)+v(PLUS))/2),S1_6,S2_6,S3_6,S4_6))'
+c_d0 PLUS SUB  c='(8.99e-4*LUM+7.98e-3)*1e-12'
 c_d1 MINUS SUB c=0
 
 
 .elseif (w == 12u)
-
-r0 PLUS MINUS
-+ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
-+     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(12-1.09)+			
-+       (13.3*(9.2/(12-1.09)+3.38/(12-1.8))+2.79))+(-21*11.9+368.9)))*		
-+     (1+(0.003599*log(12)-0.0129)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+			
-+     (1.03248*10**(-5)*log(12)+1.5764*10**(-5))*((v(SUB)-(v(MINUS)+		
-+     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-9.9788*10**(-7)*log(12)-9.4884*10**(-7))*((v(SUB)-	
-+     (v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(2.1996*10**(-8)*log(12)+1.2939*10**(-7))*	+ 
-+     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.21)*abs(v(PLUS,MINUS))/		
-+     (l*10**6)+0.44*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.032)*			
-+     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
-
-c_d0 PLUS SUB  c='(1.47*(10**-3)*l*(10**6)+1.31*(10**-2))*10**(-12)'
+.param RTEMP_12='1+0.00105*(temper-tnom)+2.4e-6*(temper-tnom)**2'
+.param RBASE_12='((834.54*magRR)*(LUM-9.2)/(12-1.09)+(13.3*(9.2/(12-1.09)+3.38/(12-1.8))+2.79))+(-21*11.9+368.9)'
+.param S1_12='0.003599*log(12)-0.0129'
+.param S2_12='1.03248e-5*log(12)+1.5764e-5'
+.param S3_12='-9.9788e-7*log(12)-9.4884e-7'
+.param S4_12='2.1996e-8*log(12)+1.2939e-7'
+r0 PLUS MINUS r = 'RSAFE(RTEMP_12*RBASE_12*VDEP(EFIELD(v(PLUS,MINUS)),-0.21,0.44,-0.032)/SUBDEP(XSUB(v(SUB)-(v(MINUS)+v(PLUS))/2),S1_12,S2_12,S3_12,S4_12))'
+c_d0 PLUS SUB  c='(1.47e-3*LUM+1.31e-2)*1e-12'
 c_d1 MINUS SUB c=0
 
 
 .elseif (w == 20u)
-
-r0 PLUS MINUS
-+ r = '(1+0.00105*(temper-tnom)+2.4*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
-+     (v(PLUS,MINUS)/((((834.54*magRR)*((l*10**6)-9.2)/(20-1.09)+			
-+       (13.3*(9.2/(20-1.09)+3.38/(20-1.8))+2.79))+(-21*20.1+495.8)))*		
-+     (1+(0.003499*log(20)-0.01299)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+		
-+     (1.73248*10**(-5)*log(20)+4.5764*10**(-5))*((v(SUB)-(v(MINUS)+		
-+     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-2.09788*10**(-6)*log(20)-8.4884*10**(-7))*((v(SUB)-	
-+     (v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(1.996*10**(-8)*log(20)+5.9395*10**(-8))*		
-+     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.15)*abs(v(PLUS,MINUS))/		
-+     (l*10**6)+0.46*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.02)*			
-+     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
-
-c_d0 PLUS SUB  c='(2.19*(10**-3)*l*(10**6)+2.19*(10**-2))*10**(-12)'
-c_d1 MINUS SUB c=0 
+.param RTEMP_20='1+0.00105*(temper-tnom)+2.4e-6*(temper-tnom)**2'
+.param RBASE_20='((834.54*magRR)*(LUM-9.2)/(20-1.09)+(13.3*(9.2/(20-1.09)+3.38/(20-1.8))+2.79))+(-21*20.1+495.8)'
+.param S1_20='0.003499*log(20)-0.01299'
+.param S2_20='1.73248e-5*log(20)+4.5764e-5'
+.param S3_20='-2.09788e-6*log(20)-8.4884e-7'
+.param S4_20='1.996e-8*log(20)+5.9395e-8'
+r0 PLUS MINUS r = 'RSAFE(RTEMP_20*RBASE_20*VDEP(EFIELD(v(PLUS,MINUS)),-0.15,0.46,-0.02)/SUBDEP(XSUB(v(SUB)-(v(MINUS)+v(PLUS))/2),S1_20,S2_20,S3_20,S4_20))'
+c_d0 PLUS SUB  c='(2.19e-3*LUM+2.19e-2)*1e-12'
+c_d1 MINUS SUB c=0
 
 
 .elseif (w == 2.8u)
-
-r0 PLUS MINUS
-+ r = '(1+0.00105*(temper-tnom)+2.7*10**(-6)*(temper-tnom)**2)*v(PLUS,MINUS)/		
-+     (v(PLUS,MINUS)/((-0.1716*((l*10**6)**2)+486.5*(l*10**6)-3605.5)*		
-+     (1+(0.007099*log(2.8)-0.01299)*(v(SUB)-(v(MINUS)+v(PLUS))/2)+		
-+     (3.73248*10**(-5)*log(2.8)+4.0764*10**(-5))*((v(SUB)-(v(MINUS)+		
-+     v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(-1.09788*10**(-6)*log(2.8)-8.4884*10**(-7))*((v(SUB)-	
-+     (v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2))+(1.90976*10**(-8)*log(2.8)+1.0839*10**(-7))*	
-+     ((v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)*(v(SUB)-(v(MINUS)+v(PLUS))/2)))/(1+(-0.17)*abs(v(PLUS,MINUS))/		
-+     (l*10**6)+0.19*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.011)*			
-+     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
-
-c_d0 PLUS SUB  c='(5.96*(10**-4)*l*(10**6)+8.07*(10**-3))*10**(-12)'
-c_d1 MINUS SUB c=0 
+.param RTEMP_28='1+0.00105*(temper-tnom)+2.7e-6*(temper-tnom)**2'
+.param RBASE_28='-0.1716*LUM**2+486.5*LUM-3605.5'
+.param S1_28='0.007099*log(2.8)-0.01299'
+.param S2_28='3.73248e-5*log(2.8)+4.0764e-5'
+.param S3_28='-1.09788e-6*log(2.8)-8.4884e-7'
+.param S4_28='1.90976e-8*log(2.8)+1.0839e-7'
+r0 PLUS MINUS r = 'RSAFE(RTEMP_28*RBASE_28*VDEP(EFIELD(v(PLUS,MINUS)),-0.17,0.19,-0.011)/SUBDEP(XSUB(v(SUB)-(v(MINUS)+v(PLUS))/2),S1_28,S2_28,S3_28,S4_28))'
+c_d0 PLUS SUB  c='(5.96e-4*LUM+8.07e-3)*1e-12'
+c_d1 MINUS SUB c=0
 .endif
 
 .ends F_RR
@@ -105,40 +87,32 @@ c_d1 MINUS SUB c=0
 
 .subckt F_RS PLUS MINUS
 .param w=1u r=1 l=1u tnom=27
+.param eps=1e-9 emax=5 rmin=1e-3 rmax=1e12
+.param LUM='l*1e6'
+
+.func LIM(x,lo,hi) {min(max(x,lo),hi)}
+.func EFIELD(vd) {min(abs(vd)/LUM,emax)}
+.func VDEP(e,a,b,c) {max(1+a*e+b*e**2+c*e**3,eps)}
+.func RSAFE(x) {LIM(x,rmin,rmax)}
+
 .if (w == 4u)
+.param RBASE4='95.0*magRS*LUM/4+2.79+705.9*4**(-1.298)'
+r PLUS MINUS r = 'RSAFE(RBASE4*VDEP(EFIELD(v(PLUS,MINUS)),-0.0112,-0.229,1.99))'
 
-r PLUS MINUS 
-+ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/4+(2.79+		
-+     (705.9*4**(-1.298))))))/(1+(-0.0112)*abs(v(PLUS,MINUS))/(l*10**6)-0.229*	
-+     (abs(v(PLUS,MINUS))/(l*10**6))**2+(1.99)*(abs(v(PLUS,MINUS))/		
-+     (l*10**6))**3)))'
-.endif
 
-.if (w == 6u)
+.elseif (w == 6u)
+.param RBASE6='95.0*magRS*LUM/6+2.79+707.5*6**(-1.35)'
+r PLUS MINUS r = 'RSAFE(RBASE6*VDEP(EFIELD(v(PLUS,MINUS)),-0.148,1.41,-0.56))'
 
-r PLUS MINUS
-+ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/6+(2.79+		
-+     (707.5*6**(-1.35))))))/(1+(-0.148)*abs(v(PLUS,MINUS))/(l*10**6)+1.41*	
-+     (abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.56)*(abs(v(PLUS,MINUS))/		
-+     (l*10**6))**3)))'
-.endif
 
-.if (w == 12u)
+.elseif (w == 12u)
+.param RBASE12='95.0*magRS*LUM/12+2.79+707.5*12**(-2)'
+r PLUS MINUS r = 'RSAFE(RBASE12*VDEP(EFIELD(v(PLUS,MINUS)),-0.156,1.96,-0.68))'
 
-r PLUS MINUS
-+ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/12+(2.79+		
-+     (707.5*12**(-2))+(361/(l*10**6)))))/(1+(-0.156)*abs(v(PLUS,MINUS))/		
-+     (l*10**6)+1.96*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.68)*			
-+     (abs(v(PLUS,MINUS))/(l*10**6))**3)))'
-.endif
 
-.if (w == 20u)
-
-r PLUS MINUS
-+ r = 'v(PLUS,MINUS)/(v(PLUS,MINUS)/((((95.0*magRS)*(l*10**6)/20+(2.79+		
-+     (701.9*20**(-1.224))))))/(1+(-0.26)*abs(v(PLUS,MINUS))/(l*10**6)+		
-+     2.05*(abs(v(PLUS,MINUS))/(l*10**6))**2+(-0.5)*(abs(v(PLUS,MINUS))/		
-+     (l*10**6))**3)))'
+.elseif (w == 20u)
+.param RBASE20='95.0*magRS*LUM/20+2.79+701.9*20**(-1.224)'
+r PLUS MINUS r = 'RSAFE(RBASE20*VDEP(EFIELD(v(PLUS,MINUS)),-0.26,2.05,-0.5))'
 .endif
 
 .ends F_RS
