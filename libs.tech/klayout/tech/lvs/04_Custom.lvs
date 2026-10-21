@@ -119,11 +119,17 @@ class MyWriter < RBA::NetlistSpiceWriterDelegate
 
     # Generate device terminals
     def generate_device_terminals(device, device_class)
-        default_terminals = device_class.terminal_definitions.map do |td|
-          net_to_string(device.net_for_terminal(td.id))
+        # mosfet terminal order is fixed
+        if device_class.name.to_s.downcase.include?('mos')
+            my_terminal_ids = %w[D G S B].map { |name| device_class.terminal_id(name) }
+        else
+            my_terminal_ids = device_class.terminal_definitions.map { |td| td.id }
         end
 
-        return "#{default_terminals.join(' ')} "
+        my_terminals = my_terminal_ids.map do |term_id|
+            net_to_string(device.net_for_terminal(term_id))
+        end
+        return "#{my_terminals.join(' ')} "
     end
 
     # Determine the unit for each parameter

@@ -620,6 +620,7 @@ append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem"
 append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/TR-1umLIB"
 append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/TR-1um_2_ESD"
 append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/TR-1um_5_stdcell"
+append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/TR-1um_frame"
 append XSCHEM_LIBRARY_PATH ":$env(PDK_ROOT)/$env(PDK)/libs.tech/xschem/systemlib"
 #puts stdout $XSCHEM_LIBRARY_PATH
 

@@ -58,7 +58,7 @@ target_netlist(Lay_file, writer, "Created by KLayout")
 #
 if NET_ONLY
     puts("Starting TR-1um LVS in Net Only Mode")
-    netlist.combine_devices
+    # netlist.combine_devices
     puts("Done")
 else
 #
@@ -76,13 +76,31 @@ else
     schematic.combine_devices
     netlist.combine_devices
     #
+    equivalent_pins("AND2_X1", "A", "B")
+    equivalent_pins("AND3_X1", "A", "B", "C")
+    equivalent_pins("AND4_X1", "A", "B", "C", "D")
+    equivalent_pins("NAND2",   "A", "B")
+    equivalent_pins("NAND3",   "A", "B", "C")
+    equivalent_pins("NAND4",   "A", "B", "C", "D")
+    equivalent_pins("NOR2",    "A", "B")
+    equivalent_pins("NOR3",    "A", "B", "C")
+    equivalent_pins("NOR4",    "A", "B", "C", "D")
+    equivalent_pins("OR2",     "A", "B")
+    equivalent_pins("OR3",     "A", "B", "C")
+    equivalent_pins("OR4",     "A", "B", "C", "D")
+    equivalent_pins("XOR2",    "A", "B")
+    equivalent_pins("XNOR2",   "A", "B")
+    #
     if IGNORE_TOP_PORTS_MISMATCH
         puts("Starting TR-1um LVS Comparison")
         success = compare
     else
         puts("Starting TR-1um LVS Comparison in strict port mode")
         puts("flag_missing_ports enabled: missing/mislabeled top-level ports are treated as errors")
-        success = compare && flag_missing_ports
+        # success = compare && flag_missing_ports
+        compare_result = compare
+        port_check_result = flag_missing_ports
+        success = compare_result && port_check_result
     end
     #================================================
     #------------- COMPARISON RESULTS ---------------

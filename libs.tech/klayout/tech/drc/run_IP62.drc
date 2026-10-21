@@ -30,4 +30,6 @@ end
 # %include IP62/07_Check.drc
 # %include IP62/08_Check.drc
 # %include IP62/09_Check.drc
+# %include IP62/10_TapeOut.drc
+
 #----

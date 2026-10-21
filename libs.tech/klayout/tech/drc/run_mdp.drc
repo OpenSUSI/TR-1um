@@ -9,14 +9,19 @@
 # Input / Output
 # --------------------------------------------------------
 if $input
-  if $top_cell
-    source($input, $top_cell)
+  if $cellname
+    source($input, $cellname)
   else
     source($input)
   end
 end
 
 target($output) if $output
+
+TOPCELL = layout.cell_name
+source_topcell  = source.select("-*", "+#{TOPCELL}")
+TXM1_TOP = source_topcell.labels(48, 0).texts  # Top M1 Label
+TXM2_TOP = source_topcell.labels(49, 0).texts  # Top M2 Label
 
 flat
 
@@ -38,15 +43,18 @@ GR = input(8, 2)       # silicide resistor
 PSUB = input(140, 0)   # Nwell / Pwell marker
 CO   = input(11, 0)    # Contact
 M1   = input(13, 0)    # Metal-1
+M1.data = M1.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 TC   = input(19, 0)    # Via1
 M2   = input(20, 0)    # Metal-2
+M2.data = M2.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 PRO  = input(14, 0)    # Pad
 
 TC23 = input(121, 0)   # Via2
 M3   = input(122, 0)   # Metal-3
 TXM1 = input(48, 0)    # Text M1
-TXM2 = input(48, 1)    # Text M2
-PIN  = input(49, 0)    # Pin text
+TXM2 = input(49, 0)    # Text M2
+M1PIN = input(48, 1)   # M1 Pin
+M2PIN = input(49, 1)   # M1 Pin
 
 SCRB = input(80, 0)    # Seal ring / scribe
 
@@ -97,7 +105,9 @@ SG = GC + GR
 MP  = ((AP & NWMP) - ESD).interacting(GC)
 MN  = ((AN & PWMN) - ESD).interacting(GC)
 MPE = (AP & NWMP & ESD).interacting(GC)
+MPEs = MPE.edges.with_angle(diagonal_only).extents + MPE
 MNE = (AN & PWMN & ESD).interacting(GC)
+MNEs = MNE.edges.with_angle(diagonal_only).extents + MNE
 
 DP  = (AP & NWMP).not_interacting(GC)
 DN  = (AN & PWMN).not_interacting(GC)
@@ -110,9 +120,13 @@ GCS = (AN & NWCS).not_interacting(GC).hulls  # CSIO back gate
 # AR resistor related layers
 # --------------------------------------------------------
 CL   = AC.sized(1.4, square_limit).merged.snap(0.05, 0.05)
-R    = AR.sized(2.0, square_limit).extents.merged.snap(0.05, 0.05)
+RR   = AR.sized(2.0, square_limit).raw.extents.merged.snap(0.05, 0.05)
+R    = RR.sized(1.3-1.dbu).sized(-1.3+1.dbu)
 RS   = GR.sized(1.4, square_limit).merged.snap(0.05, 0.05)
-RPSD = (R - (CO & R).sized(4.2)).and(R)
+
+# Non-RPSD block region should be limited to half the surrounding poly.
+# Anything larger can conflict with neighboring resistors of different sizes.
+RPSD = RR - (CO & RR).sized(4.2-1.0, size_inside(SG.holes), steps(7)).sized(1.0)
 
 # --------------------------------------------------------
 # Main generated process layers
@@ -123,31 +137,91 @@ HVNW = (BULK & PSUB.interacting(AR)).sized(1.5)
 NF = PSUB
 PF = PSUB.not_interacting(AC + AR)
 
-PBEx = ((MP + MPE).sized(2.7, square_limit).merged).sized(-2.7, square_limit).snap(0.05, 0.05)
-PBE  = PBEx.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+ARs = AR.edges.with_angle(diagonal_only).extents + AR
 
-NBEx = ((MN + MNE).sized(2.7, square_limit).merged).sized(-2.7, square_limit).snap(0.05, 0.05)
-NBE  = NBEx.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+# The base implant area is the minimum enclosure
+base_implant = (AC + AN + AP + GR + MNEs + MPEs).sized(1.4) + ARs.sized(2.0)
+# The implant_grow_limit is the area that the implant may grow to eliminate width errors
+implant_grow_limit = BULK - base_implant
 
-PMx = (
-  (DP + GP + MN + DN + GN + MNE + GCS)
-    .sized(2.7, square_limit)
-    .merged
-).sized(-2.7, square_limit).snap(0.05, 0.05)
-PM = R + RS + PMx.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+# 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
+PBE_base = MP + MPEs
+PBE_minimum = PBE_base.sized(1.4)
+PBE_spacing = PBE_minimum.sized(2.6+1.4)
+PBE_maximum = PBE_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + PBE_minimum
+# Undersize by just less than half width to remove minimum width errors
+# Final sizing needs to be minimum enclosure to get diagonal spacing correct
+PBE_W_OK = (PBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PBE_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+PBE_WS_OK = PBE_W_OK - (PBE_W_OK & PBE_spacing).not_interacting(PBE_minimum)
+PBE = PBE_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+PBE.data = PBE.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
-NMx = (
-  (MP + DP + GP + DN + GN + MPE + MNE + GCS)
-    .sized(2.7, square_limit)
-    .merged
-).sized(-2.7, square_limit).snap(0.05, 0.05)
-NM = R + RS + NMx.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+# 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
+NBE_base = MN + MNEs
+NBE_minimum = NBE_base.sized(1.4)
+NBE_spacing = NBE_minimum.sized(2.6+1.4)
+NBE_maximum = NBE_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + NBE_minimum
+# Undersize by just less than half width to remove minimum width errors
+# Final sizing needs to be minimum enclosure to get diagonal spacing correct
+NBE_W_OK = (NBE_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NBE_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+NBE_WS_OK = NBE_W_OK - (NBE_W_OK & NBE_spacing).not_interacting(NBE_minimum)
+NBE = NBE_WS_OK.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+NBE.data = NBE.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
-PSDx = ((AN + GCS).sized(2.5, square_limit).merged).sized(-2.5, square_limit).snap(0.05, 0.05)
-PSD  = RPSD + RS + PSDx.sized(1.4, octagon_limit).merged.snap(0.05, 0.05)
+# 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
+PM_base = (ARs.sized(0.6) + GR + MN + DP + GP + DN + GN + MNEs + GCS)
+PM_minimum = PM_base.sized(1.4)
+PM_spacing = PM_minimum.sized(2.6+1.4)
+PM_maximum = PM_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + PM_minimum
+# Undersize by just less than half width to remove minimum width errors
+# Final sizing needs to be minimum enclosure to get diagonal spacing correct
+PM_W_OK = (PM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PM_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+PM_WS_OK = PM_W_OK - (PM_W_OK & PM_spacing).not_interacting(PM_minimum)
+PM = (PM_WS_OK.sized(1.4, octagon_limit) + GR.sized(1.4)).merged.snap(0.05, 0.05)
+PM.data = PM.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
-NSDx = ((AP + AC).sized(2.7, square_limit).merged).sized(-2.7, square_limit).snap(0.05, 0.05)
-NSD  = (R + NSDx.sized(1.4, octagon_limit).merged.snap(0.05, 0.05) + CL).merged
+# 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
+NM_base = (ARs.sized(0.6) + GR + MP + DP + GP + DN + GN + MPEs + MNEs + GCS)
+NM_minimum = NM_base.sized(1.4)
+NM_spacing = NM_minimum.sized(2.6+1.4)
+NM_maximum = NM_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + NM_minimum
+# Undersize by just less than half width to remove minimum width errors
+# Final sizing needs to be minimum enclosure to get diagonal spacing correct
+NM_W_OK = (NM_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NM_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+NM_WS_OK = NM_W_OK - (NM_W_OK & NM_spacing).not_interacting(NM_minimum)
+NM = (NM_WS_OK.sized(1.4, octagon_limit) + GR.sized(1.4)).merged.snap(0.05, 0.05)
+NM.data = NM.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
+
+# 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
+PSD_base = AN + GCS + GR
+PSD_minimum = PSD_base.sized(1.4) + RPSD
+PSD_spacing = PSD_minimum.sized(2.6+1.4)
+PSD_maximum = PSD_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + PSD_minimum
+# Undersize by just less than half width to remove minimum width errors
+# Final sizing needs to be minimum enclosure to get diagonal spacing correct
+PSD_W_OK = (PSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + PSD_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+PSD_WS_OK = PSD_W_OK - (PSD_W_OK & PSD_spacing).not_interacting(PSD_minimum)
+PSD = (PSD_WS_OK.sized(1.4, octagon_limit) + RPSD + GR.sized(1.4)).merged.snap(0.05, 0.05)
+PSD.data = PSD.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
+
+# 2.6um is minimum space, 4.2um is minimum width, 1.4um is minimum enclosure. ( 2 * 1.4 + 2.6 ) / 2 = 2.7
+NSD_base = AP + AC + ARs.sized(0.6)
+NSD_minimum = NSD_base.sized(1.4)
+NSD_spacing = NSD_minimum.sized(2.6+1.4)
+NSD_maximum = NSD_minimum.hulls.extents.sized(1.3).extents.sized(-1.3) - base_implant + NSD_minimum
+# Undersize by just less than half width to remove minimum width errors
+# Final sizing needs to be minimum enclosure to get diagonal spacing correct
+NSD_W_OK = (NSD_maximum.sized(-2.1+1.dbu).sized(0.7-1.dbu) + NSD_minimum.sized(-1.4))
+# subtract spacing error implant that doesn't do anything
+NSD_WS_OK = NSD_W_OK - (NSD_W_OK & NSD_spacing).not_interacting(NSD_minimum)
+DLCSIO = NWCS.sized(1.5)
+NSD = (NSD_WS_OK.sized(1.4, octagon_limit) - DLCSIO + CL).merged.snap(0.05, 0.05)
+NSD.data = NSD.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 
 HPM = BULK
 
@@ -156,20 +230,23 @@ HPM = BULK
 # --------------------------------------------------------
 DLWLMP = NW.not_interacting(AC + AR)
 DLWLMN = PWMN
+DLWLMN.data = DLWLMN.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 DLWLRR = HVNW
 
 DLMP   = MP.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
 DLMN   = MN.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
-DLRR   = HVNW & GC.hulls
+DLRR   = (HVNW & GC).holes.sized(2.0)
 DLRS   = GR.sized(1.4, square_limit).merged.snap(0.05, 0.05)
-DLCSIO = NWCS.sized(1.5)
+#DLCSIO = NWCS.sized(1.5)
 DLDP   = DP.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
 DLDN   = DN.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
 DLMPE  = MPE.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
 DLMNE  = MNE.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
-DLBGMP = GP.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
+DLBGMP = (GP - HVNW).sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
+DLBGMP.data = DLBGMP.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
 DLBGMN = GN.sized(2.7, square_limit).merged.sized(-1.3, square_limit).snap(0.05, 0.05)
-DLBGRR = HVNW & PSD
+DLBGMN.data = DLBGMN.data.merged(true, 0).decompose_convex_to_region # splits into rectangles
+DLBGRR = HVNW & PSD - DLRR
 
 # --------------------------------------------------------
 # Output MDP layers
@@ -202,14 +279,14 @@ DLBGRR = HVNW & PSD
 (TC23      ).output(121, 0)   # Via2
 (M3        ).output(122, 0)   # Metal-3
 (SCRB      ).output(80,  0)   # SCRB
-(TXM1      ).output(48,  0)   # TEXT M1
-(TXM2      ).output(48,  1)   # TEXT M2
-(PIN       ).output(49,  0)   # PIN
+(TXM1_TOP  ).output(48,  0)   # TEXT M1
+(TXM2_TOP  ).output(49,  0)   # TEXT M2
+(M1PIN     ).output(48,  1)   # M1 PIN
+(M2PIN     ).output(49,  1)   # M2 PIN
 
 (MASK      ).output(63,  0)   # DRC waiver
 (PTECT     ).output(63,  1)   # Protection recognition
 (ESD       ).output(63,  2)   # IO/ESD recognition
-(SCRB      ).output(80,  0)   # Seal ring
 
 (DLWLMP    ).output(150, 0)
 (DLWLMN    ).output(151, 0)

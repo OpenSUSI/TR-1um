@@ -4,15 +4,51 @@
 #          http://www.apache.org/licenses/
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # See: https://www.klayout.de/doc-qt5/manual/lvs_device_extractors.html
-#
-deep          # Hierarchical extraction
-#
-report_lvs    # LVS report window
+# Run mode {deep(default), flat}
+if $run_mode == 'flat'
+    puts("Setting running mode => flat")
+    flat
+else
+    puts("Setting running mode => deep")
+    deep          # Hierarchical extraction
+end
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Define Top Cell
+if $input 
+    if $top_cell
+        source($input, $top_cell)
+    else
+        source($input)
+    end
+end
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Extract Netlist Only
+if $netlist_only
+    NET_ONLY = true
+else
+    NET_ONLY = false
+end
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Output report(lvsdb) file
+if $report
+    report_lvs($report)
+else
+    report_lvs    # LVS report window
+end
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Extract Netlist Only
+if $ignore_top_ports_mismatch
+    IGNORE_TOP_PORTS_MISMATCH = true
+else
+    IGNORE_TOP_PORTS_MISMATCH = false
+end
 #----
-# %include ../drc/00_Layers.drc
-# %include ../drc/02_Device.drc
+# %include ../../drc/IP62/00_Layers.drc
+# %include ../../drc/IP62/02_Device.drc
+# %include 00_Extract.lvs
 # %include 01_Extract.lvs
+# %include ../03_Combiner.lvs
 # %include 02_Extract.lvs
-# %include 03_Extract.lvs
-# %include 04_Compare.lvs
+# %include ../04_Custom.lvs
+# %include ../05_Compare.lvs
 ### %include test.lvs

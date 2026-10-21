@@ -42,12 +42,15 @@ if $ignore_top_ports_mismatch
 else
     IGNORE_TOP_PORTS_MISMATCH = false
 end
+
+skip_warnings = true
+
 #----
 # %include ../drc/00_Layers.drc
 # %include ../drc/02_Device.drc
-# %include 01_Extract.lvs
 # %include 03_Combiner.lvs
 # %include 02_Extract.lvs
+# %include 01_Extract.lvs
 ### %include 03_Extract.lvs
 # %include 04_Custom.lvs
 # %include 05_Compare.lvs
