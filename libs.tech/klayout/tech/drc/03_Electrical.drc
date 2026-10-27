@@ -6,12 +6,26 @@
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Drain connected to Backgate
 #
-COS = ( SDPE & antenna_check(GP, CO, 0.0)) + ( SDNE & antenna_check(GN, CO, 0.0))
-COD = (((SDPE & CO) + (SDNE & CO)) - COS)
+(SPE.not_interacting(antenna_check(GP, CO, 0.0))).output("Warning: ESD PMOS source not connected to well tap")
+(SNE.not_interacting(antenna_check(GN, CO, 0.0))).output("Warning: ESD NMOS source not connected to sub tap")
+COS  = CO & ( SPE + SNE )
+COD  = CO & ( DPE + DNE )
+COD_s = COD.drc((space(projection) <= 1.6).polygons) # Requires width and space from DRM
+COS_s = COS.drc((space(projection) <= 1.6).polygons) # Requires width and space from DRM
+# end of row diffusion contacts. enclosure is half max enclosure allowed without adding another CO
+# DRM calculates to 4.8um, but actual layout is 5.1um, so add 0.3um fudge factor
+COD_e = COD.edges.enclosed(AME_h, 2.5+(1.6+3.0)/2+0.3+1.dbu, projection).polygons
+COS_e = COS.edges.enclosed(AME_h, 2.5+(1.6+3.0)/2+0.3+1.dbu, projection).polygons
+
+GC_ext3 = GA.edges.inside_part(AME).extended_out(3.0).edges.inside_part(SPE + SNE)
+GC_ext7 = GA.edges.inside_part(AME).extended_out(7.0).edges.inside_part(DPE + DNE)
 # COS.output("SOURCE")      # DEBUG
 # COD.output("DRAIN")       # DEBUG
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Gate electrically connected to Substrate
+#
+connect(AR, CO) # short diffusion resistors for substrate connection checks
+connect(GR, CO) # short poly resistors for substrate connection checks
 #
 GC_MP = antenna_check(SDP,  GC, 0.0)
 GC_MN = antenna_check(SDN,  GC, 0.0)
@@ -21,6 +35,32 @@ GC_DP = antenna_check(DP,   GC, 0.0)
 GC_DN = antenna_check(DN,   GC, 0.0)
 GC_GP = antenna_check(GP,   GC, 0.0)
 GC_GN = antenna_check(GN,   GC, 0.0)
+GC_PAD = antenna_check(M2P, GC, 0.0)
 #
-GC_FL = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC+GN))  # Floating Gate
+GC_FL = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN))  # Floating Gate
 #
+# Select Top
+#
+TOPCELL = layout.cell_name
+if SCRB.is_empty?
+    source_topcell  = source.select("-*", "+#{TOPCELL}")
+else
+    source_topcell = source.select("-*")
+end
+#
+# Select Top Metal Labels
+#
+M1LBL_TOP = source_topcell.labels(48, 0).texts(as_boxes)  # Top M1 Label
+M2LBL_TOP = source_topcell.labels(49, 0).texts(as_boxes)  # Top M2 Label
+#
+# Top Pins and labels connection
+#
+connect(M1,   M1LBL_TOP)  # Attaches M1 top labels
+connect(M2,   M2LBL_TOP)  # Attaches M2 top labels
+#
+# Gate electrically connected to Substrate
+#
+GC_M1LBL_TOP = antenna_check(M1LBL_TOP, GC, 0.0)
+GC_M2LBL_TOP = antenna_check(M2LBL_TOP, GC, 0.0)
+#
+GC_FL_LBL_TOP = (GC - (GC_MP + GC_MN + GC_PE + GC_NE + GC_DP + GC_DN + GC_GP + GC_GN + GC_M1LBL_TOP + GC_M2LBL_TOP + GC_PAD))  # Floating Gate

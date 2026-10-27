@@ -75,3 +75,47 @@ extract_devices(diode("DN"),                          # Floating Protection
 tolerance("DN", "A", :relative => 0.05)               # 5% tolerance 
 tolerance("DN", "P", :relative => 0.05)               # 5% tolerance 
 #
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ ----- 
+# Resistor extraction
+#
+extract_devices(resistor("F_RS", 1, LWResistor),
+                    { "R"  => (RS),              # Resistance Layer`
+                      "C"  => (RSC),             # Contact Layer
+                      "tA" => (RSC),             # Terminal: A
+                      "tB" => (RSC) })           # Terminal: B
+#
+tolerance("F_RS", "W", :relative => 0.01)        # 1% tolerance 
+tolerance("F_RS", "L", :relative => 0.01)        # 1% tolerance
+ignore_parameter("F_RS", "R")                    # ignore "R" for comparison
+#
+extract_devices(resistor_with_bulk("F_RR", 1, LWResistorWithBulk),
+                    { "R"  => (RR),              # Resistance Layer`
+                      "C"  => (ARC),             # Contact Layer
+                      "W"  => (AR),              # NWELL plate
+                      "tA" => (ARC),             # Terminal: A
+                      "tB" => (ARC),             # Terminal: B
+                      "tW" => (WR) })            # Terminal: NWELL
+#
+tolerance("F_RR", "W", :relative => 0.01)        # 1% tolerance
+tolerance("F_RR", "L", :relative => 0.01)        # 1% tolerance
+ignore_parameter("F_RR", "R")                    # ignore "R" for comparison
+#
+# ----- ------ ----- ----- ------ ----- ----- ------ -----
+equivalent_pins("F_RS", "A", "B")
+equivalent_pins("F_RR", "A", "B")
+
+extract_devices(capacitor_with_bulk("F_CSIO", 0.6e-15, LWCapacitorWithBulk), 
+                    { "P1" => (GC),             # Top plate
+                      "P2" => (AC),             # Bottom plate
+                      "W"  => (WC),             # Bulk plate
+                      "tA" => (GC),             # Terminal: A
+                      "tB" => (WC),             # Terminal: B
+                      "tW" => (BULK) })         # Terminal: BULK
+
+# tolerance("F_CSIO", "C", :relative => 0.01)     # 1% tolerance 
+tolerance("F_CSIO", "A", :relative => 0.01)     # 1% tolerance 
+tolerance("F_CSIO", "P", :relative => 0.01)     # 1% tolerance 
+ignore_parameter("F_CSIO", "C")                 # ignore "C" for comparison
+ignore_parameter("F_CSIO", "W")                 # ignore "W" for comparison
+ignore_parameter("F_CSIO", "L")                 # ignore "L" for comparison

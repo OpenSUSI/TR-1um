@@ -8,37 +8,54 @@
 #
 WR  = WN.covering(AR)                                       # Nwell for RR
 WC  = WN.covering(AC)                                       # Nwell for CSIO
-WM  = WN.covering(AP)                                       # Nwell for PMOS
+WM  = WN.covering(AP & GC)                                  # Nwell for PMOS
+WB  = WN - (WR + WC + WM)                                   # Nwell for bipolar
 #
 AA  = (AN + AP + AC + AR)                                   # ALL ACTIVE
+
+GA  = (GC + GR)                                             # ALL POLY
 #
-MP  = (AP.interacting(GC) & WN - ESD)                       # PMOS
-MN  = (AN.interacting(GC) & WP - ESD)                       # NMOS
+MP  = (AP.interacting(GC) & WN - ESD)                       # PMOS diffusion
+MN  = (AN.interacting(GC) & WP - ESD)                       # NMOS diffusion
 AM  = (MP + MN)                                             # ALL MOS
+AM_h = AM.edges.interacting(GC)                             # MOS diffusion edges crossing poly
 #
 MPE = (AP.interacting(GC) & WN & ESD)                       # PMOS (ESD)
 MNE = (AN.interacting(GC) & WP & ESD)                       # NMOS (ESD)
+AME = (MPE + MNE)                                           # ALL MOS (ESD)
+AME_h = AME.edges.interacting(GC)                           # MOS (ESD) diffusion edges crossing poly
 #
 GP  = (AN & WN)                                             # BG-contact (PMOS) (poly interaction not relevant)
 GN  = (AP & WP)                                             # BG-contact (NMOS) (poly interaction not relevant)
-BG  = ((GP + GN) - WC)                                      # BG-contact except for CSIO
+BG  = (GP + GN)                                             # BG-contact
+BGM = (BG - WC)                                             # BG-contact except for CSIO
 #
 DP  = (AP.not_interacting(GC) & WN)                         # DIODE(P)
 DN  = (AN.not_interacting(GC) & WP)                         # DIODE(N)
 AD  = (DP + DN)                                             # ALL DIODE 
 #
 CL  = CO.drc( area >= 1.5 )                                 # LARGE CONTACT
+COM = CO & (MP + MN)                                        # S/D CONTACT on MOSFET
+COM_s = COM.drc((space(projection) <= 1.0).polygons) # Requires width and space from DRM
+# end of row diffusion contacts. enclosure is half max enclosure allowed without adding another CO
+COM_e = COM.edges.enclosed(AM_h, 0.8+1.0+1.dbu, projection).polygons
 COE = CO & (MPE + MNE)                                      # S/D CONTACT on ESD MOSFET
+COE_s = COE.drc((space(projection) <= 1.6).polygons) # Requires width and space from DRM
+# end of row diffusion contacts. enclosure is half max enclosure allowed without adding another CO
+# DRM calculates to 4.8um, but actual layout is 5.1um, so add 0.3um fudge factor
+COE_e = COE.edges.enclosed(AME_h, 2.5+(1.6+3.0)/2+0.3+1.dbu, projection).polygons
 CS  = CO - (AR + WC + AD + MPE + MNE)                       # Small CO
 #
 M1W = M1.sized(-5.0).merged.sized(5.0).merged               # WIDE M1
-M1C = ((M1 & WC).not_interacting(AC)) & AN                  # M1 for GUARD-RING (CSIO)
-M1P = M1.interacting(PO)                                    # M1 for PAD
-# M1W.output("M1W")                                         # DEBUG
+M1C = (M1 & WC & AN).interacting(CO)                        # M1 for GUARD-RING (CSIO)
+ANC = (AN.interacting(M1C) - M1C).sized(-1.8+1.dbu).sized(1.8-1.dbu) # AN for GUARD-RING (CSIO) without M1C
+M1P = (M1 & PO).sized(5.0)                                  # Updated PAD definition
 #
 V1P = V1.interacting(PO)                                    # M1 for PAD
 #
-M2P = M2.interacting(PO)                                    # M2 for PAD
+M2P = (M2 & PO).sized(5.0)                                  # Updated PAD definition
+#
+PP = PO.with_bbox_max(70.0 ..)                              # Bonding pads have at least one dimension as 70um
 #
 CRS = (CO & GR).sized(0.5).sized(-0.5)                      # RS CO merged with 1.0um spacing
 RSW = (GR - (CO & GR).sized(2.0)).sized(2.0)                # RS WIDE SIDE to measure RS Length
@@ -95,6 +112,7 @@ GRS = GR.edges.interacting(RS.edges)
 # RR Resistance
 #
 ARC = AR - RR                   # RR Contact
+DLRR = (WR & GC).holes.sized(2.0) # RR device recognition - No GC contacts
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Saliside Gate Resistance
@@ -108,6 +126,20 @@ SDP  = (MP  - GC)               # MP S/D
 SDN  = (MN  - GC)               # MN S/D
 SDPE = (MPE - GC)               # MPE S/D
 SDNE = (MNE - GC)               # MNE S/D
+
+# CO is sized by 5.2um in the following rules becuase that is the current ESD device AA-CO enclosure.
+SPE  = SDPE.inside(CO.sized(5.2)) # ESD source has contacts < 5.2um from gate
+SNE  = SDNE.inside(CO.sized(5.2)) # ESD source has contacts < 5.2um from gate
+DPE  = SDPE - SPE
+DNE  = SDNE - SNE
+
+SDC  = (AM - GC).interacting(CO)  # Normal mos source/drain with CO
+SDEC = (AME - GC).interacting(CO) # ESD mos source/drain with CO
+#
+GC_ext1 = GA.edges.inside_part(AM).extended_out(1.0).edges.inside_part(SDC)
+# ESD diffusion long side
+APT = MPE.edges.not_interacting(GC).with_angle(ortho)
+ANT = MNE.edges.not_interacting(GC).with_angle(ortho)
 #
 # ----- ------ ----- ----- ------ ----- ----- ------ ----- 
 # Global node
@@ -129,7 +161,6 @@ connect(WC,   AC)       # CIS
 connect(WC,   GP)       # BG-CIS
 connect(WR,   RR)       # BG-RR
 connect(WR,   GP)       # BG-RR
-# ---
 # mos
 connect(SDP,  CO)       # MP S/D
 connect(SDN,  CO)       # MN S/D
@@ -153,4 +184,28 @@ connect(M1,   V1)       # M1-V1
 connect(V1,   M2)       # V1-M2
 connect(M1,   M1_LBL)   # Attaches labels
 connect(M2,   M2_LBL)   # Attaches labels
-#
+connect(M2,   M2P)      # connects pads
+
+unless skip_warnings
+
+  #
+  # Reliability rules.
+  #
+  # Check contact density on AC. Flag locations where another CO could be added
+  AC_check_region = AC.sized(-3.5)  # AC - CO enclosure 2.9um + 1/2 CO width 1.2um = 3.5um
+  AC_CO_coverage = (CO & AC).sized(1.8-1.dbu)  # CO space 1.2um + 1/2 CO width 1.2um
+  (AC_check_region - AC_CO_coverage).sized(0.6).output("Warning: missing CSIO CO")
+
+  # Check contact density on CSIO guard ring. Flag locations where another CO could be added
+  M1C_check_region = M1C.sized(-1.8+1.dbu)  # M1C - CO enclosure 1.2um + 1/2 CO width 1.2um = 1.8um
+  M1C_CO_coverage = (CO & M1C).sized(3.6-1.dbu)  # (CO space 1.2um * 4 + CO width 1.2um * 2) / 2
+  (M1C_check_region - M1C_CO_coverage).sized(0.6).output("Warning: missing CSIO guardring CO")
+
+  # Check contact density on normal guard ring. Flag locations where another CO could be added
+  BG_check_region = (M1 & BGM).interacting(CO).sized(-1.3+1.dbu)  # BGM - CO enclosure 0.8um + 1/2 CO width 1.0um = 1.3um
+  BG_CO_coverage = CO.sized(5.5, size_inside(M1 & BGM), steps(12))  # CO space 1.0um x 3.0 + CO width 1.0um x 2.5 (missing 5 contacts)
+  # V1 space 1.5 x 2 + V1 width 1.4 = 4.4. Don't need taps in V1 arrays
+  (BG_check_region - BG_CO_coverage - V1.sized(2.2-1.dbu)).sized(0.5).output("Warning: missing guardring CO")
+
+end
+
